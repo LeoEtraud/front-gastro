@@ -162,7 +162,7 @@ export default function Register() {
                 <label className="text-sm font-medium">Telefone</label>
                 <Input
                   {...phoneRegister}
-                  placeholder="(11) 98765-4321"
+                  placeholder="(98) 99999-9999"
                   className="sm:h-12"
                   inputMode="tel"
                   autoComplete="tel"

@@ -1,38 +1,112 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { api } from '@/lib/axios';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { PasswordResetTimeline, type ResetTimelineStepStatus } from '@/components/auth/PasswordResetTimeline';
+import { PasswordStrengthHints } from '@/components/auth/PasswordStrengthHints';
+import { resetPasswordMeetsAllCriteria } from '@/lib/password-reset-criteria';
 import { BookOpen, Stethoscope } from 'lucide-react';
+
+const passwordField = z
+  .string()
+  .min(1, 'Digite a nova senha')
+  .refine(resetPasswordMeetsAllCriteria, 'Atenda a todos os critérios de senha indicados abaixo.');
 
 const schema = z
   .object({
-    password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
-    confirmPassword: z.string().min(6, 'Confirme a senha'),
+    password: passwordField,
+    confirmPassword: z.string().min(1, 'Confirme a nova senha'),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: 'As senhas não coincidem',
+    message: 'As senhas devem ser iguais',
     path: ['confirmPassword'],
   });
 
 type FormValues = z.infer<typeof schema>;
 
-// PÁGINA DE REDEFINIÇÃO DE SENHA - PÁGINA PARA REDEFINIR A SENHA DO USUÁRIO
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
   const token = useMemo(() => searchParams.get('token') ?? '', [searchParams]);
 
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [tokenChecked, setTokenChecked] = useState(false);
+  const [tokenOk, setTokenOk] = useState(false);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>({
+  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormValues>({
     resolver: zodResolver(schema),
+    defaultValues: { password: '', confirmPassword: '' },
   });
+
+  const passwordValue = watch('password');
+  const confirmPasswordValue = watch('confirmPassword');
+
+  const timelineStatuses = useMemo((): [
+    ResetTimelineStepStatus,
+    ResetTimelineStepStatus,
+    ResetTimelineStepStatus,
+    ResetTimelineStepStatus,
+  ] => {
+    if (successMsg) {
+      return ['done', 'done', 'done', 'done'];
+    }
+    if (!token) {
+      return ['active', 'todo', 'todo', 'todo'];
+    }
+    if (!tokenChecked) {
+      return ['done', 'active', 'todo', 'todo'];
+    }
+    if (!tokenOk) {
+      return ['done', 'error', 'todo', 'todo'];
+    }
+    return ['done', 'done', 'active', 'todo'];
+  }, [successMsg, token, tokenChecked, tokenOk]);
+
+  useEffect(() => {
+    if (!token) {
+      setTokenChecked(true);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        setErrorMsg('');
+        await api.post('/auth/verify-reset-token', { token });
+        if (!cancelled) {
+          setTokenOk(true);
+        }
+      } catch (err: unknown) {
+        const status = (err as { response?: { status?: number } })?.response?.status;
+        if (!cancelled) {
+          if (status === 400) {
+            setTokenOk(false);
+            setErrorMsg('Link inválido ou expirado. Solicite um novo e-mail em Esqueci minha senha.');
+          } else {
+            setTokenOk(true);
+          }
+        }
+      } finally {
+        if (!cancelled) {
+          setTokenChecked(true);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
+  const canSubmit =
+    Boolean(token) &&
+    tokenOk &&
+    resetPasswordMeetsAllCriteria(passwordValue) &&
+    passwordValue === confirmPasswordValue &&
+    confirmPasswordValue.length > 0;
 
   const onSubmit = async (data: FormValues) => {
     if (!token) {
@@ -44,8 +118,11 @@ export default function ResetPassword() {
       setSuccessMsg('');
       await api.post('/auth/reset-password', { token, password: data.password });
       setSuccessMsg('Senha alterada com sucesso. Você já pode entrar com a nova senha.');
-    } catch (error: any) {
-      setErrorMsg(error.response?.data?.error || 'Não foi possível redefinir a senha. O link pode ter expirado.');
+    } catch (error: unknown) {
+      const msg =
+        (error as { response?: { data?: { error?: string } } })?.response?.data?.error ||
+        'Não foi possível redefinir a senha. O link pode ter expirado.';
+      setErrorMsg(msg);
     }
   };
 
@@ -64,32 +141,46 @@ export default function ResetPassword() {
 
       <div className="flex min-w-0 items-center justify-center p-4 sm:p-6">
         <Card className="w-full max-w-md border-slate-200 shadow-xl">
-          <CardHeader className="space-y-2 pt-6 text-center sm:pt-8">
-            <div className="flex justify-center mb-4 md:hidden">
+          <CardHeader className="space-y-3 pt-6 text-center sm:pt-8">
+            <div className="flex justify-center mb-5 md:hidden">
               <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
                 <BookOpen className="h-6 w-6 text-white" />
               </div>
             </div>
             <CardTitle className="font-display text-2xl font-bold sm:text-3xl">Redefinir senha</CardTitle>
-            <CardDescription>Defina uma nova senha para sua conta</CardDescription>
+            <CardDescription>
+              Siga as etapas abaixo. Os critérios da senha são validados em tempo real enquanto você digita.
+            </CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="mb-5 border-b border-border/60 pb-5">
+              <PasswordResetTimeline statuses={timelineStatuses} />
+            </div>
             {!token ? (
-              <div className="p-3 text-sm text-amber-800 bg-amber-50 rounded-md border border-amber-100">
+              <div className="p-4 text-sm text-amber-800 bg-amber-50 rounded-md border border-amber-100">
                 Este link não contém um token válido.{' '}
                 <Link to="/forgot-password" className="font-semibold text-primary hover:underline">
                   Solicitar novo link
                 </Link>
               </div>
+            ) : !tokenChecked ? (
+              <p className="text-sm text-slate-600 text-center py-8">Verificando link…</p>
+            ) : !tokenOk ? (
+              <div className="p-4 text-sm text-amber-800 bg-amber-50 rounded-md border border-amber-100">
+                {errorMsg || 'Link inválido ou expirado.'}{' '}
+                <Link to="/forgot-password" className="font-semibold text-primary hover:underline">
+                  Solicitar novo link
+                </Link>
+              </div>
             ) : (
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 {errorMsg && (
-                  <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md border border-red-100">
+                  <div className="p-4 text-sm text-red-600 bg-red-50 rounded-md border border-red-100">
                     {errorMsg}
                   </div>
                 )}
                 {successMsg && (
-                  <div className="p-3 text-sm text-green-800 bg-green-50 rounded-md border border-green-100 space-y-3">
+                  <div className="p-4 text-sm text-green-800 bg-green-50 rounded-md border border-green-100 space-y-4">
                     <p>{successMsg}</p>
                     <Link
                       to="/login"
@@ -101,19 +192,30 @@ export default function ResetPassword() {
                 )}
                 {!successMsg && (
                   <>
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       <label className="text-sm font-medium">Nova senha</label>
-                      <PasswordInput {...register('password')} placeholder="••••••••" className="sm:h-12" />
+                      <PasswordInput {...register('password')} placeholder="••••••••" className="sm:h-12" autoComplete="new-password" />
                       {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       <label className="text-sm font-medium">Confirmar nova senha</label>
-                      <PasswordInput {...register('confirmPassword')} placeholder="••••••••" className="sm:h-12" />
+                      <PasswordInput
+                        {...register('confirmPassword')}
+                        placeholder="••••••••"
+                        className="sm:h-12"
+                        autoComplete="new-password"
+                      />
                       {errors.confirmPassword && (
                         <p className="text-xs text-red-500">{errors.confirmPassword.message}</p>
                       )}
                     </div>
-                    <Button type="submit" className="w-full text-base sm:h-12 sm:text-lg" isLoading={isSubmitting}>
+                    <PasswordStrengthHints password={passwordValue} confirmPassword={confirmPasswordValue} />
+                    <Button
+                      type="submit"
+                      className="w-full text-base sm:h-12 sm:text-lg"
+                      isLoading={isSubmitting}
+                      disabled={!canSubmit}
+                    >
                       Salvar nova senha
                     </Button>
                   </>
@@ -121,13 +223,15 @@ export default function ResetPassword() {
               </form>
             )}
           </CardContent>
-          <CardFooter className="flex flex-col gap-2 pb-8 text-center">
-            <p className="text-sm text-slate-600">
-              <Link to="/login" className="text-primary hover:underline font-semibold">
-                Voltar ao login
-              </Link>
-            </p>
-          </CardFooter>
+          {!successMsg && (
+            <CardFooter className="flex flex-col gap-3 pt-7 pb-8 text-center">
+              <p className="text-sm text-slate-600">
+                <Link to="/login" className="text-primary hover:underline font-semibold">
+                  Voltar ao login
+                </Link>
+              </p>
+            </CardFooter>
+          )}
         </Card>
       </div>
     </div>
