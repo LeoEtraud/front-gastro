@@ -1,69 +1,80 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** Skeleton do dashboard do aluno — espelha stats (3 colunas) + Continue aprendendo + Últimas avaliações. */
+/** Skeleton do dashboard do aluno — layout atual (stats/continue + experiência de curso único). */
 export function DashboardSkeleton() {
-  const statBorders = ["border-l-primary", "border-l-accent", "border-l-green-500"] as const;
-
   return (
-    <div className="mx-auto max-w-[92rem] min-w-0 space-y-6 sm:space-y-8">
-      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, index) => (
-          <Card key={index} className={`border-l-4 ${statBorders[index]}`}>
-            <CardContent className="flex items-center gap-4 p-4 sm:p-6">
-              <Skeleton className="h-12 w-12 shrink-0 rounded-full" />
-              <div className="min-w-0 flex-1 space-y-2">
-                <Skeleton className="h-4 w-32 max-w-full sm:w-36" />
-                <Skeleton className="h-8 w-12 sm:h-9 sm:w-14" />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2 md:gap-8">
-        <div className="space-y-4">
-          <Skeleton className="h-7 w-48 sm:h-8 sm:w-56" />
-          <div className="space-y-4">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <Card key={index}>
-                <CardContent className="flex flex-col gap-4 p-4 sm:p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1 space-y-2">
-                      <Skeleton className="h-5 w-full max-w-[18rem] sm:h-6" />
-                      <Skeleton className="h-4 w-full max-w-[14rem]" />
-                    </div>
-                    <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between">
-                      <Skeleton className="h-3 w-20" />
-                      <Skeleton className="h-3 w-8" />
-                    </div>
-                    <Skeleton className="h-2 w-full rounded-full" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+    <div className="mx-auto max-w-[92rem] min-w-0 space-y-4 sm:space-y-5">
+      {/* Corpo docente */}
+      <div className="space-y-2 sm:space-y-2.5">
+        <div className="space-y-1">
+          <Skeleton className="h-6 w-36" />
+          <Skeleton className="h-3.5 w-full max-w-[28rem]" />
         </div>
 
-        <div className="space-y-4">
-          <Skeleton className="h-7 w-44 sm:h-8 sm:w-52" />
-          <Card>
-            <CardContent className="divide-y divide-border p-0">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="min-w-0 flex-1 space-y-2">
-                    <Skeleton className="h-4 w-full max-w-[16rem]" />
-                    <Skeleton className="h-3 w-3/4 max-w-[12rem]" />
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Card key={`faculty-${index}`} className="border-border/80">
+              <CardContent className="space-y-2 p-3 sm:p-3.5">
+                <div className="flex items-start gap-2.5">
+                  <Skeleton className="h-10 w-10 shrink-0 rounded-full sm:h-11 sm:w-11" />
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <Skeleton className="h-4 w-4/5" />
+                    <Skeleton className="h-3 w-3/5" />
                   </div>
-                  <Skeleton className="h-7 w-24 shrink-0 self-start rounded-full sm:self-auto" />
                 </div>
-              ))}
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-4 w-24" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Aulas em destaque + mural */}
+      <div className="space-y-2 sm:space-y-2.5">
+        <Skeleton className="h-6 w-64" />
+
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 md:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <Card key={`top-lessons-${index}`} className="overflow-hidden border-border/80">
+              <Skeleton className="aspect-[16/8.7] w-full rounded-none" />
+              <CardContent className="p-2 sm:p-2.5">
+                <Skeleton className="h-4 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 gap-2.5 sm:gap-3 md:grid-cols-3">
+          <Card className="overflow-hidden border-border/80 md:col-span-1">
+            <Skeleton className="aspect-[16/8.7] w-full rounded-none" />
+            <CardContent className="p-2 sm:p-2.5">
+              <Skeleton className="h-4 w-full" />
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/80 md:col-span-2">
+            <CardContent className="space-y-2 p-3 sm:p-3.5">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-2 w-full" />
+              <Skeleton className="h-10 w-full" />
+
+              <div className="space-y-1.5">
+                <Skeleton className="h-3 w-28" />
+                {Array.from({ length: 3 }).map((_, idx) => (
+                  <Skeleton key={`mural-item-${idx}`} className="h-7 w-full" />
+                ))}
+              </div>
+
+              <div className="space-y-1.5">
+                <Skeleton className="h-3 w-20" />
+                <div className="grid gap-1 sm:grid-cols-2">
+                  {Array.from({ length: 4 }).map((_, idx) => (
+                    <Skeleton key={`mural-module-${idx}`} className="h-6 w-full" />
+                  ))}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
