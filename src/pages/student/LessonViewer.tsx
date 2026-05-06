@@ -49,10 +49,7 @@ function LessonVideoPanel({ lesson, loading }: { lesson: LessonWithProgress; loa
     </div>
   );
 
-  if (lesson.type !== 'VIDEO') {
-    return placeholder;
-  }
-
+  // Vídeo hospedado (S3/R2) ou URL externa: exibir mesmo se `type` ainda estiver TEXT no banco (ex.: seed + upload).
   if (lesson.videoPlaybackUrl) {
     const playbackSrc = resolveApiUrl(lesson.videoPlaybackUrl);
     return (
@@ -97,6 +94,10 @@ function LessonVideoPanel({ lesson, loading }: { lesson: LessonWithProgress; loa
         </video>
       </div>
     );
+  }
+
+  if (lesson.type !== 'VIDEO') {
+    return placeholder;
   }
 
   return placeholder;

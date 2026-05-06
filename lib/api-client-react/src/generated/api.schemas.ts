@@ -492,6 +492,145 @@ export interface QuizAttemptResult {
   completedAt: string;
 }
 
+export interface StudentDashboardFacultySocialLink {
+  label: string;
+  url: string;
+}
+
+export interface StudentDashboardFacultyTaughtLesson {
+  moduleTitle: string;
+  lessonTitle: string;
+  /** @nullable */
+  lessonId?: string | null;
+}
+
+export interface StudentDashboardFacultyMember {
+  userId: string;
+  name: string;
+  /** @nullable */
+  avatarUrl?: string | null;
+  /** @nullable */
+  specialty?: string | null;
+  bioShort: string;
+  bioFull: string;
+  specializations: string[];
+  practiceAreas: string[];
+  experience: string;
+  academicFormation: string;
+  certifications: string[];
+  achievements: string[];
+  socialLinks: StudentDashboardFacultySocialLink[];
+  courseThemes: string[];
+  taughtLessons: StudentDashboardFacultyTaughtLesson[];
+  languagesSpoken: string[];
+  /** @nullable */
+  facultyRole?: string | null;
+  /** @nullable */
+  headline?: string | null;
+}
+
+export type StudentDashboardLessonPreviewStatus =
+  (typeof StudentDashboardLessonPreviewStatus)[keyof typeof StudentDashboardLessonPreviewStatus];
+
+export const StudentDashboardLessonPreviewStatus = {
+  AVAILABLE: "AVAILABLE",
+  COMPLETED: "COMPLETED",
+  COMING_SOON: "COMING_SOON",
+} as const;
+
+export interface StudentDashboardLessonPreview {
+  id: string;
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  type: string;
+  /** @nullable */
+  duration?: number | null;
+  moduleTitle: string;
+  moduleOrder: number;
+  lessonOrder: number;
+  isCompleted: boolean;
+  watchedSeconds: number;
+  status: StudentDashboardLessonPreviewStatus;
+  /** @nullable */
+  videoUrl: string | null;
+  /**
+   * URL relativa (ex. /api/student/lessons/.../video?token=...) para preview do vídeo hospedado
+   * @nullable
+   */
+  videoPreviewUrl: string | null;
+}
+
+export type StudentDashboardMuralNextItemStatus =
+  (typeof StudentDashboardMuralNextItemStatus)[keyof typeof StudentDashboardMuralNextItemStatus];
+
+export const StudentDashboardMuralNextItemStatus = {
+  AVAILABLE: "AVAILABLE",
+  COMPLETED: "COMPLETED",
+  COMING_SOON: "COMING_SOON",
+} as const;
+
+export interface StudentDashboardMuralNextItem {
+  lessonId: string;
+  title: string;
+  moduleTitle: string;
+  status: StudentDashboardMuralNextItemStatus;
+}
+
+export interface StudentDashboardMuralModuleSummary {
+  moduleId: string;
+  title: string;
+  publishedLessons: number;
+  completedLessons: number;
+}
+
+export interface StudentDashboardMuralComplementary {
+  lessonId: string;
+  title: string;
+  type: string;
+}
+
+/**
+ * @nullable
+ */
+export type StudentDashboardMuralRecommended = {
+  lessonId: string;
+  title: string;
+  moduleTitle: string;
+} | null;
+
+export type StudentDashboardMuralStats = {
+  totalPublishedLessons: number;
+  completedLessons: number;
+  comingSoonLessons: number;
+};
+
+export interface StudentDashboardMural {
+  progressPercent: number;
+  modulesSummary: StudentDashboardMuralModuleSummary[];
+  nextUp: StudentDashboardMuralNextItem[];
+  /** @nullable */
+  recommended?: StudentDashboardMuralRecommended;
+  bulletins: string[];
+  complementary: StudentDashboardMuralComplementary[];
+  stats: StudentDashboardMuralStats;
+}
+
+export interface StudentDashboardSingleCourseHome {
+  courseId: string;
+  courseTitle: string;
+  courseSlug: string;
+  /** @nullable */
+  courseCover?: string | null;
+  /** @nullable */
+  courseSpecialty?: string | null;
+  firstModuleTitle: string;
+  faculty: StudentDashboardFacultyMember[];
+  lessonRowTop: StudentDashboardLessonPreview[];
+  lessonFourth?: StudentDashboardLessonPreview | null;
+  mural: StudentDashboardMural;
+}
+
 export interface RecentQuizAttempt {
   id: string;
   quizTitle: string;
@@ -505,6 +644,7 @@ export interface StudentDashboard {
   enrolledCoursesCount: number;
   completedCoursesCount: number;
   inProgressCoursesCount: number;
+  singleCourseHome: StudentDashboardSingleCourseHome | null;
   recentEnrollments: EnrollmentWithCourse[];
   recentQuizAttempts: RecentQuizAttempt[];
 }

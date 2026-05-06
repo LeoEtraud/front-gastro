@@ -261,6 +261,7 @@ function LessonEditorRow({ lesson }: { lesson: Lesson }) {
       await updateLesson.mutateAsync({
         id: lesson.id,
         data: {
+          type: 'VIDEO',
           videoObjectKey: objectKey,
           videoSizeBytes: file.size,
           videoContentType: file.type || null,

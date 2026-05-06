@@ -170,11 +170,114 @@ export interface LessonWithProgress extends Lesson {
   quiz?: Quiz;
 }
 
+export type LessonPreviewStatus = 'AVAILABLE' | 'COMPLETED' | 'COMING_SOON';
+
+export interface StudentDashboardFacultySocialLink {
+  label: string;
+  url: string;
+}
+
+export interface StudentDashboardFacultyTaughtLesson {
+  moduleTitle: string;
+  lessonTitle: string;
+  lessonId?: string | null;
+}
+
+export interface StudentDashboardFacultyMember {
+  userId: string;
+  name: string;
+  avatarUrl?: string | null;
+  specialty?: string | null;
+  bioShort: string;
+  bioFull: string;
+  specializations: string[];
+  practiceAreas: string[];
+  experience: string;
+  academicFormation: string;
+  certifications: string[];
+  achievements: string[];
+  socialLinks: StudentDashboardFacultySocialLink[];
+  courseThemes: string[];
+  taughtLessons: StudentDashboardFacultyTaughtLesson[];
+  languagesSpoken: string[];
+  facultyRole?: string | null;
+  headline?: string | null;
+}
+
+export interface StudentDashboardLessonPreview {
+  id: string;
+  title: string;
+  description?: string | null;
+  type: string;
+  duration?: number | null;
+  moduleTitle: string;
+  moduleOrder: number;
+  lessonOrder: number;
+  isCompleted: boolean;
+  watchedSeconds: number;
+  status: LessonPreviewStatus;
+  videoUrl?: string | null;
+  videoPreviewUrl?: string | null;
+}
+
+export interface StudentDashboardMuralNextItem {
+  lessonId: string;
+  title: string;
+  moduleTitle: string;
+  status: LessonPreviewStatus;
+}
+
+export interface StudentDashboardMuralModuleSummary {
+  moduleId: string;
+  title: string;
+  publishedLessons: number;
+  completedLessons: number;
+}
+
+export interface StudentDashboardMuralComplementary {
+  lessonId: string;
+  title: string;
+  type: string;
+}
+
+export interface StudentDashboardMural {
+  progressPercent: number;
+  modulesSummary: StudentDashboardMuralModuleSummary[];
+  nextUp: StudentDashboardMuralNextItem[];
+  recommended?: {
+    lessonId: string;
+    title: string;
+    moduleTitle: string;
+  } | null;
+  bulletins: string[];
+  complementary: StudentDashboardMuralComplementary[];
+  stats: {
+    totalPublishedLessons: number;
+    completedLessons: number;
+    comingSoonLessons: number;
+  };
+}
+
+export interface StudentDashboardSingleCourseHome {
+  courseId: string;
+  courseTitle: string;
+  courseSlug: string;
+  courseCover?: string | null;
+  courseSpecialty?: string | null;
+  firstModuleTitle: string;
+  faculty: StudentDashboardFacultyMember[];
+  lessonRowTop: StudentDashboardLessonPreview[];
+  lessonFourth?: StudentDashboardLessonPreview | null;
+  mural: StudentDashboardMural;
+}
+
 // INTERFACE PARA O DASHBOARD DO ALUNO
 export interface StudentDashboard {
   enrolledCoursesCount: number;
   completedCoursesCount: number;
   inProgressCoursesCount: number;
+  /** Presente quando a API retorna a experiência estendida (curso único). */
+  singleCourseHome?: StudentDashboardSingleCourseHome | null;
   recentEnrollments: EnrollmentWithCourse[];
   recentQuizAttempts: any[];
 }
