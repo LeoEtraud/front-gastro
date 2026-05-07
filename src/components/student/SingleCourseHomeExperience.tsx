@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState, type MouseEventHandler } from 'react';
 import { Link } from 'react-router-dom';
 import type {
   StudentDashboardFacultyMember,
@@ -23,6 +23,7 @@ import {
 import {
   Award,
   BookMarked,
+  Captions,
   ChevronRight,
   ExternalLink,
   GraduationCap,
@@ -33,6 +34,8 @@ import {
   Sparkles,
   Target,
   Users,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { normalizePtBrText } from '@/lib/normalize-ptbr';
 import { resolveApiUrl } from '@/lib/axios';
@@ -40,17 +43,21 @@ import { cn } from '@/lib/utils';
 
 /** Miniatura oficial do YouTube quando a aula usa `videoUrl` externo. */
 function youtubePosterUrl(videoUrl: string): string | null {
+  const id = youtubeVideoId(videoUrl);
+  return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : null;
+}
+
+function youtubeVideoId(videoUrl: string): string | null {
   try {
     const u = new URL(videoUrl);
     if (u.hostname.includes('youtu.be')) {
-      const id = u.pathname.replace(/^\//, '').split('/')[0];
-      return id ? `https://i.ytimg.com/vi/${id}/mqdefault.jpg` : null;
+      return u.pathname.replace(/^\//, '').split('/')[0] || null;
     }
     if (u.hostname.includes('youtube.com')) {
       const v = u.searchParams.get('v');
-      if (v) return `https://i.ytimg.com/vi/${v}/mqdefault.jpg`;
+      if (v) return v;
       const m = u.pathname.match(/\/embed\/([^/?]+)/);
-      if (m?.[1]) return `https://i.ytimg.com/vi/${m[1]}/mqdefault.jpg`;
+      if (m?.[1]) return m[1];
     }
   } catch {
     /* ignore */
@@ -72,20 +79,152 @@ function lessonStatusLabel(status: StudentDashboardLessonPreview['status']): str
 
 function LessonPreviewCard({
   courseId,
+  courseTitle,
+  courseCover,
+  audioPreferenceEnabled,
+  onAudioPreferenceChange,
   lesson,
   className,
   visualOnly = false,
 }: {
   courseId: string;
+  courseTitle: string;
+  courseCover?: string | null;
+  audioPreferenceEnabled: boolean;
+  onAudioPreferenceChange: (enabled: boolean) => void;
   lesson: StudentDashboardLessonPreview;
   className?: string;
   /** Preview compacto (player + informações úteis abaixo). */
   visualOnly?: boolean;
 }) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const youtubeFrameRef = useRef<HTMLIFrameElement | null>(null);
+  const [isHovering, setIsHovering] = useState(false);
+  const [isAudioEnabled, setIsAudioEnabled] = useState(false);
+  const [isSubtitleEnabled, setIsSubtitleEnabled] = useState(false);
+  const [hasSubtitleTrack, setHasSubtitleTrack] = useState(false);
+  const [isYoutubeReady, setIsYoutubeReady] = useState(false);
+
   const dur = formatDuration(lesson.duration);
-  const label = `${normalizePtBrText(lesson.title)} — ${normalizePtBrText(lesson.moduleTitle)}`;
+  const label = `${normalizePtBrText(courseTitle)} — ${normalizePtBrText(lesson.title)} — ${normalizePtBrText(lesson.moduleTitle)}`;
   const ytPoster = lesson.videoUrl ? youtubePosterUrl(lesson.videoUrl) : null;
+  const ytVideoId = lesson.videoUrl ? youtubeVideoId(lesson.videoUrl) : null;
   const hostedSrc = lesson.videoPreviewUrl ? resolveApiUrl(lesson.videoPreviewUrl) : null;
+  const canPreview = Boolean(hostedSrc || ytVideoId);
+  const isYoutubePreview = Boolean(!hostedSrc && ytVideoId && isHovering);
+  const canToggleSubtitle = Boolean(ytVideoId || hasSubtitleTrack);
+  const youtubePreviewSrc = ytVideoId
+    ? `https://www.youtube.com/embed/${ytVideoId}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&playsinline=1&loop=1&playlist=${ytVideoId}&cc_load_policy=1&cc_lang_pref=pt&enablejsapi=1`
+    : null;
+
+  const sendYoutubeCommand = (func: string, args: unknown[] = []) => {
+    if (!youtubeFrameRef.current?.contentWindow) return;
+    youtubeFrameRef.current.contentWindow.postMessage(
+      JSON.stringify({ event: 'command', func, args }),
+      '*',
+    );
+  };
+
+  const applyYoutubePreferences = (audioEnabled: boolean, subtitleEnabled: boolean) => {
+    sendYoutubeCommand(audioEnabled ? 'unMute' : 'mute');
+    sendYoutubeCommand('setVolume', [audioEnabled ? 100 : 0]);
+    if (subtitleEnabled) {
+      sendYoutubeCommand('loadModule', ['captions']);
+      sendYoutubeCommand('setOption', ['captions', 'track', { languageCode: 'pt' }]);
+      return;
+    }
+    sendYoutubeCommand('unloadModule', ['captions']);
+  };
+
+  useEffect(() => {
+    if (!videoRef.current?.textTracks) return;
+    for (let i = 0; i < videoRef.current.textTracks.length; i += 1) {
+      videoRef.current.textTracks[i].mode = isSubtitleEnabled ? 'showing' : 'disabled';
+    }
+  }, [isSubtitleEnabled]);
+
+  useEffect(() => {
+    if (!isYoutubePreview || !isYoutubeReady) return;
+    applyYoutubePreferences(isAudioEnabled, isSubtitleEnabled);
+    const retry1 = window.setTimeout(() => applyYoutubePreferences(isAudioEnabled, isSubtitleEnabled), 220);
+    const retry2 = window.setTimeout(() => applyYoutubePreferences(isAudioEnabled, isSubtitleEnabled), 520);
+    return () => {
+      window.clearTimeout(retry1);
+      window.clearTimeout(retry2);
+    };
+  }, [isAudioEnabled, isSubtitleEnabled, isYoutubePreview, isYoutubeReady]);
+
+  useEffect(() => {
+    if (!isYoutubePreview) return;
+    setIsYoutubeReady(false);
+  }, [isYoutubePreview]);
+
+  const handlePreviewStart = async () => {
+    setIsHovering(true);
+    setIsAudioEnabled(audioPreferenceEnabled);
+    setIsSubtitleEnabled(true);
+    if (ytVideoId && !hostedSrc) return;
+    if (!videoRef.current) return;
+    try {
+      videoRef.current.currentTime = 0;
+      videoRef.current.muted = !isAudioEnabled;
+      await videoRef.current.play();
+    } catch {
+      /* ignore autoplay block */
+    }
+  };
+
+  const handlePreviewStop = () => {
+    setIsHovering(false);
+    setIsAudioEnabled(audioPreferenceEnabled);
+    setIsSubtitleEnabled(false);
+    setIsYoutubeReady(false);
+    if (youtubeFrameRef.current) {
+      sendYoutubeCommand('mute');
+      sendYoutubeCommand('stopVideo');
+    }
+    if (!videoRef.current) return;
+    videoRef.current.pause();
+    videoRef.current.currentTime = 0;
+    videoRef.current.muted = true;
+  };
+
+  const handleToggleAudio: MouseEventHandler<HTMLButtonElement> = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const nextAudioEnabled = !isAudioEnabled;
+    setIsAudioEnabled(nextAudioEnabled);
+    onAudioPreferenceChange(nextAudioEnabled);
+    if (videoRef.current) {
+      videoRef.current.muted = !nextAudioEnabled;
+    }
+    if (isYoutubePreview && isYoutubeReady) {
+      applyYoutubePreferences(nextAudioEnabled, isSubtitleEnabled);
+    }
+  };
+
+  const handleToggleSubtitle: MouseEventHandler<HTMLButtonElement> = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!canToggleSubtitle) return;
+    const nextSubtitleEnabled = !isSubtitleEnabled;
+    setIsSubtitleEnabled(nextSubtitleEnabled);
+    if (videoRef.current?.textTracks) {
+      for (let i = 0; i < videoRef.current.textTracks.length; i += 1) {
+        videoRef.current.textTracks[i].mode = nextSubtitleEnabled ? 'showing' : 'disabled';
+      }
+    }
+  };
+
+  const handleHostedMetadata = () => {
+    if (!videoRef.current) return;
+    setHasSubtitleTrack(videoRef.current.textTracks.length > 0);
+  };
+
+  const handleYoutubeLoaded = () => {
+    setIsYoutubeReady(true);
+    applyYoutubePreferences(isAudioEnabled, isSubtitleEnabled);
+  };
 
   const playerArea = (
     <div
@@ -93,6 +232,8 @@ function LessonPreviewCard({
         'relative w-full shrink-0 overflow-hidden bg-gradient-to-br from-primary/25 via-primary/10 to-muted',
         visualOnly ? 'aspect-[16/8.7]' : 'h-[5.5rem] sm:h-[6.5rem]',
       )}
+      onMouseEnter={canPreview ? handlePreviewStart : undefined}
+      onMouseLeave={canPreview ? handlePreviewStop : undefined}
     >
       {ytPoster ? (
         <img
@@ -103,25 +244,94 @@ function LessonPreviewCard({
         />
       ) : hostedSrc ? (
         <video
+          ref={videoRef}
           src={hostedSrc}
           muted
           playsInline
           preload="metadata"
-          className="pointer-events-none absolute inset-0 z-[1] h-full w-full object-cover"
+          loop
+          onLoadedMetadata={handleHostedMetadata}
+          className={cn(
+            'preview-video pointer-events-none absolute inset-0 z-[1] h-full w-full object-cover contrast-110 saturate-110 transition-transform duration-300',
+            isHovering ? 'scale-[1.03]' : 'scale-100',
+          )}
           aria-hidden
         />
       ) : null}
-      <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-black/45 via-black/10 to-transparent" aria-hidden />
+      {isYoutubePreview && youtubePreviewSrc ? (
+        <iframe
+          ref={youtubeFrameRef}
+          src={youtubePreviewSrc}
+          title={`Prévia da aula ${normalizePtBrText(lesson.title)}`}
+          allow="autoplay; encrypted-media; picture-in-picture"
+          className="absolute inset-0 z-[1] h-full w-full contrast-110 saturate-110"
+          onLoad={handleYoutubeLoaded}
+          tabIndex={-1}
+          aria-hidden
+        />
+      ) : null}
+      <div
+        className={cn(
+          'pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t transition-colors duration-300',
+          isHovering
+            ? 'from-black/75 via-black/45 to-black/20'
+            : 'from-black/50 via-black/15 to-transparent group-hover:from-black/65 group-hover:via-black/30 group-hover:to-black/15',
+        )}
+        aria-hidden
+      />
       <div className="absolute inset-0 z-[3] flex items-center justify-center">
         <div
           className={cn(
-            'flex items-center justify-center rounded-full bg-background/90 text-primary shadow-md ring-2 ring-primary/15 transition-transform group-hover:scale-105',
-            visualOnly ? 'h-11 w-11 sm:h-12 sm:w-12' : 'h-10 w-10 sm:h-11 sm:w-11',
+            'flex items-center justify-center rounded-full border border-white/70 bg-white/90 text-primary shadow-xl shadow-black/30 ring-1 ring-black/10 transition-all',
+            visualOnly ? 'h-12 w-12 sm:h-14 sm:w-14' : 'h-11 w-11 sm:h-12 sm:w-12',
+            isHovering ? 'scale-110 opacity-0' : 'scale-100 opacity-100',
           )}
         >
-          <PlayCircle className={cn(visualOnly ? 'h-6 w-6 sm:h-7 sm:w-7' : 'h-5 w-5 sm:h-6 sm:w-6')} aria-hidden />
+          <PlayCircle className={cn(visualOnly ? 'h-7 w-7 sm:h-8 sm:w-8' : 'h-6 w-6 sm:h-7 sm:w-7')} aria-hidden />
         </div>
       </div>
+      {isHovering && canPreview ? (
+        <div className="absolute right-2 top-2 z-[4] flex flex-col gap-1.5">
+          <button
+            type="button"
+            className={cn(
+              'inline-flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm transition',
+              isAudioEnabled ? 'bg-white/90 text-black' : 'bg-black/70 text-white hover:bg-black/80',
+            )}
+            onClick={handleToggleAudio}
+            aria-label={isAudioEnabled ? 'Desativar áudio da prévia' : 'Ativar áudio da prévia'}
+          >
+            {isAudioEnabled ? <Volume2 className="h-3.5 w-3.5" aria-hidden /> : <VolumeX className="h-3.5 w-3.5" aria-hidden />}
+          </button>
+          <button
+            type="button"
+            disabled={!canToggleSubtitle}
+            className={cn(
+              'inline-flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm transition',
+              canToggleSubtitle
+                ? isSubtitleEnabled
+                  ? 'bg-white/90 text-black'
+                  : 'bg-black/70 text-white hover:bg-black/80'
+                : 'cursor-not-allowed bg-black/45 text-white opacity-60',
+            )}
+            onClick={handleToggleSubtitle}
+            aria-label={isSubtitleEnabled ? 'Desativar legenda da prévia' : 'Ativar legenda da prévia'}
+          >
+            <Captions className="h-3.5 w-3.5" aria-hidden />
+          </button>
+        </div>
+      ) : null}
+      <style>{`
+        .preview-video::cue {
+          font-size: 1.22rem;
+          line-height: 1.45;
+          font-weight: 800;
+          letter-spacing: 0.01em;
+          color: #ffffff;
+          background: rgba(0, 0, 0, 0.86);
+          text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+        }
+      `}</style>
       {visualOnly ? null : (
         <Badge
           variant="secondary"
@@ -153,16 +363,41 @@ function LessonPreviewCard({
     >
       <Card
         className={cn(
-          'overflow-hidden border-border/80 transition-shadow hover:shadow-md',
+          'overflow-hidden border-border/80 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10',
           visualOnly ? 'p-0' : 'flex h-full flex-col',
         )}
       >
         {playerArea}
         {visualOnly ? (
-          <CardContent className="space-y-1.5 p-2 sm:p-2.5">
-            <h3 className="line-clamp-2 font-display text-xs font-bold leading-snug text-foreground sm:text-sm">
-              {normalizePtBrText(lesson.title)}
-            </h3>
+          <CardContent
+            className={cn(
+              'space-y-2 border-t p-2 transition-colors sm:p-2.5',
+              isHovering
+                ? 'border-primary/45 bg-primary/10'
+                : 'border-border/60 bg-gradient-to-b from-background to-muted/20',
+            )}
+          >
+            <div className="flex items-center gap-2.5">
+              <Avatar
+                className={cn(
+                  'h-7 w-7 border-2 shadow-sm sm:h-8 sm:w-8',
+                  isHovering ? 'border-primary/70 ring-2 ring-primary/25' : 'border-border/70',
+                )}
+              >
+                {courseCover ? <AvatarImage src={courseCover} alt={normalizePtBrText(courseTitle)} /> : null}
+                <AvatarFallback className="bg-primary/10 text-[9px] font-bold text-primary sm:text-[10px]">
+                  {normalizePtBrText(courseTitle).slice(0, 2).toLocaleUpperCase('pt-BR')}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <h3 className="line-clamp-2 font-display text-[12px] font-bold leading-snug text-foreground sm:text-[13px]">
+                  {normalizePtBrText(lesson.title).toLocaleUpperCase('pt-BR')}
+                </h3>
+                <p className="line-clamp-1 text-[10px] font-medium text-muted-foreground sm:text-[11px]">
+                  {normalizePtBrText(courseTitle)}
+                </p>
+              </div>
+            </div>
           </CardContent>
         ) : (
           <CardContent className="flex flex-1 flex-col gap-1.5 p-2.5 sm:p-3">
@@ -170,7 +405,7 @@ function LessonPreviewCard({
               {normalizePtBrText(lesson.moduleTitle)}
             </p>
             <h3 className="line-clamp-2 font-display text-xs font-bold leading-snug text-foreground sm:text-sm">
-              {normalizePtBrText(lesson.title)}
+              {normalizePtBrText(lesson.title).toLocaleUpperCase('pt-BR')}
             </h3>
             {lesson.description ? (
               <p className="line-clamp-2 text-[11px] leading-snug text-muted-foreground sm:text-xs">
@@ -217,10 +452,8 @@ function TagList({ label, items, max = 6 }: { label: string; items: string[]; ma
 
 function FacultyCard({
   member,
-  courseTitle,
 }: {
   member: StudentDashboardFacultyMember;
-  courseTitle: string;
 }) {
   const [open, setOpen] = useState(false);
   const initials = member.name
@@ -238,33 +471,54 @@ function FacultyCard({
         onClick={() => setOpen(true)}
         className="text-left outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <Card className="h-full border-border/80 transition-all hover:border-primary/40 hover:shadow-sm">
-          <CardHeader className="space-y-0 p-3 pb-2 sm:p-3.5">
+        <Card className="h-full overflow-hidden border-border/80 transition-all hover:shadow-sm">
+          <div className="relative h-12 overflow-hidden border-b border-border/60 bg-gradient-to-r from-primary/15 via-primary/5 to-muted/40 sm:h-14">
+            {member.avatarUrl ? (
+              <>
+                <img src={member.avatarUrl} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35 blur-[1px]" />
+                <div className="absolute inset-0 bg-black/15" />
+              </>
+            ) : null}
+            <div className="absolute left-2 top-2 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-semibold text-primary backdrop-blur-sm">
+              Docente
+            </div>
+          </div>
+          <CardHeader className="space-y-0 p-2 pb-1 sm:p-2.5 sm:pb-1.5">
             <div className="flex items-start gap-2.5">
-              <Avatar className="h-10 w-10 shrink-0 border border-primary/15 sm:h-11 sm:w-11">
+              <Avatar className="h-8 w-8 shrink-0 border border-primary/15 sm:h-9 sm:w-9">
                 {member.avatarUrl ? <AvatarImage src={member.avatarUrl} alt="" /> : null}
                 <AvatarFallback className="bg-primary/10 font-display text-xs font-bold text-primary sm:text-sm">
                   {initials}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1 space-y-0.5">
-                <CardTitle className="font-display text-sm font-bold leading-tight sm:text-base">
+                <CardTitle className="font-display text-xs font-bold leading-tight sm:text-sm">
                   {normalizePtBrText(member.name)}
                 </CardTitle>
-                {member.headline ? (
-                  <p className="line-clamp-1 text-[11px] font-medium text-primary sm:text-xs">{normalizePtBrText(member.headline)}</p>
-                ) : null}
                 {member.facultyRole ? (
-                  <p className="line-clamp-1 text-[10px] text-muted-foreground sm:text-[11px]">{normalizePtBrText(member.facultyRole)}</p>
+                  <p className="line-clamp-1 text-[9px] text-muted-foreground sm:text-[10px]">{normalizePtBrText(member.facultyRole)}</p>
                 ) : null}
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-2 p-3 pt-0 text-sm sm:p-3.5 sm:pt-0">
-            <p className="line-clamp-2 text-xs leading-snug text-muted-foreground sm:line-clamp-3">{normalizePtBrText(member.bioShort)}</p>
-            <TagList label="Especializações" items={member.specializations} max={3} />
-            <TagList label={`Temas no curso`} items={member.courseThemes} max={2} />
-            <p className="flex items-center gap-0.5 pt-0.5 text-[11px] font-medium text-primary sm:text-xs">
+          <CardContent className="space-y-1 p-2 pt-0 text-sm sm:p-2.5 sm:pt-0">
+            {member.headline ? (
+              <p className="line-clamp-1 text-[9px] font-medium text-primary sm:text-[10px]">{normalizePtBrText(member.headline)}</p>
+            ) : null}
+            {member.specialty ? (
+              <p className="line-clamp-1 text-[9px] text-muted-foreground sm:text-[10px]">
+                <span className="font-semibold text-foreground">Especialidade:</span> {normalizePtBrText(member.specialty)}
+              </p>
+            ) : null}
+            {member.practiceAreas.length > 0 ? (
+              <p className="line-clamp-1 text-[9px] text-muted-foreground sm:text-[10px]">
+                <span className="font-semibold text-foreground">Atuação:</span> {normalizePtBrText(member.practiceAreas[0])}
+              </p>
+            ) : null}
+            <p className="line-clamp-1 text-[9px] leading-snug text-muted-foreground sm:text-[10px]">
+              {normalizePtBrText(member.bioShort)}
+            </p>
+            <p className="flex items-center gap-0.5 text-[10px] font-medium text-primary sm:text-[11px]">
               Perfil completo
               <ChevronRight className="h-3 w-3" aria-hidden />
             </p>
@@ -407,6 +661,11 @@ function PlaceholderFacultyCard({ index }: { index: number }) {
 }
 
 function InfoMural({ courseId, mural, courseTitle }: { courseId: string; mural: StudentDashboardMural; courseTitle: string }) {
+  const nextLessons = mural.nextUp.slice(0, 2);
+  const materials = mural.complementary.slice(0, 2);
+  const bulletins = mural.bulletins.slice(0, 1);
+  const modulesTracked = mural.modulesSummary.length;
+
   return (
     <Card className="flex h-full max-h-[23rem] flex-col border-primary/15 bg-gradient-to-b from-card to-primary/[0.02] sm:max-h-[24rem]">
       <CardHeader className="space-y-0.5 px-3 py-2.5 sm:px-3.5 sm:py-3">
@@ -416,7 +675,7 @@ function InfoMural({ courseId, mural, courseTitle }: { courseId: string; mural: 
         </CardTitle>
         <p className="text-[10px] text-muted-foreground sm:text-xs">«{normalizePtBrText(courseTitle)}»</p>
       </CardHeader>
-      <CardContent className="flex min-h-0 flex-1 flex-col gap-2 px-3 pb-3 pt-0 text-sm overflow-y-auto sm:px-3.5 sm:pb-3.5">
+      <CardContent className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 pb-3 pt-0 text-sm sm:px-3.5 sm:pb-3.5">
         <div>
           <div className="mb-0.5 flex justify-between text-[10px] font-medium text-muted-foreground sm:text-xs">
             <span>Progresso</span>
@@ -445,74 +704,71 @@ function InfoMural({ courseId, mural, courseTitle }: { courseId: string; mural: 
           </div>
         ) : null}
 
+        <div className="grid grid-cols-3 gap-1.5 text-[10px]">
+          <div className="rounded border border-border/60 bg-muted/30 px-2 py-1 text-center">
+            <p className="font-semibold text-foreground">{nextLessons.length}</p>
+            <p className="text-muted-foreground">Próximas</p>
+          </div>
+          <div className="rounded border border-border/60 bg-muted/30 px-2 py-1 text-center">
+            <p className="font-semibold text-foreground">{materials.length}</p>
+            <p className="text-muted-foreground">Materiais</p>
+          </div>
+          <div className="rounded border border-border/60 bg-muted/30 px-2 py-1 text-center">
+            <p className="font-semibold text-foreground">{modulesTracked}</p>
+            <p className="text-muted-foreground">Módulos</p>
+          </div>
+        </div>
+
         <div>
           <p className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
             <LayoutList className="h-3 w-3" aria-hidden />
             Próximas aulas
           </p>
-          <ul className="max-h-[7.5rem] space-y-1 overflow-y-auto pr-0.5 text-[11px] sm:max-h-[8.5rem] sm:text-xs">
-            {mural.nextUp.length === 0 ? (
-              <li className="text-muted-foreground">Nada além do bloco inicial.</li>
-            ) : (
-              mural.nextUp.slice(0, 4).map((l) => (
+          {nextLessons.length === 0 ? (
+            <p className="text-[11px] text-muted-foreground sm:text-xs">Nada além do bloco inicial.</p>
+          ) : (
+            <ul className="space-y-1 text-[11px] sm:text-xs">
+              {nextLessons.map((l) => (
                 <li key={l.lessonId}>
                   <Link
                     to={`/student/courses/${courseId}/lessons/${l.lessonId}`}
-                    className="flex items-center justify-between gap-1.5 rounded px-0.5 py-0.5 hover:bg-muted/80"
+                    className="flex items-center justify-between gap-1.5 rounded px-1 py-1 hover:bg-muted/80"
                   >
-                    <span className="line-clamp-2 font-medium leading-snug">{normalizePtBrText(l.title)}</span>
+                    <span className="line-clamp-1 font-medium leading-snug">{normalizePtBrText(l.title)}</span>
                     <Badge variant="outline" className="shrink-0 px-1 py-0 text-[9px]">
                       {lessonStatusLabel(l.status)}
                     </Badge>
                   </Link>
-                  <span className="block pl-0.5 text-[9px] text-muted-foreground">{normalizePtBrText(l.moduleTitle)}</span>
                 </li>
-              ))
-            )}
-          </ul>
+              ))}
+            </ul>
+          )}
         </div>
 
-        <div>
-          <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Módulos</p>
-          <ul className="grid gap-1 text-[11px] sm:grid-cols-2 sm:text-xs">
-            {mural.modulesSummary.slice(0, 4).map((m) => (
-              <li key={m.moduleId} className="flex justify-between gap-1 rounded bg-muted/35 px-1.5 py-1">
-                <span className="line-clamp-1 min-w-0 font-medium">{normalizePtBrText(m.title)}</span>
-                <span className="shrink-0 tabular-nums text-muted-foreground">
-                  {m.completedLessons}/{m.publishedLessons}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {mural.complementary.length > 0 ? (
+        {materials.length > 0 ? (
           <div>
             <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Materiais</p>
             <ul className="space-y-0.5 text-[11px] sm:text-xs">
-              {mural.complementary.slice(0, 4).map((c) => (
+              {materials.map((c) => (
                 <li key={c.lessonId} className="truncate">
                   <Link to={`/student/courses/${courseId}/lessons/${c.lessonId}`} className="text-primary hover:underline">
                     {normalizePtBrText(c.title)}
                   </Link>
-                  <span className="text-muted-foreground"> · {c.type}</span>
                 </li>
               ))}
             </ul>
           </div>
         ) : null}
 
-        <div>
-          <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Avisos</p>
-          <ul className="space-y-1 text-[10px] text-muted-foreground sm:text-[11px]">
-            {mural.bulletins.slice(0, 2).map((b, i) => (
-              <li key={i} className="flex gap-1.5 rounded border border-border/40 bg-background/60 px-2 py-1.5 leading-snug">
-                <MapPin className="mt-0.5 h-3 w-3 shrink-0 text-primary" aria-hidden />
-                <span className="line-clamp-3">{normalizePtBrText(b)}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {bulletins.length > 0 ? (
+          <div>
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Aviso</p>
+            <div className="flex gap-1.5 rounded border border-border/40 bg-background/60 px-2 py-1.5 text-[10px] leading-snug text-muted-foreground sm:text-[11px]">
+              <MapPin className="mt-0.5 h-3 w-3 shrink-0 text-primary" aria-hidden />
+              <span className="line-clamp-2">{normalizePtBrText(bulletins[0])}</span>
+            </div>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );
@@ -522,6 +778,7 @@ type Props = { home: StudentDashboardSingleCourseHome };
 
 export function SingleCourseHomeExperience({ home }: Props) {
   const facultySlots: (StudentDashboardFacultyMember | null)[] = [...home.faculty];
+  const [audioPreferenceEnabled, setAudioPreferenceEnabled] = useState(false);
   while (facultySlots.length < 4) facultySlots.push(null);
 
   return (
@@ -538,7 +795,7 @@ export function SingleCourseHomeExperience({ home }: Props) {
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-4">
           {facultySlots.slice(0, 4).map((member, idx) =>
             member ? (
-              <FacultyCard key={member.userId} member={member} courseTitle={home.courseTitle} />
+              <FacultyCard key={member.userId} member={member} />
             ) : (
               <PlaceholderFacultyCard key={`ph-${idx}`} index={idx} />
             ),
@@ -553,7 +810,16 @@ export function SingleCourseHomeExperience({ home }: Props) {
 
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 md:grid-cols-3">
           {home.lessonRowTop.map((lesson) => (
-            <LessonPreviewCard key={lesson.id} courseId={home.courseId} lesson={lesson} visualOnly />
+            <LessonPreviewCard
+              key={lesson.id}
+              courseId={home.courseId}
+              courseTitle={home.courseTitle}
+              courseCover={home.courseCover}
+              audioPreferenceEnabled={audioPreferenceEnabled}
+              onAudioPreferenceChange={setAudioPreferenceEnabled}
+              lesson={lesson}
+              visualOnly
+            />
           ))}
         </div>
 
@@ -561,6 +827,10 @@ export function SingleCourseHomeExperience({ home }: Props) {
           {home.lessonFourth ? (
             <LessonPreviewCard
               courseId={home.courseId}
+              courseTitle={home.courseTitle}
+              courseCover={home.courseCover}
+              audioPreferenceEnabled={audioPreferenceEnabled}
+              onAudioPreferenceChange={setAudioPreferenceEnabled}
               lesson={home.lessonFourth}
               className="md:col-span-1"
               visualOnly

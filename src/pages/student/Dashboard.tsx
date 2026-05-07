@@ -21,8 +21,7 @@ export default function StudentDashboard() {
   if (isWaitingData) return <AppLayout><div className="min-h-24" /></AppLayout>;
   if (!data) return <AppLayout><div>Erro ao carregar dados.</div></AppLayout>;
 
-  const singleCourse =
-    data.enrolledCoursesCount === 1 && data.singleCourseHome != null ? data.singleCourseHome : null;
+  const singleCourse = data.singleCourseHome != null ? data.singleCourseHome : null;
 
   return (
     <AppLayout>
