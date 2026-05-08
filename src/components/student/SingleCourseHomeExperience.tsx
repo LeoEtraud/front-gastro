@@ -340,18 +340,6 @@ function LessonPreviewCard({
           {lessonStatusLabel(lesson.status)}
         </Badge>
       )}
-      {dur ? (
-        <span
-          className={cn(
-            'absolute z-[4] rounded bg-black/60 font-medium text-white',
-            visualOnly
-              ? 'bottom-2 right-2 px-2 py-0.5 text-[11px] sm:text-xs'
-              : 'bottom-1 right-1.5 px-1.5 py-0.5 text-[10px] sm:bottom-1.5 sm:text-[11px]',
-          )}
-        >
-          {dur}
-        </span>
-      ) : null}
     </div>
   );
 

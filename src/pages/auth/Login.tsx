@@ -11,6 +11,7 @@ import { PasswordInput } from '@/components/ui/password-input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen, Stethoscope, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import '@/styles/animations/text-focus-in.css';
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -79,14 +80,14 @@ export default function Login() {
   const submitBlocked = !recaptchaToken || !hasRecaptchaSiteKey;
 
   return (
-    <div className="grid min-h-dvh overflow-x-hidden bg-slate-50 md:grid-cols-2">
+    <div className="grid min-h-dvh overflow-x-hidden bg-slate-50 md:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
       <div className="hidden md:flex flex-col justify-center items-center p-12 bg-sidebar text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <img src={`${import.meta.env.BASE_URL}images/doctor-abstract.png`} alt="Medical" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 opacity-20">
+          <img src={`${import.meta.env.BASE_URL}img-de-fundo.jpg`} alt="Medical" className="w-full h-full object-cover" />
         </div>
         <div className="relative z-10 max-w-md text-center">
           <Stethoscope className="w-16 h-16 mx-auto mb-8 text-primary" />
-          <h2 className="mb-4 font-display text-4xl font-bold text-white">
+          <h2 className="text-focus-in mb-4 font-display text-4xl font-bold text-white">
             Bem-vindo de volta ao MedLearn
           </h2>
           <p className="text-lg text-slate-300">Acesse seus cursos, continue seu aprendizado e expanda seus conhecimentos médicos.</p>

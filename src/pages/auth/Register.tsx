@@ -18,6 +18,7 @@ import {
   isValidPhoneBR,
 } from '@/lib/profile-formatters';
 import { RecaptchaWidget, getRecaptchaSiteKey } from '@/components/auth/RecaptchaWidget';
+import '@/styles/animations/text-focus-in.css';
 
 const registerSchema = z.object({
   name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
@@ -97,14 +98,14 @@ export default function Register() {
   const submitBlocked = !isValid || !recaptchaToken || !hasRecaptchaSiteKey;
 
   return (
-    <div className="grid min-h-dvh overflow-x-hidden bg-slate-50 md:grid-cols-2">
+    <div className="grid min-h-dvh overflow-x-hidden bg-slate-50 md:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
       <div className="hidden md:flex flex-col justify-center items-center p-12 bg-sidebar text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <img src={`${import.meta.env.BASE_URL}images/doctor-abstract.png`} alt="Medical" className="w-full h-full object-cover" />
+          <img src={`${import.meta.env.BASE_URL}img-de-fundo-2.jpg`} alt="Medical" className="w-full h-full object-cover" />
         </div>
         <div className="relative z-10 max-w-md text-center">
           <Stethoscope className="w-16 h-16 mx-auto mb-8 text-primary" />
-          <h2 className="text-4xl font-display font-bold mb-4 text-white">Comece sua jornada no MedLearn</h2>
+          <h2 className="text-focus-in text-4xl font-display font-bold mb-4 text-white">Comece sua jornada no MedLearn</h2>
           <p className="text-lg text-slate-300">
             Crie sua conta e acesse cursos, materiais e uma comunidade focada em educação médica de qualidade.
           </p>
