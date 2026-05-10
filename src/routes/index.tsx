@@ -6,7 +6,7 @@ import ResetPassword from "@/pages/auth/ResetPassword";
 import NotFound from "@/pages/not-found";
 import CourseCatalog from "@/pages/public/CourseCatalog";
 import CourseDetail from "@/pages/public/CourseDetail";
-import Home from "@/pages/public/Home";
+import GastrocentroHome from "@/pages/public/GastrocentroHome";
 import StudentCourses from "@/pages/student/Courses";
 import StudentDashboard from "@/pages/student/Dashboard";
 import LessonViewer from "@/pages/student/LessonViewer";
@@ -22,7 +22,8 @@ export function AppRoutes() {
   return (
     <Routes>
       {/* Public */}
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<GastrocentroHome />} />
+      <Route path="/gastrocentro" element={<GastrocentroHome />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
