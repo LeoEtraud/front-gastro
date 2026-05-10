@@ -42,7 +42,7 @@ export function GastroHero() {
               href="#especialidades"
               className={cn(
                 buttonVariants({ variant: 'outline', size: 'lg' }),
-                'h-12 w-full rounded-full border-2 border-cyan-700/40 bg-gradient-to-b from-white via-white to-cyan-50/90 px-8 text-base font-semibold text-cyan-950 shadow-md shadow-cyan-900/10 ring-1 ring-cyan-900/5 backdrop-blur-sm transition hover:border-cyan-600 hover:bg-gradient-to-b hover:from-cyan-50 hover:via-white hover:to-cyan-50/80 hover:shadow-lg hover:shadow-cyan-900/15 sm:w-auto sm:min-w-[11.5rem] sm:text-lg',
+                'h-12 w-full rounded-full border-2 border-cyan-700/40 bg-gradient-to-b from-white via-white to-cyan-50/90 px-8 text-base font-semibold text-cyan-950 shadow-md shadow-cyan-900/10 ring-1 ring-cyan-900/5 backdrop-blur-sm transition hover:border-cyan-600 hover:bg-gradient-to-b hover:from-cyan-50 hover:via-white hover:to-cyan-50/80 hover:text-cyan-950 hover:shadow-lg hover:shadow-cyan-900/15 focus-visible:text-cyan-950 sm:w-auto sm:min-w-[11.5rem] sm:text-lg',
               )}
             >
               Conhecer especialidades
