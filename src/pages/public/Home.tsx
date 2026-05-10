@@ -31,7 +31,7 @@ export default function Home() {
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:h-16 sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-2 font-display text-lg font-bold text-primary sm:text-2xl">
             <BookOpen className="h-6 w-6 shrink-0 sm:h-7 sm:w-7" aria-hidden />
-            <span className="truncate">MedLearn</span>
+            <span className="truncate">GastroCentro</span>
           </div>
 
           <div className="hidden items-center gap-2 md:flex md:gap-4">
@@ -287,9 +287,9 @@ export default function Home() {
       <footer className="border-t border-slate-800 bg-slate-950 py-10 text-slate-400 sm:py-12">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 font-display text-lg font-bold text-white sm:text-xl">
-            <BookOpen className="h-6 w-6 shrink-0 text-primary" aria-hidden /> MedLearn
+            <BookOpen className="h-6 w-6 shrink-0 text-primary" aria-hidden /> GastroCentro
           </div>
-          <p className="text-center text-xs sm:text-sm">© {new Date().getFullYear()} MedLearn Plataforma EAD. Todos os direitos reservados.</p>
+          <p className="text-center text-xs sm:text-sm">© {new Date().getFullYear()} GastroCentro — Plataforma EAD. Todos os direitos reservados.</p>
         </div>
       </footer>
     </div>

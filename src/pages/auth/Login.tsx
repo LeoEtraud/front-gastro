@@ -88,7 +88,7 @@ export default function Login() {
         <div className="relative z-10 max-w-md text-center">
           <Stethoscope className="w-16 h-16 mx-auto mb-8 text-primary" />
           <h2 className="text-focus-in mb-4 font-display text-4xl font-bold text-white">
-            Bem-vindo de volta ao MedLearn
+            Bem-vindo de volta ao GastroCentro
           </h2>
           <p className="text-lg text-slate-300">Acesse seus cursos, continue seu aprendizado e expanda seus conhecimentos médicos.</p>
         </div>

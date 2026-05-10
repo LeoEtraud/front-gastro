@@ -105,7 +105,7 @@ export default function Register() {
         </div>
         <div className="relative z-10 max-w-md text-center">
           <Stethoscope className="w-16 h-16 mx-auto mb-8 text-primary" />
-          <h2 className="text-focus-in text-4xl font-display font-bold mb-4 text-white">Comece sua jornada no MedLearn</h2>
+          <h2 className="text-focus-in text-4xl font-display font-bold mb-4 text-white">Comece sua jornada no GastroCentro</h2>
           <p className="text-lg text-slate-300">
             Crie sua conta e acesse cursos, materiais e uma comunidade focada em educação médica de qualidade.
           </p>

@@ -12,23 +12,23 @@ import type { UseChatHelpers, UIMessage } from "@ai-sdk/react";
 import { useAuth } from "@/hooks/use-auth";
 import { getAuthTokenFromCookie } from "@/lib/auth-cookie";
 
-const CHAT_ID = "medlearn-assistant";
+const CHAT_ID = "gastrocentro-assistant";
 
-// TIPO DE VALOR DO CONTEXTO DE CHAT DO MEDLEARN AI
+// Tipo do contexto de chat do assistente GastroCentro
 type MedlearnAiChatContextValue = UseChatHelpers<UIMessage>;
 
-// CONTEXTO DE CHAT DO MEDLEARN AI
+// Contexto de chat do assistente GastroCentro
 const MedlearnAiChatContext = createContext<MedlearnAiChatContextValue | null>(
   null,
 );
 
-// PROPS PARA O FORNECEDOR DE CONTEXTO DE CHAT DO MEDLEARN AI
+// Props do provider de contexto de chat
 type MedlearnAiChatProviderProps = {
   children: ReactNode;
   apiEndpoint?: string;
 };
 
-// FUNÇÃO PARA FORNECER O CONTEXTO DE CHAT DO MEDLEARN AI
+// Provider de contexto de chat (assistente GastroCentro)
 export function MedlearnAiChatProvider({
   children,
   apiEndpoint = "/api/chat",
@@ -78,12 +78,12 @@ export function MedlearnAiChatProvider({
   );
 }
 
-// FUNÇÃO PARA USAR O CONTEXTO DE CHAT DO MEDLEARN AI
+// Hook do contexto de chat do assistente GastroCentro
 export function useMedlearnAiChat() {
   const ctx = useContext(MedlearnAiChatContext);
   if (!ctx) {
     throw new Error(
-      "useMedlearnAiChat deve ser usado dentro de MedlearnAiChatProvider",
+      "useMedlearnAiChat deve ser usado dentro de MedlearnAiChatProvider (GastroCentro)",
     );
   }
   return ctx;

@@ -26,8 +26,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.png", "images/doctor-abstract.png", "images/hero-bg.png"],
       manifest: {
-        name: "MedLearn — Plataforma de cursos médicos",
-        short_name: "MedLearn",
+        name: "GastroCentro — Plataforma de cursos médicos",
+        short_name: "GastroCentro",
         description:
           "Cursos, materiais e comunidade focada em educação médica de qualidade.",
         lang: "pt-BR",
@@ -61,7 +61,7 @@ export default defineConfig({
             urlPattern: ({ url }) => url.pathname.startsWith("/api/"),
             handler: "NetworkFirst",
             options: {
-              cacheName: "medlearn-api",
+              cacheName: "gastrocentro-api",
               networkTimeoutSeconds: 10,
               expiration: { maxEntries: 64, maxAgeSeconds: 60 * 5 },
             },

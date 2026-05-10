@@ -74,7 +74,7 @@ export default function ForgotPassword() {
               </div>
             </div>
             <CardTitle className="font-display text-2xl font-bold sm:text-3xl">Esqueci minha senha</CardTitle>
-            <CardDescription>Digite o e-mail cadastrado no MedLearn</CardDescription>
+            <CardDescription>Digite o e-mail cadastrado no GastroCentro</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="mb-5 border-b border-border/60 pb-5">

@@ -18,7 +18,7 @@ type ChatMessage = {
 };
 
 export function FloatingChatButton({
-  title = "Assistente Med Learn",
+  title = "Assistente GastroCentro",
 }: FloatingChatButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");

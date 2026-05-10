@@ -71,7 +71,7 @@ export function GastroFooter() {
             </li>
             <li>
               <Link className="hover:text-cyan-800" to="/">
-                MedLearn (home)
+                GastroCentro (início)
               </Link>
             </li>
           </ul>

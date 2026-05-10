@@ -128,7 +128,7 @@ export function Sidebar({
           <>
             <div className="flex min-w-0 flex-1 items-center gap-2">
               <BookOpen className="h-6 w-6 shrink-0 text-primary" />
-              <span className="truncate font-display text-lg font-bold">MedLearn</span>
+              <span className="truncate font-display text-lg font-bold">GastroCentro</span>
             </div>
             {onToggleCollapse && (
               <Tooltip>
@@ -177,7 +177,7 @@ export function Sidebar({
       <div className="flex h-16 items-center justify-between rounded-t-2xl border-b border-border px-3">
         <div className="flex min-w-0 items-center gap-2">
           <BookOpen className="h-6 w-6 shrink-0 text-primary" />
-          <span className="truncate font-display text-lg font-bold">MedLearn</span>
+          <span className="truncate font-display text-lg font-bold">GastroCentro</span>
         </div>
         <button
           type="button"

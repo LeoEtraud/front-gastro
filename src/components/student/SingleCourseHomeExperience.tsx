@@ -29,6 +29,7 @@ import {
   GraduationCap,
   Languages,
   LayoutList,
+  Layers,
   MapPin,
   Play,
   PlayCircle,
@@ -230,7 +231,7 @@ function LessonPreviewCard({
       <Link
         to={`/student/courses/${courseId}/lessons/${lesson.id}`}
         className={cn(
-          'group relative flex aspect-[3/4] min-w-0 overflow-hidden rounded-2xl border border-cyan-950/10 bg-cyan-950 shadow-md',
+          'group relative flex aspect-[3/4] w-full min-w-0 overflow-hidden rounded-2xl border border-cyan-950/10 bg-cyan-950 shadow-md',
           'transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl hover:shadow-cyan-900/25',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           className,
@@ -315,13 +316,13 @@ function LessonPreviewCard({
           >
             <span
               className={cn(
-                'inline-flex h-16 w-16 items-center justify-center rounded-full bg-white/95 text-cyan-900 shadow-xl ring-2 ring-white/40 transition-all duration-300 ease-out motion-reduce:transition-none',
+                'inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/95 text-cyan-900 shadow-lg ring-2 ring-white/40 transition-all duration-300 ease-out motion-reduce:transition-none sm:h-16 sm:w-16',
                 isHovering
                   ? 'scale-95 opacity-0'
-                  : 'scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100 motion-reduce:group-hover:scale-95',
+                  : 'scale-100 opacity-100 shadow-xl group-hover:scale-110 motion-reduce:group-hover:scale-100',
               )}
             >
-              <Play className="ml-1 h-8 w-8 fill-cyan-900 text-cyan-900" stroke="none" aria-hidden />
+              <Play className="ml-0.5 h-7 w-7 fill-cyan-900 text-cyan-900 sm:ml-1 sm:h-8 sm:w-8" stroke="none" aria-hidden />
             </span>
           </div>
 
@@ -368,23 +369,16 @@ function LessonPreviewCard({
               text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
             }
           `}</style>
-
-          <Badge
-            variant="secondary"
-            className="absolute left-2 top-2 z-[8] max-w-[calc(100%-5rem)] truncate border-0 bg-black/55 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm sm:left-2.5 sm:top-2.5 sm:text-[11px]"
-          >
-            {lessonStatusLabel(lesson.status)}
-          </Badge>
         </div>
 
-        <div className="pointer-events-none relative z-[6] mt-auto flex flex-col gap-1.5 p-4 sm:p-5">
-          <span className="inline-flex w-fit max-w-full truncate rounded-full bg-white/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cyan-50 backdrop-blur-sm sm:text-[11px]">
+        <div className="pointer-events-none relative z-[6] mt-auto flex flex-col gap-1 p-3 sm:p-4">
+          <span className="inline-flex w-fit max-w-full truncate rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cyan-50 backdrop-blur-sm sm:text-[11px]">
             {normalizePtBrText(lesson.moduleTitle)}
           </span>
-          <h3 className="line-clamp-2 font-display text-base font-bold leading-tight text-white sm:text-lg">
+          <h3 className="line-clamp-2 font-display text-sm font-bold leading-tight text-white sm:text-base">
             {normalizePtBrText(lesson.title).toLocaleUpperCase('pt-BR')}
           </h3>
-          <p className="line-clamp-2 text-xs leading-relaxed text-cyan-50/90 sm:text-sm">{subtitleText}</p>
+          <p className="line-clamp-2 text-[11px] leading-relaxed text-cyan-50/90 sm:text-xs">{subtitleText}</p>
           <div className="flex flex-wrap gap-1 pt-0.5">
             <span className="inline-flex rounded-full border border-white/25 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cyan-50/95 sm:text-[11px]">
               {lesson.type}
@@ -782,78 +776,124 @@ function InfoMural({ courseId, mural, courseTitle }: { courseId: string; mural: 
   const nextLessons = mural.nextUp.slice(0, 2);
   const materials = mural.complementary.slice(0, 2);
   const bulletins = mural.bulletins.slice(0, 1);
-  const modulesTracked = mural.modulesSummary.length;
+  const nextTotal = mural.nextUp.length;
+  const materialsTotal = mural.complementary.length;
+  const modulesTotal = mural.modulesSummary.length;
+  const progressRounded = Math.round(mural.progressPercent);
+  const comingSoon = mural.stats.comingSoonLessons;
+  const comingSoonPhrase =
+    comingSoon > 0
+      ? comingSoon === 1
+        ? ' · 1 aula em breve'
+        : ` · ${comingSoon} aulas em breve`
+      : '';
 
   return (
-    <Card className="flex h-full max-h-[23rem] flex-col border-primary/15 bg-gradient-to-b from-card to-primary/[0.02] sm:max-h-[24rem]">
-      <CardHeader className="space-y-0.5 px-3 py-2.5 sm:px-3.5 sm:py-3">
-        <CardTitle className="flex items-center gap-1.5 font-display text-sm font-bold sm:text-base">
-          <Target className="h-4 w-4 shrink-0 text-primary sm:h-4 sm:w-4" aria-hidden />
-          Mural do curso
+    <Card
+      role="region"
+      aria-labelledby="student-course-mural-title"
+      className="flex h-full max-h-[23rem] flex-col overflow-hidden border border-primary/15 bg-gradient-to-b from-card via-card to-primary/[0.035] shadow-sm sm:max-h-[24rem]"
+    >
+      <CardHeader className="shrink-0 space-y-1 border-b border-border/50 bg-muted/20 px-3 py-3 sm:px-4 sm:py-3.5">
+        <CardTitle
+          id="student-course-mural-title"
+          className="flex items-center gap-2 font-display text-sm font-bold leading-tight sm:text-base"
+        >
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-primary/15 bg-primary/10 text-primary">
+            <Target className="h-4 w-4" aria-hidden />
+          </span>
+          <span className="min-w-0 flex-1">Mural do curso</span>
         </CardTitle>
-        <p className="text-[10px] text-muted-foreground sm:text-xs">«{normalizePtBrText(courseTitle)}»</p>
+        <p className="pl-10 text-[11px] leading-snug text-muted-foreground sm:text-xs">
+          <span className="sr-only">Curso: </span>«{normalizePtBrText(courseTitle)}»
+        </p>
       </CardHeader>
-      <CardContent className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 pb-3 pt-0 text-sm sm:px-3.5 sm:pb-3.5">
-        <div>
-          <div className="mb-0.5 flex justify-between text-[10px] font-medium text-muted-foreground sm:text-xs">
-            <span>Progresso</span>
-            <span>{Math.round(mural.progressPercent)}%</span>
+      <CardContent className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-3 pb-3 pt-3 text-sm sm:px-4 sm:pb-4 sm:pt-3.5">
+        <div
+          className="rounded-lg border border-border/60 bg-background/40 px-3 py-2.5"
+          aria-label={`Progresso no curso: ${progressRounded} por cento. ${mural.stats.completedLessons} de ${mural.stats.totalPublishedLessons} aulas publicadas concluídas.`}
+        >
+          <div className="mb-1.5 flex items-baseline justify-between gap-2">
+            <span className="text-xs font-semibold text-foreground">Seu progresso</span>
+            <span className="tabular-nums text-xs font-bold text-primary">{progressRounded}%</span>
           </div>
-          <Progress value={mural.progressPercent} className="h-1.5" />
-          <p className="mt-0.5 text-[10px] leading-snug text-muted-foreground sm:text-xs">
-            {mural.stats.completedLessons}/{mural.stats.totalPublishedLessons} aulas concluídas
-            {mural.stats.comingSoonLessons > 0 ? ` · ${mural.stats.comingSoonLessons} em breve` : ''}
+          <Progress value={mural.progressPercent} className="h-2" />
+          <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
+            <span className="font-medium text-foreground">{mural.stats.completedLessons}</span>
+            {' de '}
+            <span className="font-medium text-foreground">{mural.stats.totalPublishedLessons}</span>
+            {' aulas publicadas concluídas'}
+            {comingSoonPhrase}
           </p>
         </div>
 
-        <Separator className="my-0" />
+        <Separator className="bg-border/70" />
 
         {mural.recommended ? (
-          <div className="rounded-md border border-primary/20 bg-primary/5 px-2.5 py-2 sm:px-3">
-            <p className="mb-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">Recomendada</p>
-            <Link
-              to={`/student/courses/${courseId}/lessons/${mural.recommended.lessonId}`}
-              className="group flex items-start justify-between gap-2 text-sm font-medium leading-snug text-foreground hover:text-primary"
-            >
-              <span className="line-clamp-2">{normalizePtBrText(mural.recommended.title)}</span>
-              <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 opacity-60 transition-transform group-hover:translate-x-0.5" />
-            </Link>
-            <p className="mt-0.5 text-[10px] text-muted-foreground">{normalizePtBrText(mural.recommended.moduleTitle)}</p>
-          </div>
+          <section aria-labelledby="mural-recommended-heading" className="space-y-1.5">
+            <h4 id="mural-recommended-heading" className="text-[10px] font-bold uppercase tracking-wide text-primary">
+              Aula recomendada
+            </h4>
+            <div className="rounded-lg border border-primary/25 bg-primary/[0.06] p-2.5 shadow-sm sm:p-3">
+              <Link
+                to={`/student/courses/${courseId}/lessons/${mural.recommended.lessonId}`}
+                className="group flex items-start justify-between gap-2 text-sm font-semibold leading-snug text-foreground transition-colors hover:text-primary"
+              >
+                <span className="line-clamp-2 min-w-0">{normalizePtBrText(mural.recommended.title)}</span>
+                <ChevronRight
+                  className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+                  aria-hidden
+                />
+              </Link>
+              <p className="mt-1 text-[11px] text-muted-foreground sm:text-xs">
+                <span className="font-medium text-foreground/80">Módulo:</span>{' '}
+                {normalizePtBrText(mural.recommended.moduleTitle)}
+              </p>
+            </div>
+          </section>
         ) : null}
 
-        <div className="grid grid-cols-3 gap-1.5 text-[10px]">
-          <div className="rounded border border-border/60 bg-muted/30 px-2 py-1 text-center">
-            <p className="font-semibold text-foreground">{nextLessons.length}</p>
-            <p className="text-muted-foreground">Próximas</p>
+        <div
+          className="grid grid-cols-3 gap-2"
+          role="group"
+          aria-label="Resumo rápido: aulas na fila, materiais complementares e módulos acompanhados."
+        >
+          <div className="flex flex-col items-center gap-1 rounded-lg border border-border/70 bg-muted/25 px-1.5 py-2.5 text-center sm:px-2 sm:py-3">
+            <LayoutList className="h-3.5 w-3.5 text-primary/80" aria-hidden />
+            <p className="text-lg font-bold tabular-nums leading-none text-foreground sm:text-xl">{nextTotal}</p>
+            <p className="text-[10px] font-medium leading-tight text-muted-foreground sm:text-[11px]">Na fila</p>
           </div>
-          <div className="rounded border border-border/60 bg-muted/30 px-2 py-1 text-center">
-            <p className="font-semibold text-foreground">{materials.length}</p>
-            <p className="text-muted-foreground">Materiais</p>
+          <div className="flex flex-col items-center gap-1 rounded-lg border border-border/70 bg-muted/25 px-1.5 py-2.5 text-center sm:px-2 sm:py-3">
+            <BookMarked className="h-3.5 w-3.5 text-primary/80" aria-hidden />
+            <p className="text-lg font-bold tabular-nums leading-none text-foreground sm:text-xl">{materialsTotal}</p>
+            <p className="line-clamp-2 text-[10px] font-medium leading-tight text-muted-foreground sm:text-[11px]">Materiais extras</p>
           </div>
-          <div className="rounded border border-border/60 bg-muted/30 px-2 py-1 text-center">
-            <p className="font-semibold text-foreground">{modulesTracked}</p>
-            <p className="text-muted-foreground">Módulos</p>
+          <div className="flex flex-col items-center gap-1 rounded-lg border border-border/70 bg-muted/25 px-1.5 py-2.5 text-center sm:px-2 sm:py-3">
+            <Layers className="h-3.5 w-3.5 text-primary/80" aria-hidden />
+            <p className="text-lg font-bold tabular-nums leading-none text-foreground sm:text-xl">{modulesTotal}</p>
+            <p className="text-[10px] font-medium leading-tight text-muted-foreground sm:text-[11px]">Módulos</p>
           </div>
         </div>
 
-        <div>
-          <p className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-            <LayoutList className="h-3 w-3" aria-hidden />
-            Próximas aulas
-          </p>
+        <section aria-labelledby="mural-next-heading" className="space-y-1.5">
+          <h4 id="mural-next-heading" className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+            <LayoutList className="h-3.5 w-3.5 shrink-0 text-primary/70" aria-hidden />
+            Próximas na sua fila
+          </h4>
           {nextLessons.length === 0 ? (
-            <p className="text-[11px] text-muted-foreground sm:text-xs">Nada além do bloco inicial.</p>
+            <p className="rounded-md border border-dashed border-muted-foreground/25 bg-muted/15 px-2.5 py-2 text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
+              Nenhuma outra aula aparece na fila neste momento. Quando houver próximos passos, eles surgirão aqui.
+            </p>
           ) : (
             <ul className="space-y-1 text-[11px] sm:text-xs">
               {nextLessons.map((l) => (
                 <li key={l.lessonId}>
                   <Link
                     to={`/student/courses/${courseId}/lessons/${l.lessonId}`}
-                    className="flex items-center justify-between gap-1.5 rounded px-1 py-1 hover:bg-muted/80"
+                    className="flex items-center justify-between gap-2 rounded-md border border-transparent px-2 py-1.5 transition-colors hover:border-border/80 hover:bg-muted/50"
                   >
-                    <span className="line-clamp-1 font-medium leading-snug">{normalizePtBrText(l.title)}</span>
-                    <Badge variant="outline" className="shrink-0 px-1 py-0 text-[9px]">
+                    <span className="line-clamp-1 min-w-0 font-medium leading-snug">{normalizePtBrText(l.title)}</span>
+                    <Badge variant="outline" className="shrink-0 px-1.5 py-0 text-[9px] font-semibold">
                       {lessonStatusLabel(l.status)}
                     </Badge>
                   </Link>
@@ -861,32 +901,52 @@ function InfoMural({ courseId, mural, courseTitle }: { courseId: string; mural: 
               ))}
             </ul>
           )}
-        </div>
+        </section>
 
-        {materials.length > 0 ? (
-          <div>
-            <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Materiais</p>
-            <ul className="space-y-0.5 text-[11px] sm:text-xs">
+        <section aria-labelledby="mural-materials-heading" className="space-y-1.5">
+          <h4 id="mural-materials-heading" className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+            Materiais complementares
+          </h4>
+          {materials.length === 0 ? (
+            <p className="rounded-md border border-dashed border-muted-foreground/25 bg-muted/15 px-2.5 py-2 text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
+              Nenhum material complementar listado para este curso no mural.
+            </p>
+          ) : (
+            <ul className="space-y-1 rounded-md border border-border/50 bg-muted/10 p-1.5 text-[11px] sm:text-xs">
               {materials.map((c) => (
-                <li key={c.lessonId} className="truncate">
-                  <Link to={`/student/courses/${courseId}/lessons/${c.lessonId}`} className="text-primary hover:underline">
-                    {normalizePtBrText(c.title)}
+                <li key={c.lessonId} className="min-w-0">
+                  <Link
+                    to={`/student/courses/${courseId}/lessons/${c.lessonId}`}
+                    className="flex items-center gap-1.5 rounded px-1.5 py-1 font-medium text-primary underline-offset-2 hover:bg-background/80 hover:underline"
+                  >
+                    <span className="truncate">{normalizePtBrText(c.title)}</span>
+                    {c.type ? (
+                      <Badge variant="secondary" className="shrink-0 px-1 py-0 text-[9px] font-normal">
+                        {c.type}
+                      </Badge>
+                    ) : null}
                   </Link>
                 </li>
               ))}
             </ul>
-          </div>
-        ) : null}
+          )}
+        </section>
 
-        {bulletins.length > 0 ? (
-          <div>
-            <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Aviso</p>
-            <div className="flex gap-1.5 rounded border border-border/40 bg-background/60 px-2 py-1.5 text-[10px] leading-snug text-muted-foreground sm:text-[11px]">
-              <MapPin className="mt-0.5 h-3 w-3 shrink-0 text-primary" aria-hidden />
-              <span className="line-clamp-2">{normalizePtBrText(bulletins[0])}</span>
+        <section aria-labelledby="mural-bulletin-heading" className="space-y-1.5">
+          <h4 id="mural-bulletin-heading" className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+            Avisos do curso
+          </h4>
+          {bulletins.length > 0 ? (
+            <div className="flex gap-2 rounded-lg border border-border/60 bg-background/70 px-2.5 py-2 text-[11px] leading-relaxed text-muted-foreground shadow-sm sm:text-xs">
+              <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />
+              <p className="line-clamp-3 min-w-0">{normalizePtBrText(bulletins[0])}</p>
             </div>
-          </div>
-        ) : null}
+          ) : (
+            <p className="rounded-md border border-dashed border-muted-foreground/25 bg-muted/15 px-2.5 py-2 text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
+              Sem avisos publicados no mural por enquanto.
+            </p>
+          )}
+        </section>
       </CardContent>
     </Card>
   );
@@ -894,10 +954,25 @@ function InfoMural({ courseId, mural, courseTitle }: { courseId: string; mural: 
 
 type Props = { home: StudentDashboardSingleCourseHome };
 
+function lessonFeaturedGridClass(slotCount: number): string {
+  if (slotCount <= 0) return 'grid-cols-1';
+  if (slotCount === 1) return 'grid-cols-1';
+  if (slotCount === 2) return 'grid-cols-1 min-[440px]:grid-cols-2';
+  if (slotCount === 3) return 'grid-cols-1 min-[440px]:grid-cols-2 md:grid-cols-3';
+  return 'grid-cols-1 min-[440px]:grid-cols-2 lg:grid-cols-4';
+}
+
 export function SingleCourseHomeExperience({ home }: Props) {
   const facultySlots: (StudentDashboardFacultyMember | null)[] = [...home.faculty];
   const [audioPreferenceEnabled, setAudioPreferenceEnabled] = useState(false);
   while (facultySlots.length < 4) facultySlots.push(null);
+
+  const featuredLessons: StudentDashboardLessonPreview[] = [
+    ...home.lessonRowTop,
+    ...(home.lessonFourth ? [home.lessonFourth] : []),
+  ];
+  const fourthLessonPlaceholder = home.lessonRowTop.length === 3 && !home.lessonFourth;
+  const lessonGridSlots = featuredLessons.length + (fourthLessonPlaceholder ? 1 : 0);
 
   return (
     <div className="space-y-4 sm:space-y-5">
@@ -926,8 +1001,8 @@ export function SingleCourseHomeExperience({ home }: Props) {
           Início do módulo — aulas em destaque
         </h2>
 
-        <div className="grid grid-cols-1 gap-4 min-[440px]:grid-cols-2 sm:gap-4 md:grid-cols-3">
-          {home.lessonRowTop.map((lesson) => (
+        <div className={cn('grid gap-4 sm:gap-4', lessonFeaturedGridClass(lessonGridSlots))}>
+          {featuredLessons.map((lesson) => (
             <LessonPreviewCard
               key={lesson.id}
               courseId={home.courseId}
@@ -939,28 +1014,15 @@ export function SingleCourseHomeExperience({ home }: Props) {
               visualOnly
             />
           ))}
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-4">
-          {home.lessonFourth ? (
-            <LessonPreviewCard
-              courseId={home.courseId}
-              courseTitle={home.courseTitle}
-              courseCover={home.courseCover}
-              audioPreferenceEnabled={audioPreferenceEnabled}
-              onAudioPreferenceChange={setAudioPreferenceEnabled}
-              lesson={home.lessonFourth}
-              className="md:col-span-1"
-              visualOnly
-            />
-          ) : (
-            <Card className="flex min-h-[6rem] items-center justify-center border-dashed px-3 text-center text-xs text-muted-foreground md:col-span-1 sm:text-sm">
+          {fourthLessonPlaceholder ? (
+            <Card className="flex aspect-[3/4] min-h-0 min-w-0 flex-col items-center justify-center border-dashed border-muted-foreground/25 bg-muted/10 px-3 text-center text-xs text-muted-foreground sm:text-sm">
               <p>Sem quarta aula publicada neste módulo.</p>
             </Card>
-          )}
-          <div className="md:col-span-2 md:min-h-0">
-            <InfoMural courseId={home.courseId} mural={home.mural} courseTitle={home.courseTitle} />
-          </div>
+          ) : null}
+        </div>
+
+        <div className="mt-4 min-h-0 sm:mt-5">
+          <InfoMural courseId={home.courseId} mural={home.mural} courseTitle={home.courseTitle} />
         </div>
       </section>
     </div>

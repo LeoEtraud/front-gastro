@@ -18,7 +18,7 @@ function isInternalAppPath(href: string): boolean {
 export function ContentCard({ title, subtitle, category, imageSrc, href, className }: ContentCardProps) {
   const label = `${title} — assistir vídeo`;
   const sharedClassName = cn(
-    'group relative flex aspect-[3/4] w-[min(78vw,17.5rem)] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-cyan-950/10 bg-cyan-950 shadow-md sm:w-[min(64vw,20rem)] md:w-[min(52vw,22rem)] lg:w-[min(44vw,24rem)] xl:w-[min(38vw,26rem)]',
+    'group relative flex aspect-[3/4] w-[min(84vw,18.5rem)] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-cyan-950/10 bg-cyan-950 shadow-md sm:w-[min(68vw,21.5rem)] md:w-[min(56vw,23.5rem)] lg:w-[min(48vw,25.5rem)] xl:w-[min(42vw,27rem)]',
     'transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl hover:shadow-cyan-900/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50',
     className,
   );

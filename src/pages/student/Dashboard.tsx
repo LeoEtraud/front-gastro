@@ -5,7 +5,7 @@ import { BookOpen, Award, Clock, PlayCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Link } from 'react-router-dom';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { DashboardSkeleton } from '@/components/ui/content-skeletons';
+import { StudentDashboardSkeleton } from '@/components/ui/content-skeletons';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { normalizePtBrText } from '@/lib/normalize-ptbr';
 import { cn } from '@/lib/utils';
@@ -17,7 +17,7 @@ export default function StudentDashboard() {
   const showLoading = useDelayedFlag(isLoading);
   const isWaitingData = isLoading && !data;
 
-  if (isWaitingData && showLoading) return <AppLayout><DashboardSkeleton /></AppLayout>;
+  if (isWaitingData && showLoading) return <AppLayout><StudentDashboardSkeleton /></AppLayout>;
   if (isWaitingData) return <AppLayout><div className="min-h-24" /></AppLayout>;
   if (!data) return <AppLayout><div>Erro ao carregar dados.</div></AppLayout>;
 

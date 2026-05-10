@@ -46,7 +46,7 @@ export function TermsOfUseModal({ open, onOpenChange }: TermsOfUseModalProps) {
                   Termos de uso, privacidade e proteção de dados
                 </DialogTitle>
                 <DialogDescription className="text-xs text-primary-foreground/90 sm:text-sm">
-                  MedLearn — referência à Lei nº 13.709/2018 (LGPD) e à Lei nº 12.527/2011 (LAI) · versão{" "}
+                  GastroCentro — referência à Lei nº 13.709/2018 (LGPD) e à Lei nº 12.527/2011 (LAI) · versão{" "}
                   {APP_VERSION}
                 </DialogDescription>
               </div>
@@ -64,12 +64,12 @@ export function TermsOfUseModal({ open, onOpenChange }: TermsOfUseModalProps) {
                 1. Objeto e aceite
               </h3>
               <p className="text-pretty leading-relaxed text-muted-foreground">
-                Este documento descreve, em linguagem acessível, como a plataforma MedLearn trata dados pessoais,
+                Este documento descreve, em linguagem acessível, como a plataforma GastroCentro trata dados pessoais,
                 quais são as regras gerais de uso e como se relacionam com a{" "}
                 <strong className="text-foreground">Lei Geral de Proteção de Dados (LGPD)</strong> e com a{" "}
                 <strong className="text-foreground">Lei de Acesso à Informação (LAI)</strong>, quando aplicável. Ao
                 utilizar o serviço, você declara ciência deste texto na versão {APP_VERSION}. O controlador das
-                operações de tratamento é a organização responsável pela MedLearn, na qualidade indicada nos
+                operações de tratamento é a organização responsável pela plataforma GastroCentro, na qualidade indicada nos
                 canais oficiais da plataforma.
               </p>
             </section>
@@ -107,7 +107,7 @@ export function TermsOfUseModal({ open, onOpenChange }: TermsOfUseModalProps) {
               <p className="text-pretty leading-relaxed text-muted-foreground">
                 A <strong className="text-foreground">Lei nº 12.527/2011 (LAI)</strong> disciplina o acesso a
                 informações de interesse coletivo ou geral produzidas ou custodiadas por órgãos e entidades
-                públicas. Sempre que a MedLearn integrar processos sujeitos à LAI ou mantiver informações
+                públicas. Sempre que a plataforma GastroCentro integrar processos sujeitos à LAI ou mantiver informações
                 institucionais de natureza pública, serão observados os princípios da publicidade, transparência e
                 resposta tempestiva às solicitações legítimas, sem prejuízo de dados pessoais protegidos pela LGPD e
                 de segredos legais ou comerciais admitidos em lei.
