@@ -6,7 +6,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Button } from '@/components/ui/button';
-import { ProfileSkeleton } from '@/components/ui/content-skeletons';
+import { CompactContentSkeleton, ProfileSkeleton } from '@/components/ui/content-skeletons';
 import { ProfileAccessSection } from '@/components/profile/ProfileAccessSection';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -157,7 +157,15 @@ export default function StudentProfile() {
   }
 
   if (isLoading && !profile) {
-    if (!showProfileLoading) return <AppLayout><div className="min-h-24" /></AppLayout>;
+    if (!showProfileLoading) {
+      return (
+        <AppLayout>
+          <div className="mx-auto max-w-[92rem] min-w-0">
+            <CompactContentSkeleton />
+          </div>
+        </AppLayout>
+      );
+    }
     return <AppLayout><ProfileSkeleton /></AppLayout>;
   }
   if (!profile) return <AppLayout><div>Não foi possível carregar o perfil.</div></AppLayout>;

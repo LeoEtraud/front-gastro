@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { CourseEditorSkeleton } from '@/components/ui/content-skeletons';
+import { CompactContentSkeleton, CourseEditorSkeleton } from '@/components/ui/content-skeletons';
 import { useForm } from 'react-hook-form';
 import { Plus, Video, FileQuestion, GripVertical, Upload, Trash2, ImagePlus, BookCheck, Save, Info, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -642,7 +642,13 @@ export default function CourseEditor() {
   };
 
   if (isLoading && !course) {
-    if (!showLoading) return <AppLayout><div className="min-h-24" /></AppLayout>;
+    if (!showLoading) {
+      return (
+        <AppLayout>
+          <CompactContentSkeleton />
+        </AppLayout>
+      );
+    }
     return <AppLayout><CourseEditorSkeleton /></AppLayout>;
   }
   if (!course) {

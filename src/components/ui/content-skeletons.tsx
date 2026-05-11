@@ -381,3 +381,162 @@ export function StudentCoursesGridSkeleton({ count = 4 }: { count?: number }) {
     </div>
   );
 }
+
+/** Carregamento curto (antes do `useDelayedFlag`) — mantém feedback visual sem layout pesado. */
+export function CompactContentSkeleton() {
+  return (
+    <div className="mx-auto min-h-[14rem] w-full max-w-[92rem] space-y-4 rounded-xl border border-border/60 bg-muted/15 p-5 sm:p-6">
+      <Skeleton className="h-7 w-40 sm:h-8" />
+      <Skeleton className="h-4 w-full max-w-xl" />
+      <Skeleton className="h-36 w-full rounded-lg sm:h-40" />
+      <div className="flex gap-2">
+        <Skeleton className="h-9 w-28 rounded-md" />
+        <Skeleton className="h-9 w-28 rounded-md" />
+      </div>
+    </div>
+  );
+}
+
+/** Dashboard do aluno sem “curso único”: métricas + lista “Continue aprendendo”. */
+export function StudentDashboardOverviewSkeleton() {
+  return (
+    <div className="mx-auto min-w-0 max-w-[92rem] space-y-6 sm:space-y-8">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Card key={i} className="border-l-4 border-l-transparent">
+            <CardContent className="flex items-center gap-4 p-4 sm:p-6">
+              <Skeleton className="h-12 w-12 shrink-0 rounded-full" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton className="h-3 w-28" />
+                <Skeleton className="h-8 w-16 sm:h-9" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <div className="space-y-4">
+        <Skeleton className="h-7 w-48 sm:h-8" />
+        {Array.from({ length: 2 }).map((_, i) => (
+          <Card key={i}>
+            <CardContent className="flex flex-col gap-4 p-4 sm:p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Skeleton className="h-5 w-4/5 sm:h-6" />
+                  <Skeleton className="h-4 w-full max-w-md" />
+                </div>
+                <Skeleton className="h-11 w-11 shrink-0 rounded-full" />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-3 w-10" />
+                </div>
+                <Skeleton className="h-2 w-full rounded-full" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Apenas a linha de métricas do dashboard do professor (carregamento rápido). */
+export function TeacherDashboardStatsSkeleton() {
+  return (
+    <div className="mx-auto min-w-0 max-w-[92rem] space-y-6">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Card key={i}>
+            <CardContent className="space-y-3 p-4 sm:space-y-4 sm:p-6">
+              <Skeleton className="h-7 w-7 rounded-md sm:h-8 sm:w-8" />
+              <Skeleton className="h-3.5 w-28 sm:h-4" />
+              <Skeleton className="h-7 w-16 sm:h-8 md:h-9" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <Skeleton className="h-48 w-full rounded-xl border border-border/60 sm:h-56" />
+    </div>
+  );
+}
+
+/** Lista de cartões (gestão de usuários) — usar abaixo do cabeçalho e filtros reais. */
+export function UserManagementCardsSkeleton() {
+  return (
+    <div className="space-y-2">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Card key={i}>
+          <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-5 w-16 rounded-full" />
+                <Skeleton className="h-5 w-20 rounded-full" />
+              </div>
+              <Skeleton className="h-4 w-72 max-w-full" />
+              <div className="flex flex-wrap gap-3">
+                <Skeleton className="h-3 w-32" />
+                <Skeleton className="h-3 w-28" />
+                <Skeleton className="h-3 w-36" />
+              </div>
+            </div>
+            <div className="flex shrink-0 gap-2">
+              <Skeleton className="h-9 w-28 rounded-md" />
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+/** Gestão de usuários — layout completo (catálogo standalone / story). */
+export function UserManagementSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-56 sm:h-9" />
+          <Skeleton className="h-4 w-full max-w-md" />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Skeleton className="h-9 w-20 rounded-md" />
+          <Skeleton className="h-9 w-24 rounded-md" />
+          <Skeleton className="h-9 w-20 rounded-md" />
+        </div>
+      </div>
+      <UserManagementCardsSkeleton />
+    </div>
+  );
+}
+
+/** Página pública de detalhe do curso — hero + cartão lateral (carregamento inicial). */
+export function CourseDetailPageSkeleton() {
+  return (
+    <div className="min-h-dvh overflow-x-hidden bg-slate-50 pb-12 sm:pb-20">
+      <div className="bg-sidebar py-12 text-white sm:py-16 md:py-20">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 md:grid-cols-3 md:gap-10 lg:px-8">
+          <div className="space-y-4 md:col-span-2">
+            <Skeleton className="h-8 w-20 bg-white/20" />
+            <Skeleton className="h-12 w-4/5 bg-white/25" />
+            <Skeleton className="h-6 w-3/5 bg-white/20" />
+            <div className="flex flex-wrap gap-3 pt-2">
+              <Skeleton className="h-5 w-32 bg-white/15" />
+              <Skeleton className="h-5 w-28 bg-white/15" />
+            </div>
+          </div>
+          <div className="rounded-xl bg-white p-5 sm:p-6">
+            <Skeleton className="mb-6 h-8 w-full bg-slate-200" />
+            <Skeleton className="mb-4 h-12 w-full bg-slate-200" />
+            <Skeleton className="h-3 w-full bg-slate-100" />
+          </div>
+        </div>
+      </div>
+      <div className="mx-auto mt-8 max-w-7xl px-4 sm:mt-12 sm:px-6 lg:px-8">
+        <Skeleton className="mb-6 h-8 w-48 bg-slate-200" />
+        <Skeleton className="h-24 w-full rounded-lg bg-slate-100 sm:h-32" />
+      </div>
+    </div>
+  );
+}

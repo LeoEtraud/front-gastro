@@ -20,6 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { CompactContentSkeleton, UserManagementCardsSkeleton } from '@/components/ui/content-skeletons';
 
 type FilterStatus = 'ALL' | 'PENDING' | 'ACTIVE';
 
@@ -143,11 +144,9 @@ export default function UserManagement() {
 
         {/* Conteúdo */}
         {isLoading && showLoading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-20 animate-pulse rounded-xl bg-muted" />
-            ))}
-          </div>
+          <UserManagementCardsSkeleton />
+        ) : isLoading ? (
+          <CompactContentSkeleton />
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center">
             <Users className="mb-3 h-10 w-10 text-muted-foreground/50" />

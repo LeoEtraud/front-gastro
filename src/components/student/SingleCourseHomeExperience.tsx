@@ -31,7 +31,6 @@ import {
   LayoutList,
   Layers,
   MapPin,
-  Play,
   PlayCircle,
   Sparkles,
   Target,
@@ -284,7 +283,7 @@ function LessonPreviewCard({
       <Link
         to={`/student/courses/${courseId}/lessons/${lesson.id}`}
         className={cn(
-          'group relative flex aspect-[3/4] w-full min-w-0 overflow-hidden rounded-2xl border border-cyan-950/10 bg-cyan-950 shadow-md',
+          'group relative flex aspect-[3/4] w-full min-w-0 cursor-pointer overflow-hidden rounded-2xl border border-cyan-950/10 bg-cyan-950 shadow-md',
           'transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl hover:shadow-cyan-900/25',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           className,
@@ -292,7 +291,7 @@ function LessonPreviewCard({
         aria-label={label}
       >
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 cursor-pointer"
           onMouseEnter={canPreview ? handlePreviewStart : undefined}
           onMouseLeave={canPreview ? handlePreviewStop : undefined}
         >
@@ -302,7 +301,7 @@ function LessonPreviewCard({
               alt=""
               loading="lazy"
               className={cn(
-                'absolute inset-0 z-[1] h-full w-full object-cover transition-transform duration-500 ease-out motion-reduce:transition-none motion-reduce:group-hover:scale-100',
+                'pointer-events-none absolute inset-0 z-[1] h-full w-full object-cover transition-transform duration-500 ease-out motion-reduce:transition-none motion-reduce:group-hover:scale-100',
                 isHovering ? 'scale-[1.02]' : 'group-hover:scale-105',
               )}
             />
@@ -329,7 +328,7 @@ function LessonPreviewCard({
               alt=""
               loading="lazy"
               className={cn(
-                'absolute inset-0 z-[1] h-full w-full object-cover transition-transform duration-500 motion-reduce:transition-none motion-reduce:group-hover:scale-100',
+                'pointer-events-none absolute inset-0 z-[1] h-full w-full object-cover transition-transform duration-500 motion-reduce:transition-none motion-reduce:group-hover:scale-100',
                 isHovering ? 'scale-[1.02]' : 'group-hover:scale-105',
               )}
             />
@@ -347,8 +346,9 @@ function LessonPreviewCard({
               title={`Prévia da aula ${normalizePtBrText(lesson.title)}`}
               allow="autoplay; encrypted-media; picture-in-picture"
               className={cn(
-                'absolute inset-0 h-full w-full contrast-110 saturate-110 transition-opacity duration-200',
-                isHovering ? 'z-[3] opacity-100' : 'pointer-events-none z-[0] opacity-0',
+                // Sempre sem captura de ponteiro: o clique deve ir para o <Link> (abrir aula).
+                'pointer-events-none absolute inset-0 h-full w-full contrast-110 saturate-110 transition-opacity duration-200',
+                isHovering ? 'z-[3] opacity-100' : 'z-[0] opacity-0',
               )}
               onLoad={handleYoutubeLoaded}
               tabIndex={-1}
@@ -365,22 +365,6 @@ function LessonPreviewCard({
             )}
             aria-hidden
           />
-
-          <div
-            className="pointer-events-none absolute inset-0 z-[5] flex items-center justify-center bg-cyan-950/0 transition-colors duration-300 group-hover:bg-black/25"
-            aria-hidden
-          >
-            <span
-              className={cn(
-                'inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/95 text-cyan-900 shadow-lg ring-2 ring-white/40 transition-all duration-300 ease-out motion-reduce:transition-none sm:h-16 sm:w-16',
-                isHovering
-                  ? 'scale-95 opacity-0'
-                  : 'scale-100 opacity-100 shadow-xl group-hover:scale-110 motion-reduce:group-hover:scale-100',
-              )}
-            >
-              <Play className="ml-0.5 h-7 w-7 fill-cyan-900 text-cyan-900 sm:ml-1 sm:h-8 sm:w-8" stroke="none" aria-hidden />
-            </span>
-          </div>
 
           {isHovering && canPreview ? (
             <div className="pointer-events-auto absolute right-2 top-2 z-[8] flex flex-col gap-1.5">
@@ -656,8 +640,14 @@ function FacultyCard({
           </div>
           <CardHeader className="space-y-0 p-2 pb-1 sm:p-2.5 sm:pb-1.5">
             <div className="flex items-start gap-2.5">
-              <Avatar className="h-8 w-8 shrink-0 border border-primary/15 sm:h-9 sm:w-9">
-                {member.avatarUrl ? <AvatarImage src={member.avatarUrl} alt="" /> : null}
+              <Avatar className="h-9 w-9 min-h-9 min-w-9 shrink-0 border border-primary/15 sm:h-10 sm:w-10 sm:min-h-10 sm:min-w-10">
+                {member.avatarUrl ? (
+                  <AvatarImage
+                    src={member.avatarUrl}
+                    alt=""
+                    className="origin-center scale-[1.06] object-cover object-[center_28%]"
+                  />
+                ) : null}
                 <AvatarFallback className="bg-primary/10 font-display text-xs font-bold text-primary sm:text-sm">
                   {initials}
                 </AvatarFallback>
@@ -703,8 +693,14 @@ function FacultyCard({
             <div className="space-y-6 p-6">
               <SheetHeader className="space-y-3 text-left">
                 <div className="flex items-start gap-4">
-                  <Avatar className="h-20 w-20 border-2 border-primary/20">
-                    {member.avatarUrl ? <AvatarImage src={member.avatarUrl} alt="" /> : null}
+                  <Avatar className="h-24 w-24 min-h-24 min-w-24 shrink-0 border-2 border-primary/20 sm:h-28 sm:w-28 sm:min-h-28 sm:min-w-28">
+                    {member.avatarUrl ? (
+                      <AvatarImage
+                        src={member.avatarUrl}
+                        alt=""
+                        className="origin-center scale-[1.08] object-cover object-[center_25%]"
+                      />
+                    ) : null}
                     <AvatarFallback className="bg-primary/10 text-xl font-bold text-primary">{initials}</AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">

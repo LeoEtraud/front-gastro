@@ -95,7 +95,7 @@ export default function CourseCatalog() {
         {isLoading && showLoading ? (
           <CourseCardGridSkeleton />
         ) : isLoading ? (
-          <div className="min-h-24" />
+          <CourseCardGridSkeleton count={2} />
         ) : data?.courses.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-xl border border-dashed">
             <GraduationCap className="w-16 h-16 text-slate-300 mx-auto mb-4" />

@@ -109,7 +109,7 @@ export default function CoursesList() {
         {isLoading && showLoading ? (
           <TeacherCoursesGridSkeleton count={4} />
         ) : isLoading ? (
-          <div className="min-h-24" />
+          <TeacherCoursesGridSkeleton count={2} />
         ) : courses?.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-xl border border-dashed">
             <h3 className="text-xl font-bold mb-2">Você ainda não possui cursos</h3>

@@ -2,7 +2,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { useTeacherDashboard } from '@/hooks/use-teacher';
 import { Card, CardContent } from '@/components/ui/card';
 import { Users, FileVideo, Activity, Target } from 'lucide-react';
-import { DashboardSkeleton } from '@/components/ui/content-skeletons';
+import { DashboardSkeleton, TeacherDashboardStatsSkeleton } from '@/components/ui/content-skeletons';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 
 function getStatusLabel(status: string): string {
@@ -37,7 +37,13 @@ export default function TeacherDashboard() {
   const isWaitingData = isLoading && !data;
 
   if (isWaitingData && showLoading) return <AppLayout><DashboardSkeleton /></AppLayout>;
-  if (isWaitingData) return <AppLayout><div className="min-h-24" /></AppLayout>;
+  if (isWaitingData) {
+    return (
+      <AppLayout>
+        <TeacherDashboardStatsSkeleton />
+      </AppLayout>
+    );
+  }
   if (!data) return <AppLayout><div>Erro</div></AppLayout>;
 
   return (

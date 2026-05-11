@@ -7,7 +7,7 @@ import { ArrowLeft, CheckCircle2, PlayCircle, FileText, Loader2 } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { resolveApiUrl } from '@/lib/axios';
-import { LessonViewerSkeleton } from '@/components/ui/content-skeletons';
+import { CompactContentSkeleton, LessonViewerSkeleton } from '@/components/ui/content-skeletons';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { normalizePtBrText } from '@/lib/normalize-ptbr';
 
@@ -140,11 +140,23 @@ export default function LessonViewer() {
   };
 
   if (!course) {
-    if (!showCourseLoading) return <AppLayout><div className="min-h-24" /></AppLayout>;
+    if (!showCourseLoading) {
+      return (
+        <AppLayout>
+          <CompactContentSkeleton />
+        </AppLayout>
+      );
+    }
     return <AppLayout><LessonViewerSkeleton /></AppLayout>;
   }
   if (isLoading && !lesson) {
-    if (!showLessonLoading) return <AppLayout><div className="min-h-24" /></AppLayout>;
+    if (!showLessonLoading) {
+      return (
+        <AppLayout>
+          <CompactContentSkeleton />
+        </AppLayout>
+      );
+    }
     return <AppLayout><LessonViewerSkeleton /></AppLayout>;
   }
   if (!lesson) return <AppLayout><div className="p-20 text-center">Aula não encontrada.</div></AppLayout>;

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
+import { CourseDetailPageSkeleton } from '@/components/ui/content-skeletons';
 import { Skeleton } from '@/components/ui/skeleton';
 import { normalizePtBrText } from '@/lib/normalize-ptbr';
 
@@ -100,7 +101,7 @@ export default function CourseDetail() {
       </div>
     );
   }
-  if (isLoading) return <div className="min-h-24" />;
+  if (isLoading) return <CourseDetailPageSkeleton />;
   if (!course) return <div className="p-20 text-center">Curso não encontrado.</div>;
 
   return (
