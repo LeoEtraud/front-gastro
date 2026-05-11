@@ -233,18 +233,17 @@ export default function LessonViewer() {
                 </div>
                 <div className="space-y-0.5 sm:space-y-1">
                   {mod.lessons?.map((l) => (
-                    <Link key={l.id} to={`/student/courses/${course.id}/lessons/${l.id}`}>
-                      <button
-                        type="button"
-                        className={`flex w-full min-h-11 items-start gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors touch-manipulation sm:gap-3 sm:px-3 sm:py-2.5 ${l.id === actualLessonId ? 'bg-primary/10 font-medium text-primary' : 'text-foreground/90 hover:bg-muted hover:text-foreground'}`}
-                      >
-                        {l.type === 'VIDEO' ? (
-                          <PlayCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-                        ) : (
-                          <FileText className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-                        )}
-                        <span className="line-clamp-2">{normalizePtBrText(l.title)}</span>
-                      </button>
+                    <Link
+                      key={l.id}
+                      to={`/student/courses/${course.id}/lessons/${l.id}`}
+                      className={`flex w-full min-h-11 cursor-pointer items-start gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors touch-manipulation sm:gap-3 sm:px-3 sm:py-2.5 ${l.id === actualLessonId ? 'bg-primary/10 font-medium text-primary' : 'text-foreground/90 hover:bg-muted hover:text-foreground'}`}
+                    >
+                      {l.type === 'VIDEO' ? (
+                        <PlayCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                      ) : (
+                        <FileText className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                      )}
+                      <span className="line-clamp-2">{normalizePtBrText(l.title)}</span>
                     </Link>
                   ))}
                 </div>

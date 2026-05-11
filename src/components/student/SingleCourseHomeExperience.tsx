@@ -470,8 +470,9 @@ function LessonPreviewCard({
           title={`Prévia da aula ${normalizePtBrText(lesson.title)}`}
           allow="autoplay; encrypted-media; picture-in-picture"
           className={cn(
-            'absolute inset-0 h-full w-full contrast-110 saturate-110 transition-opacity duration-200',
-            isHovering ? 'z-[3] opacity-100' : 'pointer-events-none z-[0] opacity-0',
+            // Sempre sem captura de ponteiro: o clique deve ir para o <Link> (abrir aula).
+            'pointer-events-none absolute inset-0 h-full w-full contrast-110 saturate-110 transition-opacity duration-200',
+            isHovering ? 'z-[3] opacity-100' : 'z-[0] opacity-0',
           )}
           onLoad={handleYoutubeLoaded}
           tabIndex={-1}
@@ -551,7 +552,7 @@ function LessonPreviewCard({
   return (
     <Link
       to={`/student/courses/${courseId}/lessons/${lesson.id}`}
-      className={cn('group block min-w-0', className)}
+      className={cn('group block min-w-0 cursor-pointer', className)}
       aria-label={label}
     >
       <Card className="flex h-full flex-col overflow-hidden border-border/80 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10">
