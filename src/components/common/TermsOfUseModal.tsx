@@ -25,7 +25,7 @@ export function TermsOfUseModal({ open, onOpenChange }: TermsOfUseModalProps) {
         className="flex max-h-[90dvh] min-h-0 flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl lg:max-w-5xl"
         hideCloseButton
       >
-        <div className="relative shrink-0 overflow-hidden rounded-t-lg bg-gradient-to-br from-primary via-primary to-indigo-900 px-4 pb-4 pt-4 sm:rounded-t-lg sm:px-6 sm:pb-5 sm:pt-5">
+        <div className="relative shrink-0 overflow-hidden rounded-t-2xl bg-gradient-to-br from-primary via-primary to-indigo-900 px-4 pb-4 pt-4 sm:px-6 sm:pb-5 sm:pt-5">
           <DialogClose
             type="button"
             className="absolute right-2 top-2 z-20 flex size-8 items-center justify-center rounded-md border border-white/30 bg-white/15 text-primary-foreground shadow-none outline-none transition-colors hover:bg-white/25 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0 sm:right-3 sm:top-3"
