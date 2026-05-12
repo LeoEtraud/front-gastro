@@ -283,9 +283,9 @@ function LessonPreviewCard({
       <Link
         to={`/student/courses/${courseId}/lessons/${lesson.id}`}
         className={cn(
-          'group relative flex aspect-[3/4] w-full min-w-0 cursor-pointer overflow-hidden rounded-2xl border border-cyan-950/10 bg-cyan-950 shadow-md',
-          'transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl hover:shadow-cyan-900/25',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+          'group relative flex aspect-[3/4] w-full min-w-0 cursor-pointer overflow-hidden rounded-2xl border border-border/80 bg-card shadow-md',
+          'transition-all duration-300 ease-out motion-reduce:transition-none motion-reduce:hover:translate-y-0 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/12 dark:hover:shadow-black/40',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           className,
         )}
         aria-label={label}
@@ -302,7 +302,7 @@ function LessonPreviewCard({
               loading="lazy"
               className={cn(
                 'pointer-events-none absolute inset-0 z-[1] h-full w-full object-cover transition-transform duration-500 ease-out motion-reduce:transition-none motion-reduce:group-hover:scale-100',
-                isHovering ? 'scale-[1.02]' : 'group-hover:scale-105',
+                isHovering ? 'scale-[1.02]' : 'group-hover:scale-[1.03]',
               )}
             />
           ) : null}
@@ -316,7 +316,7 @@ function LessonPreviewCard({
               loop
               onLoadedMetadata={handleHostedMetadata}
               className={cn(
-                'preview-video pointer-events-none absolute inset-0 z-[1] h-full w-full object-cover contrast-110 saturate-110 transition-transform duration-300 motion-reduce:transition-none',
+                'preview-video pointer-events-none absolute inset-0 z-[1] h-full w-full object-cover transition-transform duration-300 motion-reduce:transition-none',
                 isHovering ? 'scale-[1.03]' : 'scale-100 motion-reduce:group-hover:scale-100 group-hover:scale-[1.02]',
               )}
               aria-hidden
@@ -335,7 +335,7 @@ function LessonPreviewCard({
           ) : null}
           {!ytPoster && !hostedSrc && !coverSrc ? (
             <div
-              className="absolute inset-0 z-[1] bg-gradient-to-br from-cyan-700/50 via-cyan-900/70 to-cyan-950"
+              className="absolute inset-0 z-[1] bg-gradient-to-br from-muted via-muted/80 to-background"
               aria-hidden
             />
           ) : null}
@@ -347,7 +347,7 @@ function LessonPreviewCard({
               allow="autoplay; encrypted-media; picture-in-picture"
               className={cn(
                 // Sempre sem captura de ponteiro: o clique deve ir para o <Link> (abrir aula).
-                'pointer-events-none absolute inset-0 h-full w-full contrast-110 saturate-110 transition-opacity duration-200',
+                'pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-200',
                 isHovering ? 'z-[3] opacity-100' : 'z-[0] opacity-0',
               )}
               onLoad={handleYoutubeLoaded}
@@ -356,12 +356,11 @@ function LessonPreviewCard({
             />
           ) : null}
 
+          {/* Vinheta só na base para legibilidade do texto — sem tom azul/ciano sobre o vídeo */}
           <div
             className={cn(
-              'pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t transition-all duration-300',
-              isHovering
-                ? 'from-black/80 via-black/50 to-black/20'
-                : 'from-cyan-950/95 via-cyan-950/55 to-cyan-900/25 group-hover:from-cyan-950 group-hover:via-cyan-950/70',
+              'pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-black/75 via-black/20 to-transparent transition-opacity duration-300 motion-reduce:transition-none',
+              isHovering ? 'opacity-100' : 'opacity-90 group-hover:opacity-100',
             )}
             aria-hidden
           />
@@ -412,15 +411,15 @@ function LessonPreviewCard({
         </div>
 
         <div className="pointer-events-none relative z-[6] mt-auto flex flex-col gap-1 p-3 sm:p-4">
-          <span className="inline-flex w-fit max-w-full truncate rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cyan-50 backdrop-blur-sm sm:text-[11px]">
+          <span className="inline-flex w-fit max-w-full truncate rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground/90 backdrop-blur-sm sm:text-[11px]">
             {normalizePtBrText(lesson.moduleTitle)}
           </span>
-          <h3 className="line-clamp-2 font-display text-sm font-bold leading-tight text-white sm:text-base">
+          <h3 className="line-clamp-2 font-display text-sm font-bold leading-tight text-white drop-shadow-sm sm:text-base">
             {normalizePtBrText(lesson.title).toLocaleUpperCase('pt-BR')}
           </h3>
-          <p className="line-clamp-2 text-[11px] leading-relaxed text-cyan-50/90 sm:text-xs">{subtitleText}</p>
+          <p className="line-clamp-2 text-[11px] leading-relaxed text-white/90 drop-shadow-sm sm:text-xs">{subtitleText}</p>
           <div className="flex flex-wrap gap-1 pt-0.5">
-            <span className="inline-flex rounded-full border border-white/25 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cyan-50/95 sm:text-[11px]">
+            <span className="inline-flex rounded-full border border-white/30 bg-black/25 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/95 backdrop-blur-sm sm:text-[11px]">
               {lesson.type}
             </span>
             {lesson.isCompleted ? (
@@ -457,7 +456,7 @@ function LessonPreviewCard({
           loop
           onLoadedMetadata={handleHostedMetadata}
           className={cn(
-            'preview-video pointer-events-none absolute inset-0 z-[1] h-full w-full object-cover contrast-110 saturate-110 transition-transform duration-300',
+            'preview-video pointer-events-none absolute inset-0 z-[1] h-full w-full object-cover transition-transform duration-300',
             isHovering ? 'scale-[1.03]' : 'scale-100',
           )}
           aria-hidden
@@ -471,7 +470,7 @@ function LessonPreviewCard({
           allow="autoplay; encrypted-media; picture-in-picture"
           className={cn(
             // Sempre sem captura de ponteiro: o clique deve ir para o <Link> (abrir aula).
-            'pointer-events-none absolute inset-0 h-full w-full contrast-110 saturate-110 transition-opacity duration-200',
+            'pointer-events-none absolute inset-0 h-full w-full transition-opacity duration-200',
             isHovering ? 'z-[3] opacity-100' : 'z-[0] opacity-0',
           )}
           onLoad={handleYoutubeLoaded}
@@ -481,10 +480,8 @@ function LessonPreviewCard({
       ) : null}
       <div
         className={cn(
-          'pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t transition-colors duration-300',
-          isHovering
-            ? 'from-black/75 via-black/45 to-black/20'
-            : 'from-black/50 via-black/15 to-transparent group-hover:from-black/65 group-hover:via-black/30 group-hover:to-black/15',
+          'pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-black/55 via-black/10 to-transparent transition-opacity duration-300',
+          isHovering ? 'opacity-100' : 'opacity-90 group-hover:opacity-100',
         )}
         aria-hidden
       />
@@ -625,9 +622,9 @@ function FacultyCard({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-left outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+        className="group h-full w-full text-left outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <Card className="h-full overflow-hidden border-border/80 transition-all hover:shadow-sm">
+        <Card className="h-full overflow-hidden border-border/80 shadow-sm transition-all duration-200 ease-out motion-reduce:transition-none motion-reduce:group-hover:translate-y-0 motion-reduce:group-hover:shadow-sm group-hover:-translate-y-0.5 group-hover:border-primary/15 group-hover:shadow-md group-hover:shadow-black/5 dark:group-hover:shadow-black/20">
           <div className="relative h-12 overflow-hidden border-b border-border/60 bg-gradient-to-r from-primary/15 via-primary/5 to-muted/40 sm:h-14">
             {member.avatarUrl ? (
               <>
@@ -641,7 +638,7 @@ function FacultyCard({
           </div>
           <CardHeader className="space-y-0 p-2 pb-1 sm:p-2.5 sm:pb-1.5">
             <div className="flex items-start gap-2.5">
-              <Avatar className="h-9 w-9 min-h-9 min-w-9 shrink-0 border border-primary/15 sm:h-10 sm:w-10 sm:min-h-10 sm:min-w-10">
+              <Avatar className="h-9 w-9 min-h-9 min-w-9 shrink-0 border-2 border-neutral-800/85 shadow-sm transition-transform duration-200 ease-out group-hover:scale-[1.02] motion-reduce:group-hover:scale-100 dark:border-neutral-950 sm:h-10 sm:w-10 sm:min-h-10 sm:min-w-10">
                 {member.avatarUrl ? (
                   <AvatarImage
                     src={member.avatarUrl}
@@ -694,7 +691,7 @@ function FacultyCard({
             <div className="space-y-6 p-6">
               <SheetHeader className="space-y-3 text-left">
                 <div className="flex items-start gap-4">
-                  <Avatar className="h-24 w-24 min-h-24 min-w-24 shrink-0 border-2 border-primary/20 sm:h-28 sm:w-28 sm:min-h-28 sm:min-w-28">
+                  <Avatar className="h-24 w-24 min-h-24 min-w-24 shrink-0 border-2 border-neutral-800/85 shadow-md dark:border-neutral-950 sm:h-28 sm:w-28 sm:min-h-28 sm:min-w-28">
                     {member.avatarUrl ? (
                       <AvatarImage
                         src={member.avatarUrl}
