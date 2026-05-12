@@ -78,7 +78,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
-          <main className="flex-1 min-h-0 overflow-y-auto rounded-2xl border border-border/90 bg-background/70 p-3 text-card-foreground shadow-inner sm:p-5 md:p-6 lg:p-8 xl:px-10">
+          <main className="min-h-0 w-full min-w-0 flex-1 overflow-y-auto overscroll-y-contain rounded-2xl border border-border/90 bg-background/70 p-3 text-card-foreground shadow-inner sm:p-5 md:p-6 lg:p-8 xl:px-10">
             {children}
           </main>
         </div>

@@ -283,7 +283,7 @@ function LessonPreviewCard({
       <Link
         to={`/student/courses/${courseId}/lessons/${lesson.id}`}
         className={cn(
-          'group relative flex aspect-[3/4] w-full min-w-0 cursor-pointer overflow-hidden rounded-2xl border border-border/80 bg-card shadow-md',
+          'group relative flex aspect-[4/5] w-full min-w-0 cursor-pointer overflow-hidden rounded-2xl border border-border/80 bg-card shadow-md sm:aspect-[3/4]',
           'transition-all duration-300 ease-out motion-reduce:transition-none motion-reduce:hover:translate-y-0 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/12 dark:hover:shadow-black/40',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           className,
@@ -845,23 +845,27 @@ function InfoMural({ courseId, mural, courseTitle }: { courseId: string; mural: 
     <Card
       role="region"
       aria-labelledby="student-course-mural-title"
-      className="flex h-full max-h-[23rem] flex-col overflow-hidden border border-primary/15 bg-gradient-to-b from-card via-card to-primary/[0.035] shadow-sm sm:max-h-[24rem]"
+      className="flex min-h-0 w-full min-w-0 max-w-full flex-col overflow-hidden border border-primary/15 bg-gradient-to-b from-card via-card to-primary/[0.035] shadow-sm sm:max-h-[min(24rem,70vh)]"
     >
-      <CardHeader className="shrink-0 space-y-1 border-b border-border/50 bg-muted/20 px-3 py-3 sm:px-4 sm:py-3.5">
-        <CardTitle
-          id="student-course-mural-title"
-          className="flex items-center gap-2 font-display text-sm font-bold leading-tight sm:text-base"
-        >
+      <CardHeader className="shrink-0 space-y-0 border-b border-border/50 bg-muted/20 px-3 py-3 sm:px-4 sm:py-3.5">
+        <div className="flex items-start gap-2.5 sm:gap-3">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-primary/15 bg-primary/10 text-primary">
             <Target className="h-4 w-4" aria-hidden />
           </span>
-          <span className="min-w-0 flex-1">Mural do curso</span>
-        </CardTitle>
-        <p className="pl-10 text-[11px] leading-snug text-muted-foreground sm:text-xs">
-          <span className="sr-only">Curso: </span>«{normalizePtBrText(courseTitle)}»
-        </p>
+          <div className="min-w-0 flex-1 space-y-1">
+            <CardTitle
+              id="student-course-mural-title"
+              className="font-display text-sm font-bold leading-tight sm:text-base"
+            >
+              Mural do curso
+            </CardTitle>
+            <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">
+              <span className="sr-only">Curso: </span>«{normalizePtBrText(courseTitle)}»
+            </p>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-3 pb-3 pt-3 text-sm sm:px-4 sm:pb-4 sm:pt-3.5">
+      <CardContent className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-y-contain px-3 pb-4 pt-3 text-sm sm:px-4 sm:pb-4 sm:pt-3.5">
         <div
           className="rounded-lg border border-border/60 bg-background/40 px-3 py-2.5"
           aria-label={`Progresso no curso: ${progressRounded} por cento. ${mural.stats.completedLessons} de ${mural.stats.totalPublishedLessons} aulas publicadas concluídas.`}
@@ -1041,7 +1045,7 @@ export function SingleCourseHomeExperience({ home }: Props) {
   useVideoPreviewPreload(preloadEntries);
 
   return (
-    <div className="space-y-4 sm:space-y-5">
+    <div className="w-full min-w-0 space-y-4 sm:space-y-5">
       <section aria-labelledby="faculty-heading" className="space-y-2 sm:space-y-2.5">
         <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
           <h2 id="faculty-heading" className="font-display text-base font-bold text-foreground sm:text-lg">
@@ -1063,11 +1067,11 @@ export function SingleCourseHomeExperience({ home }: Props) {
       </section>
 
       <section aria-labelledby="lessons-heading" className="space-y-2 sm:space-y-2.5">
-        <h2 id="lessons-heading" className="font-display text-base font-bold sm:text-lg">
+        <h2 id="lessons-heading" className="min-w-0 break-words font-display text-base font-bold sm:text-lg">
           Início do módulo — aulas em destaque
         </h2>
 
-        <div className={cn('grid gap-4 sm:gap-4', lessonFeaturedGridClass(lessonGridSlots))}>
+        <div className={cn('grid min-w-0 gap-3 sm:gap-4', lessonFeaturedGridClass(lessonGridSlots))}>
           {featuredLessons.map((lesson, idx) => (
             <LessonPreviewCard
               key={lesson.id}
@@ -1082,7 +1086,7 @@ export function SingleCourseHomeExperience({ home }: Props) {
             />
           ))}
           {fourthLessonPlaceholder ? (
-            <Card className="flex aspect-[3/4] min-h-0 min-w-0 flex-col items-center justify-center border-dashed border-muted-foreground/25 bg-muted/10 px-3 text-center text-xs text-muted-foreground sm:text-sm">
+            <Card className="flex aspect-[4/5] min-h-0 min-w-0 flex-col items-center justify-center border-dashed border-muted-foreground/25 bg-muted/10 px-3 text-center text-xs text-muted-foreground sm:aspect-[3/4] sm:text-sm">
               <p>Sem quarta aula publicada neste módulo.</p>
             </Card>
           ) : null}

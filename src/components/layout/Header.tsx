@@ -52,17 +52,17 @@ export function Header({ user, location, theme, onMenuToggle, onToggleTheme, onL
       )}
     >
       <div className="flex h-full items-center justify-between gap-3 px-4 sm:px-6">
-        <div className="flex min-w-0 shrink-0 items-center gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           <button
             type="button"
             onClick={onMenuToggle}
-            className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:hidden"
+            className="shrink-0 rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:hidden"
             aria-label="Abrir menu"
           >
             <Menu className="h-5 w-5" />
           </button>
 
-          <h1 className="truncate font-display text-base font-semibold md:text-lg">{routeLabel(location)}</h1>
+          <h1 className="min-w-0 truncate font-display text-base font-semibold md:text-lg">{routeLabel(location)}</h1>
         </div>
 
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">

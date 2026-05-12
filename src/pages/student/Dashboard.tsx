@@ -33,7 +33,7 @@ export default function StudentDashboard() {
     <AppLayout>
       <div
         className={cn(
-          'mx-auto min-w-0 max-w-[92rem]',
+          'mx-auto w-full min-w-0 max-w-[92rem] pb-[max(0rem,env(safe-area-inset-bottom))]',
           singleCourse ? 'space-y-4 sm:space-y-5' : 'space-y-6 sm:space-y-8',
         )}
       >
