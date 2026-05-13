@@ -25,7 +25,23 @@ import {
 } from '@/components/ui/alert-dialog';
 import { CompactContentSkeleton, CourseEditorSkeleton } from '@/components/ui/content-skeletons';
 import { useForm } from 'react-hook-form';
-import { Plus, Video, FileQuestion, GripVertical, Upload, Trash2, ImagePlus, BookCheck, Save, Info, ArrowLeft } from 'lucide-react';
+import {
+  Plus,
+  Video,
+  FileQuestion,
+  GripVertical,
+  Upload,
+  Trash2,
+  ImagePlus,
+  BookCheck,
+  Save,
+  Info,
+  ArrowLeft,
+  ChevronDown,
+  Pencil,
+  MoreHorizontal,
+  Link2,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { CreateLessonModal, CreateModuleModal } from '@/components/course-management/create-entity-modals';
 import {
@@ -37,6 +53,16 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MEDICAL_SPECIALTIES } from '@/lib/medical-specialties';
@@ -179,7 +205,21 @@ function uploadFileWithProgress({ uploadUrl, file, contentType, onProgress }: Up
   });
 }
 
-// FUNÇÃO PARA EDITAR UMA AULA
+/**
+ * Estilos do badge de status do vídeo da aula. Mantém legibilidade e
+ * coerência com os tokens do projeto, sem cores chamativas no estado padrão.
+ */
+function lessonSourceBadgeClass(status: 'hosted' | 'external' | 'none'): string {
+  if (status === 'hosted') {
+    return 'border-emerald-300/70 bg-emerald-100 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300';
+  }
+  if (status === 'external') {
+    return 'border-blue-300/70 bg-blue-100 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/15 dark:text-blue-300';
+  }
+  return 'border-border/60 bg-muted/60 text-muted-foreground';
+}
+
+// COMPONENTE PARA EDITAR UMA AULA — linha compacta + área expansível.
 function LessonEditorRow({ lesson }: { lesson: Lesson }) {
   const presign = usePresignLessonVideo();
   const updateLesson = useUpdateLesson();
@@ -193,6 +233,8 @@ function LessonEditorRow({ lesson }: { lesson: Lesson }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
   const [localVideoPreviewUrl, setLocalVideoPreviewUrl] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [videoSourceTab, setVideoSourceTab] = useState<'hosted' | 'external'>('hosted');
 
   useEffect(() => {
     if (lesson.videoObjectKey) {
@@ -201,6 +243,15 @@ function LessonEditorRow({ lesson }: { lesson: Lesson }) {
       setExternalUrl(lesson.videoUrl ?? '');
     }
   }, [lesson.id, lesson.videoUrl, lesson.videoObjectKey]);
+
+  // Quando a aula tem link externo, abrimos a aba correspondente por padrão.
+  useEffect(() => {
+    if (!lesson.videoObjectKey && lesson.videoUrl) {
+      setVideoSourceTab('external');
+    } else {
+      setVideoSourceTab('hosted');
+    }
+  }, [lesson.id, lesson.videoObjectKey, lesson.videoUrl]);
 
   useEffect(() => {
     return () => {
@@ -213,9 +264,12 @@ function LessonEditorRow({ lesson }: { lesson: Lesson }) {
 
   const hasHosted = !!lesson.videoObjectKey;
   const hasExternal = !!lesson.videoUrl && !hasHosted;
+  const hasAnyVideo = hasHosted || hasExternal;
   const previewUrl = localVideoPreviewUrl || lesson.videoPlaybackUrl || (!hasHosted ? lesson.videoUrl : null) || null;
   const busy = isUploading || presign.isPending || (updateLesson.isPending && !isRemovingVideo);
-  const sourceLabel = hasHosted ? 'Hospedado' : hasExternal ? 'Externo' : 'Sem vídeo';
+  const sourceStatus: 'hosted' | 'external' | 'none' = hasHosted ? 'hosted' : hasExternal ? 'external' : 'none';
+  const sourceLabel = hasHosted ? 'Hospedado' : hasExternal ? 'Link externo' : 'Sem vídeo';
+  const durationLabel = lesson.duration ? formatDuration(lesson.duration) : null;
 
   const setLocalPreviewFromFile = (file: File) => {
     if (localPreviewRef.current) {
@@ -318,115 +372,261 @@ function LessonEditorRow({ lesson }: { lesson: Lesson }) {
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-3">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3 min-w-0">
-          <GripVertical className="h-4 w-4 shrink-0 cursor-grab text-muted-foreground/70" />
+    <Collapsible
+      open={isExpanded}
+      onOpenChange={setIsExpanded}
+      className="rounded-lg border border-border bg-card transition-colors data-[state=open]:border-primary/40 data-[state=open]:bg-card"
+    >
+      {/* Linha compacta (visão padrão) */}
+      <div className="flex flex-wrap items-center gap-2 px-3 py-2.5 sm:flex-nowrap sm:gap-3 sm:px-4 sm:py-3">
+        <GripVertical
+          className="h-4 w-4 shrink-0 cursor-grab text-muted-foreground/70"
+          aria-hidden
+        />
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
           {lesson.type === 'VIDEO' ? (
-            <Video className="w-4 h-4 text-blue-500 shrink-0" />
+            <Video className="h-4 w-4 text-blue-500" aria-hidden />
           ) : (
-            <FileQuestion className="w-4 h-4 text-orange-500 shrink-0" />
+            <FileQuestion className="h-4 w-4 text-orange-500" aria-hidden />
           )}
+        </span>
+
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="truncate text-sm font-medium text-foreground">{lesson.title}</span>
-          <span className="shrink-0 rounded-full border border-border/60 bg-muted/60 px-2 py-0.5 text-[10px] font-bold uppercase text-muted-foreground">
-            {sourceLabel}
-          </span>
+          <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+            <span
+              className={cn(
+                'inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
+                lessonSourceBadgeClass(sourceStatus),
+              )}
+            >
+              {sourceLabel}
+            </span>
+            {durationLabel ? (
+              <span className="inline-flex items-center gap-1 tabular-nums">
+                <span aria-hidden>·</span>
+                {durationLabel}
+              </span>
+            ) : null}
+          </div>
         </div>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={() => fileRef.current?.click()}
-          isLoading={busy}
-          className="sm:shrink-0 border-primary/30 bg-primary/10 text-primary hover:border-primary/50 hover:bg-primary/20 focus-visible:ring-primary"
-        >
-          <Upload className="w-4 h-4 mr-1" />
-          Upload de Vídeo
-        </Button>
+
+        <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <CollapsibleTrigger asChild>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="gap-1.5"
+              aria-label={isExpanded ? 'Recolher aula' : 'Editar aula'}
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{isExpanded ? 'Recolher' : 'Editar'}</span>
+              <ChevronDown
+                className={cn(
+                  'h-3.5 w-3.5 text-muted-foreground transition-transform',
+                  isExpanded && 'rotate-180',
+                )}
+                aria-hidden
+              />
+            </Button>
+          </CollapsibleTrigger>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                aria-label="Mais ações da aula"
+                title="Mais ações"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="text-xs uppercase tracking-wide text-muted-foreground">
+                Ações da aula
+              </DropdownMenuLabel>
+              <DropdownMenuItem
+                onSelect={() => {
+                  setIsExpanded(true);
+                  setVideoSourceTab('hosted');
+                }}
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                {hasHosted ? 'Trocar vídeo hospedado' : 'Enviar vídeo'}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() => {
+                  setIsExpanded(true);
+                  setVideoSourceTab('external');
+                }}
+              >
+                <Link2 className="mr-2 h-4 w-4" />
+                {hasExternal ? 'Editar link externo' : 'Adicionar link externo'}
+              </DropdownMenuItem>
+              {hasHosted ? (
+                <DropdownMenuItem onSelect={() => setIsInfoDialogOpen(true)}>
+                  <Info className="mr-2 h-4 w-4" />
+                  Informações do vídeo
+                </DropdownMenuItem>
+              ) : null}
+              {hasAnyVideo ? (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+                    onSelect={() => setIsDeleteDialogOpen(true)}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Remover vídeo
+                  </DropdownMenuItem>
+                </>
+              ) : null}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
-      <input
-        type="file"
-        ref={fileRef}
-        accept="video/mp4,video/webm,video/quicktime,video/*"
-        className="hidden"
-        onChange={onFileChange}
-      />
+      {/* Área expandida — edição de mídia da aula */}
+      <CollapsibleContent>
+        <div className="border-t border-border/70 px-3 pb-3 pt-3 sm:px-4 sm:pb-4">
+          <input
+            type="file"
+            ref={fileRef}
+            accept="video/mp4,video/webm,video/quicktime,video/*"
+            className="hidden"
+            onChange={onFileChange}
+          />
 
-      {uploadProgress !== null && (
-        <div className="space-y-1.5 rounded-md border border-border/70 bg-muted/40 p-2.5">
-          <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
-            <span>Enviando vídeo...</span>
-            <span>{uploadProgress}%</span>
-          </div>
-          <Progress value={uploadProgress} className="h-2.5" />
-        </div>
-      )}
+          <Tabs
+            value={videoSourceTab}
+            onValueChange={(value) => setVideoSourceTab(value as 'hosted' | 'external')}
+            className="space-y-3"
+          >
+            <TabsList className="grid w-full grid-cols-2 sm:max-w-sm">
+              <TabsTrigger value="hosted" className="gap-1.5">
+                <Upload className="h-3.5 w-3.5" />
+                Vídeo hospedado
+              </TabsTrigger>
+              <TabsTrigger value="external" className="gap-1.5">
+                <Link2 className="h-3.5 w-3.5" />
+                Link externo
+              </TabsTrigger>
+            </TabsList>
 
-      {previewUrl && (
-        <div className="rounded-md border border-border/70 bg-muted/30 p-2.5">
-          <div className="flex items-start justify-between gap-3">
-            <div className="space-y-2 min-w-0">
-              <p className="text-xs font-medium text-muted-foreground">Pré-visualização do vídeo</p>
-              <div className="w-full max-w-[15rem] overflow-hidden rounded-md bg-black/90 sm:max-w-[16rem]">
-                <video src={previewUrl} controls preload="metadata" className="aspect-video w-full" />
+            <TabsContent value="hosted" className="space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => fileRef.current?.click()}
+                  isLoading={busy}
+                  className="bg-green-600 text-white hover:bg-green-700 dark:bg-green-600 dark:text-white dark:hover:bg-green-700"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  {hasHosted ? 'Trocar vídeo' : 'Enviar vídeo'}
+                </Button>
+                {hasHosted ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setIsInfoDialogOpen(true)}
+                  >
+                    <Info className="mr-2 h-4 w-4" />
+                    Informações do vídeo
+                  </Button>
+                ) : null}
               </div>
-            </div>
 
-            <div className="flex shrink-0 flex-col gap-2">
-              <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+              {uploadProgress !== null && (
+                <div className="space-y-1.5 rounded-md border border-border/70 bg-muted/40 p-2.5">
+                  <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
+                    <span>Enviando vídeo...</span>
+                    <span>{uploadProgress}%</span>
+                  </div>
+                  <Progress value={uploadProgress} className="h-2.5" />
+                </div>
+              )}
+
+              {previewUrl ? (
+                <div className="space-y-2 rounded-md border border-border/70 bg-muted/30 p-2.5">
+                  <p className="text-xs font-medium text-muted-foreground">Pré-visualização do vídeo</p>
+                  <div className="w-full max-w-md overflow-hidden rounded-md bg-black/90">
+                    <video src={previewUrl} controls preload="metadata" className="aspect-video w-full" />
+                  </div>
+                </div>
+              ) : (
+                <p className="rounded-md border border-dashed border-border bg-muted/30 px-3 py-4 text-center text-xs text-muted-foreground sm:text-sm">
+                  Nenhum vídeo hospedado para esta aula. Faça o upload para disponibilizar a reprodução.
+                </p>
+              )}
+            </TabsContent>
+
+            <TabsContent value="external" className="space-y-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                <div className="flex-1 space-y-1 min-w-0">
+                  <label className="text-xs font-medium text-muted-foreground">
+                    Link externo (ex.: YouTube)
+                  </label>
+                  <Input
+                    value={externalUrl}
+                    onChange={(e) => setExternalUrl(e.target.value)}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    className="h-9"
+                  />
+                </div>
                 <Button
                   type="button"
-                  size="icon"
-                  variant="destructive"
-                  onClick={() => setIsDeleteDialogOpen(true)}
-                  isLoading={isRemovingVideo}
-                  aria-label="Excluir vídeo"
-                  title="Excluir vídeo"
+                  size="sm"
+                  onClick={onSaveExternal}
+                  isLoading={updateLesson.isPending}
+                  className="sm:shrink-0"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  Salvar link
                 </Button>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Excluir vídeo</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Tem certeza que deseja excluir este vídeo? Essa ação remove a pré-visualização e desvincula o vídeo da aula.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isRemovingVideo}>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      onClick={async (event) => {
-                        event.preventDefault();
-                        await onDeleteVideo();
-                        setIsDeleteDialogOpen(false);
-                      }}
-                      disabled={isRemovingVideo}
-                    >
-                      {isRemovingVideo ? 'Excluindo...' : 'Excluir'}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-
+              </div>
               {hasHosted ? (
-                <Button
-                  type="button"
-                  size="icon"
-                  onClick={() => setIsInfoDialogOpen(true)}
-                  className="bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-600 border-transparent"
-                  aria-label="Informações do vídeo"
-                  title="Informações do vídeo"
-                >
-                  <Info className="h-4 w-4" />
-                </Button>
+                <p className="text-xs text-muted-foreground">
+                  Salvar um link externo substitui o vídeo hospedado nesta aula (o arquivo antigo pode permanecer no
+                  armazenamento até você apagá-lo manualmente).
+                </p>
               ) : null}
-            </div>
-          </div>
+            </TabsContent>
+          </Tabs>
         </div>
-      )}
+      </CollapsibleContent>
 
+      {/* Diálogo: confirmar exclusão do vídeo */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover vídeo da aula</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja remover o vídeo desta aula? A reprodução ficará indisponível para os alunos até que
+              um novo vídeo seja enviado ou um link externo seja informado.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isRemovingVideo}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={async (event) => {
+                event.preventDefault();
+                await onDeleteVideo();
+                setIsDeleteDialogOpen(false);
+              }}
+              disabled={isRemovingVideo}
+            >
+              {isRemovingVideo ? 'Removendo...' : 'Remover vídeo'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Diálogo: informações detalhadas do vídeo hospedado */}
       <Dialog open={isInfoDialogOpen} onOpenChange={setIsInfoDialogOpen}>
         <DialogContent className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden bg-card p-0 sm:max-w-[640px]">
           <DialogHeader className="shrink-0 px-5 pb-3 pt-4 sm:px-6 sm:pt-5">
@@ -486,28 +686,7 @@ function LessonEditorRow({ lesson }: { lesson: Lesson }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <div className="flex flex-col sm:flex-row gap-2 sm:items-end">
-        <div className="flex-1 space-y-1 min-w-0">
-          <label className="text-xs font-medium text-muted-foreground">Link externo (ex.: YouTube)</label>
-          <Input
-            value={externalUrl}
-            onChange={(e) => setExternalUrl(e.target.value)}
-            placeholder="https://www.youtube.com/watch?v=..."
-            className="h-9"
-          />
-        </div>
-        <Button type="button" size="sm" variant="outline" onClick={onSaveExternal} isLoading={updateLesson.isPending}>
-          Usar link externo
-        </Button>
-      </div>
-      {hasHosted && (
-        <p className="text-xs text-muted-foreground">
-          Salvar um link externo substitui o vídeo hospedado nesta aula (o arquivo antigo pode permanecer no armazenamento
-          até você apagá-lo manualmente).
-        </p>
-      )}
-    </div>
+    </Collapsible>
   );
 }
 
@@ -974,44 +1153,129 @@ export default function CourseEditor() {
 
         {activeTab === 'modules' && (
           <div className="space-y-6">
-            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-              <Button type="button" onClick={handleAddModule} className="w-full sm:w-auto">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <h2 className="text-base font-semibold text-foreground sm:text-lg">Estrutura do curso</h2>
+                <p className="text-xs text-muted-foreground sm:text-sm">
+                  Organize módulos e aulas. Use o botão Editar de cada aula para gerenciar o vídeo.
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleAddModule}
+                className="w-full sm:w-auto"
+              >
                 <Plus className="mr-2 h-4 w-4" /> Novo Módulo
               </Button>
             </div>
 
             <div className="space-y-4">
-              {course.modules?.map((mod, index) => (
-                <Card key={mod.id} className="border-border">
-                  <div className="flex flex-col gap-3 rounded-t-xl border-b border-primary/20 bg-primary/10 px-4 py-3 dark:border-primary/30 dark:bg-primary/15 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
-                    <h3 className="flex min-w-0 items-center gap-2 text-base font-bold text-foreground sm:gap-3 sm:text-lg">
-                      <GripVertical className="h-5 w-5 shrink-0 cursor-grab text-primary/70" aria-hidden />
-                      <span className="truncate">
-                        <span className="text-primary">Módulo {index + 1}:</span> {mod.title}
-                      </span>
-                    </h3>
-                    <Button
-                      type="button"
-                      size="sm"
-                      className="w-full shrink-0 bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:ring-emerald-600 sm:w-auto"
-                      onClick={() => handleAddLesson(mod.id)}
-                    >
-                      <Plus className="mr-1 h-4 w-4" /> Nova Aula
-                    </Button>
-                  </div>
-                  <div className="bg-card p-3 sm:p-4">
-                    {mod.lessons?.length === 0 ? (
-                      <p className="py-4 text-center text-sm text-muted-foreground">Nenhuma aula neste módulo.</p>
-                    ) : (
-                      <div className="space-y-3">
-                        {mod.lessons?.map((lesson) => (
-                          <LessonEditorRow key={lesson.id} lesson={lesson as Lesson} />
-                        ))}
+              {course.modules?.map((mod, index) => {
+                const lessonsCount = mod.lessons?.length ?? 0;
+                return (
+                  <Card key={mod.id} className="overflow-hidden border-border">
+                    <div className="flex flex-col gap-3 border-b border-primary/20 bg-primary/10 px-4 py-3 dark:border-primary/30 dark:bg-primary/15 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
+                      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                        <GripVertical
+                          className="h-5 w-5 shrink-0 cursor-grab text-primary/70"
+                          aria-hidden
+                        />
+                        <div className="min-w-0">
+                          <h3 className="flex min-w-0 items-center gap-2 text-base font-bold text-foreground sm:text-lg">
+                            <span className="truncate">
+                              <span className="text-primary">Módulo {index + 1}:</span> {mod.title}
+                            </span>
+                          </h3>
+                          <p className="mt-0.5 text-[11px] font-medium text-muted-foreground sm:text-xs">
+                            {lessonsCount === 0
+                              ? 'Nenhuma aula'
+                              : lessonsCount === 1
+                                ? '1 aula'
+                                : `${lessonsCount} aulas`}
+                          </p>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </Card>
-              ))}
+                      <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="flex-1 border-primary/30 bg-background/60 text-foreground hover:bg-background sm:flex-none"
+                          onClick={() => handleAddLesson(mod.id)}
+                        >
+                          <Plus className="mr-1 h-4 w-4" /> Nova aula
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="ghost"
+                              className="text-muted-foreground hover:bg-background/60 hover:text-foreground"
+                              aria-label="Mais ações do módulo"
+                              title="Mais ações"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-56">
+                            <DropdownMenuLabel className="text-xs uppercase tracking-wide text-muted-foreground">
+                              Ações do módulo
+                            </DropdownMenuLabel>
+                            <DropdownMenuItem
+                              onSelect={() =>
+                                toast({
+                                  title: 'Edição de módulo em breve',
+                                  description: 'Em uma próxima atualização será possível renomear o módulo por aqui.',
+                                })
+                              }
+                            >
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Editar módulo
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+                              onSelect={() =>
+                                toast({
+                                  title: 'Exclusão de módulo em breve',
+                                  description:
+                                    'Para preservar dados de alunos, remoção de módulos será habilitada em uma atualização futura.',
+                                })
+                              }
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Excluir módulo
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                    <div className="bg-card p-3 sm:p-4">
+                      {lessonsCount === 0 ? (
+                        <div className="flex flex-col items-center gap-2 rounded-md border border-dashed border-border bg-muted/30 px-4 py-6 text-center">
+                          <p className="text-sm text-muted-foreground">Nenhuma aula neste módulo.</p>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleAddLesson(mod.id)}
+                          >
+                            <Plus className="mr-1 h-4 w-4" /> Adicionar primeira aula
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {mod.lessons?.map((lesson) => (
+                            <LessonEditorRow key={lesson.id} lesson={lesson as Lesson} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                );
+              })}
               {(!course.modules || course.modules.length === 0) && (
                 <div className="rounded-xl border-2 border-dashed border-border py-12 text-center text-muted-foreground">
                   Comece adicionando seu primeiro módulo.

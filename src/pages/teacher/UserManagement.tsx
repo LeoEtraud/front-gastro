@@ -100,17 +100,21 @@ export default function UserManagement() {
 
   return (
     <AppLayout>
-      <div className="mx-auto max-w-5xl space-y-6">
+      <div className="mx-auto max-w-[92rem] min-w-0 space-y-6">
         {/* Cabeçalho */}
-        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Gestão de Usuários</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex flex-col gap-2">
+            <p className="mb-1 text-sm font-bold uppercase tracking-wider text-muted-foreground">Professor</p>
+            <div className="inline-flex w-fit flex-col gap-2">
+              <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Gestão de Usuários</h1>
+              <div className="h-1 w-full rounded-full bg-primary/80" />
+            </div>
+            <p className="max-w-2xl text-sm text-muted-foreground">
               Habilite ou suspenda o acesso de alunos e professores à plataforma.
             </p>
           </div>
           {pendingCount > 0 && (
-            <Badge className="h-7 gap-1.5 bg-amber-500 text-white hover:bg-amber-500 sm:h-8 sm:text-sm">
+            <Badge className="h-8 shrink-0 gap-1.5 self-start bg-amber-500 text-white hover:bg-amber-500 sm:self-auto sm:text-sm">
               <Clock className="h-4 w-4" />
               {pendingCount} {pendingCount === 1 ? 'pendente' : 'pendentes'}
             </Badge>
@@ -118,29 +122,31 @@ export default function UserManagement() {
         </div>
 
         {/* Filtros */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nome, e-mail ou CPF..."
-              className="pl-9"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <div className="flex gap-2">
-            {(['ALL', 'PENDING', 'ACTIVE'] as FilterStatus[]).map((s) => (
-              <Button
-                key={s}
-                variant={filterStatus === s ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilterStatus(s)}
-              >
-                {s === 'ALL' ? 'Todos' : s === 'PENDING' ? 'Pendentes' : 'Ativos'}
-              </Button>
-            ))}
-          </div>
-        </div>
+        <Card>
+          <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
+            <div className="relative min-w-0 flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nome, e-mail ou CPF..."
+                className="pl-9"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-wrap gap-2 sm:flex-nowrap">
+              {(['ALL', 'PENDING', 'ACTIVE'] as FilterStatus[]).map((s) => (
+                <Button
+                  key={s}
+                  variant={filterStatus === s ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilterStatus(s)}
+                >
+                  {s === 'ALL' ? 'Todos' : s === 'PENDING' ? 'Pendentes' : 'Ativos'}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Conteúdo */}
         {isLoading && showLoading ? (
@@ -148,18 +154,21 @@ export default function UserManagement() {
         ) : isLoading ? (
           <CompactContentSkeleton />
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center">
+          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card py-16 text-center sm:py-20">
             <Users className="mb-3 h-10 w-10 text-muted-foreground/50" />
             <p className="font-medium text-muted-foreground">Nenhum usuário encontrado.</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {filtered.map((user) => (
-              <Card key={user.id} className="transition-shadow hover:shadow-md">
+              <Card
+                key={user.id}
+                className="border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+              >
                 <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
                   <div className="flex min-w-0 flex-1 flex-col gap-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-semibold">{user.name}</span>
+                      <span className="font-semibold text-card-foreground">{user.name}</span>
                       <StatusBadge status={user.status} />
                       <RoleBadge role={user.role} />
                     </div>
@@ -174,7 +183,7 @@ export default function UserManagement() {
                     {user.status === 'PENDING' ? (
                       <Button
                         size="sm"
-                        className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white"
+                        className="w-full gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700 sm:w-auto"
                         disabled={isWorking}
                         onClick={() => setActionTarget({ user, action: 'activate' })}
                       >
@@ -184,7 +193,7 @@ export default function UserManagement() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                        className="w-full gap-1.5 border-destructive/30 text-destructive hover:border-destructive hover:bg-destructive hover:text-destructive-foreground focus-visible:ring-destructive sm:w-auto"
                         disabled={isWorking}
                         onClick={() => setActionTarget({ user, action: 'deactivate' })}
                       >
