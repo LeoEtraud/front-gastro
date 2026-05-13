@@ -106,12 +106,7 @@ function ModalShell({
           </div>
 
           <DialogFooter className="shrink-0 gap-2 border-t border-border/60 bg-card px-6 py-4 sm:px-8">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="border-slate-200 bg-slate-50 text-white transition-colors hover:bg-slate-100 hover:text-white dark:border-slate-700 dark:bg-slate-800/60 dark:text-white dark:hover:bg-slate-700 dark:hover:text-white"
-            >
+            <Button type="button" variant="cancel" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
             <Button type="submit" isLoading={isSubmitting}>

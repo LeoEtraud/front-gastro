@@ -36,6 +36,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MEDICAL_SPECIALTIES } from '@/lib/medical-specialties';
@@ -427,37 +428,59 @@ function LessonEditorRow({ lesson }: { lesson: Lesson }) {
       )}
 
       <Dialog open={isInfoDialogOpen} onOpenChange={setIsInfoDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Informações do vídeo</DialogTitle>
-            <DialogDescription>
-              Metadados do arquivo enviado para esta aula.
-            </DialogDescription>
+        <DialogContent className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden bg-card p-0 sm:max-w-[640px]">
+          <DialogHeader className="shrink-0 px-5 pb-3 pt-4 sm:px-6 sm:pt-5">
+            <div className="space-y-1.5 pr-10 sm:pr-12">
+              <DialogTitle className="flex items-center gap-2 text-xl sm:text-2xl">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-300">
+                  <Info className="h-4 w-4" />
+                </span>
+                Informações do vídeo
+              </DialogTitle>
+              <DialogDescription className="text-sm leading-relaxed text-muted-foreground">
+                Metadados do arquivo enviado para esta aula.
+              </DialogDescription>
+            </div>
+            <Separator className="mt-3" />
           </DialogHeader>
-          <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="rounded-md border border-border/60 bg-muted/30 p-3">
-              <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Data de publicação</dt>
-              <dd className="mt-1 text-sm font-semibold text-foreground">
-                {formatDateTime(lesson.videoUploadedAt)}
-              </dd>
-            </div>
-            <div className="rounded-md border border-border/60 bg-muted/30 p-3">
-              <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Tamanho do arquivo</dt>
-              <dd className="mt-1 text-sm font-semibold text-foreground">{formatFileSize(lesson.videoSizeBytes)}</dd>
-            </div>
-            <div className="rounded-md border border-border/60 bg-muted/30 p-3">
-              <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Qualidade do vídeo</dt>
-              <dd className="mt-1 text-sm font-semibold text-foreground">
-                {formatVideoQuality(lesson.videoHeight, lesson.videoWidth, lesson.videoContentType)}
-              </dd>
-            </div>
-            <div className="rounded-md border border-border/60 bg-muted/30 p-3">
-              <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Duração</dt>
-              <dd className="mt-1 text-sm font-semibold text-foreground">{formatDuration(lesson.duration)}</dd>
-            </div>
-          </dl>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsInfoDialogOpen(false)}>
+
+          <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6">
+            <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="rounded-lg border border-border/60 bg-background p-3.5 dark:bg-background/40">
+                <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Data de publicação
+                </dt>
+                <dd className="mt-1.5 text-sm font-semibold text-foreground">
+                  {formatDateTime(lesson.videoUploadedAt)}
+                </dd>
+              </div>
+              <div className="rounded-lg border border-border/60 bg-background p-3.5 dark:bg-background/40">
+                <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Tamanho do arquivo
+                </dt>
+                <dd className="mt-1.5 text-sm font-semibold text-foreground">{formatFileSize(lesson.videoSizeBytes)}</dd>
+              </div>
+              <div className="rounded-lg border border-border/60 bg-background p-3.5 dark:bg-background/40">
+                <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Qualidade do vídeo
+                </dt>
+                <dd className="mt-1.5 text-sm font-semibold text-foreground">
+                  {formatVideoQuality(lesson.videoHeight, lesson.videoWidth, lesson.videoContentType)}
+                </dd>
+              </div>
+              <div className="rounded-lg border border-border/60 bg-background p-3.5 dark:bg-background/40">
+                <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Duração</dt>
+                <dd className="mt-1.5 text-sm font-semibold text-foreground">{formatDuration(lesson.duration)}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <DialogFooter className="shrink-0 gap-2 border-t border-border/60 bg-card px-5 py-4 sm:px-6">
+            <Button
+              type="button"
+              onClick={() => setIsInfoDialogOpen(false)}
+              className="bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:text-white dark:hover:bg-red-700"
+            >
               Fechar
             </Button>
           </DialogFooter>
@@ -911,12 +934,11 @@ export default function CourseEditor() {
                             Nenhuma imagem selecionada
                           </div>
                         )}
-                        <div className="flex flex-wrap justify-center gap-2">
+                        <div className="flex flex-wrap items-center justify-center gap-2">
                           <Button
                             type="button"
-                            variant="outline"
                             size="sm"
-                            className="border-primary/40 bg-primary/10 text-primary hover:border-primary/60 hover:bg-primary/20"
+                            className="flex-1 basis-32 sm:max-w-[11rem] bg-green-600 text-white hover:bg-green-700 dark:bg-green-600 dark:text-white dark:hover:bg-green-700"
                             onClick={() => fileInputRef.current?.click()}
                           >
                             <ImagePlus className="mr-2 h-4 w-4" />
@@ -925,9 +947,8 @@ export default function CourseEditor() {
                           {form.watch('coverImageUrl') ? (
                             <Button
                               type="button"
-                              variant="outline"
                               size="sm"
-                              className="border-destructive/50 bg-destructive/10 text-destructive hover:border-destructive/70 hover:bg-destructive/20"
+                              className="flex-1 basis-32 sm:max-w-[11rem] bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:text-white dark:hover:bg-red-700"
                               onClick={handleRemoveCover}
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
@@ -962,11 +983,11 @@ export default function CourseEditor() {
             <div className="space-y-4">
               {course.modules?.map((mod, index) => (
                 <Card key={mod.id} className="border-border">
-                  <div className="flex flex-col gap-3 rounded-t-xl border-b border-border bg-muted/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
-                    <h3 className="flex min-w-0 items-center gap-2 text-base font-bold sm:gap-3 sm:text-lg">
-                      <GripVertical className="h-5 w-5 shrink-0 cursor-grab text-muted-foreground/70" aria-hidden />
+                  <div className="flex flex-col gap-3 rounded-t-xl border-b border-primary/20 bg-primary/10 px-4 py-3 dark:border-primary/30 dark:bg-primary/15 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
+                    <h3 className="flex min-w-0 items-center gap-2 text-base font-bold text-foreground sm:gap-3 sm:text-lg">
+                      <GripVertical className="h-5 w-5 shrink-0 cursor-grab text-primary/70" aria-hidden />
                       <span className="truncate">
-                        Módulo {index + 1}: {mod.title}
+                        <span className="text-primary">Módulo {index + 1}:</span> {mod.title}
                       </span>
                     </h3>
                     <Button

@@ -14,6 +14,10 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        // Botão "Cancelar" padrão usado em modais, alerts e formulários.
+        // Mantém visual consistente com o modal de criação de curso.
+        cancel:
+          "border border-slate-200 bg-slate-50 text-white hover:bg-slate-100 hover:text-white dark:border-slate-700 dark:bg-slate-800/60 dark:text-white dark:hover:bg-slate-700 dark:hover:text-white",
       },
       size: {
         default: "min-h-11 px-4 py-2 sm:h-10 sm:min-h-10",
