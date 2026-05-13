@@ -180,7 +180,7 @@ export default function LessonViewer() {
               <Button
                 onClick={handleComplete}
                 variant="default"
-                className={`w-full shrink-0 sm:w-auto ${lesson.isCompleted ? '!border-green-900 !bg-green-800 !text-white hover:!bg-green-900 hover:!text-white disabled:!opacity-100 dark:!border-green-500/35 dark:!bg-green-500/15 dark:!text-green-300 dark:hover:!bg-green-500/20' : ''}`}
+                className={`w-full shrink-0 sm:w-auto ${lesson.isCompleted ? '!border-green-900 !bg-green-800 !text-white hover:!border-green-950 hover:!bg-green-900 hover:!text-white disabled:!opacity-100 dark:!border-green-800 dark:!bg-green-700 dark:!text-white dark:hover:!bg-green-800' : ''}`}
                 isLoading={markProgress.isPending}
                 disabled={isLessonSwitching}
               >
