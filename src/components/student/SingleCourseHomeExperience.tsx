@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type MouseEventHandler } from 'react';
+import { useEffect, useMemo, useRef, useState, type MouseEventHandler, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import type {
   StudentDashboardFacultyMember,
@@ -13,6 +13,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import {
   Sheet,
   SheetContent,
@@ -71,6 +72,47 @@ function lessonStatusLabel(status: StudentDashboardLessonPreview['status']): str
   if (status === 'COMPLETED') return 'Concluída';
   if (status === 'COMING_SOON') return 'Em breve';
   return 'Disponível';
+}
+
+/**
+ * Classes para o badge de status conforme estado da aula. Mantém o verde
+ * suave para "Disponível" (distinto do verde escuro de "Assistida").
+ */
+function lessonStatusBadgeClass(status: StudentDashboardLessonPreview['status']): string {
+  if (status === 'AVAILABLE') {
+    return 'border-transparent bg-green-600 text-white hover:bg-green-600';
+  }
+  if (status === 'COMPLETED') {
+    return 'border-transparent bg-green-700 text-white hover:bg-green-700';
+  }
+  return '';
+}
+
+/**
+ * Renderiza um texto de aviso destacando trechos entre «...» (ex.: nome do
+ * curso) em negrito. Os marcadores de aspas latinas são removidos do output.
+ */
+function renderBulletinText(text: string): ReactNode {
+  const regex = /«([^»]+)»/g;
+  const nodes: ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let key = 0;
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(text.slice(lastIndex, match.index));
+    }
+    nodes.push(
+      <strong key={key++} className="font-bold text-foreground">
+        {match[1]}
+      </strong>,
+    );
+    lastIndex = regex.lastIndex;
+  }
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex));
+  }
+  return nodes.length > 0 ? nodes : text;
 }
 
 function LessonPreviewCard({
@@ -825,13 +867,7 @@ function PlaceholderFacultyCard({ index }: { index: number }) {
   );
 }
 
-function InfoMural({ courseId, mural, courseTitle }: { courseId: string; mural: StudentDashboardMural; courseTitle: string }) {
-  const nextLessons = mural.nextUp.slice(0, 2);
-  const materials = mural.complementary.slice(0, 2);
-  const bulletins = mural.bulletins.slice(0, 1);
-  const nextTotal = mural.nextUp.length;
-  const materialsTotal = mural.complementary.length;
-  const modulesTotal = mural.modulesSummary.length;
+function CourseProgressCard({ mural }: { mural: StudentDashboardMural }) {
   const progressRounded = Math.round(mural.progressPercent);
   const comingSoon = mural.stats.comingSoonLessons;
   const comingSoonPhrase =
@@ -844,30 +880,30 @@ function InfoMural({ courseId, mural, courseTitle }: { courseId: string; mural: 
   return (
     <Card
       role="region"
-      aria-labelledby="student-course-mural-title"
-      className="flex min-h-0 w-full min-w-0 max-w-full flex-col overflow-hidden border border-primary/15 bg-gradient-to-b from-card via-card to-primary/[0.035] shadow-sm sm:max-h-[min(24rem,70vh)]"
+      aria-labelledby="mural-progress-title"
+      className="flex h-full min-w-0 flex-col overflow-hidden border border-border/50 bg-muted/60 shadow-none dark:bg-muted/30"
     >
-      <CardHeader className="shrink-0 space-y-0 border-b border-border/50 bg-muted/20 px-3 py-3 sm:px-4 sm:py-3.5">
+      <CardHeader className="space-y-0 border-b border-border/40 px-3 py-3 sm:px-4 sm:py-3.5">
         <div className="flex items-start gap-2.5 sm:gap-3">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-primary/15 bg-primary/10 text-primary">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <Target className="h-4 w-4" aria-hidden />
           </span>
-          <div className="min-w-0 flex-1 space-y-1">
+          <div className="min-w-0 flex-1 space-y-0.5">
             <CardTitle
-              id="student-course-mural-title"
+              id="mural-progress-title"
               className="font-display text-sm font-bold leading-tight sm:text-base"
             >
-              Mural do curso
+              Progresso do curso
             </CardTitle>
             <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">
-              <span className="sr-only">Curso: </span>«{normalizePtBrText(courseTitle)}»
+              Acompanhe sua evolução nas aulas publicadas.
             </p>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-y-contain px-3 pb-4 pt-3 text-sm sm:px-4 sm:pb-4 sm:pt-3.5">
+      <CardContent className="flex flex-1 flex-col gap-3 px-3 pb-4 pt-3 text-sm sm:px-4 sm:pb-4 sm:pt-3.5">
         <div
-          className="rounded-lg border border-border/60 bg-background/40 px-3 py-2.5"
+          className="rounded-lg border border-border/60 bg-background/80 px-3 py-2.5 dark:bg-background/40"
           aria-label={`Progresso no curso: ${progressRounded} por cento. ${mural.stats.completedLessons} de ${mural.stats.totalPublishedLessons} aulas publicadas concluídas.`}
         >
           <div className="mb-1.5 flex items-baseline justify-between gap-2">
@@ -884,62 +920,151 @@ function InfoMural({ courseId, mural, courseTitle }: { courseId: string; mural: 
           </p>
         </div>
 
-        <Separator className="bg-border/70" />
-
-        {mural.recommended ? (
-          <section aria-labelledby="mural-recommended-heading" className="space-y-1.5">
-            <h4 id="mural-recommended-heading" className="text-[10px] font-bold uppercase tracking-wide text-primary">
-              Aula recomendada
-            </h4>
-            <div className="rounded-lg border border-primary/25 bg-primary/[0.06] p-2.5 shadow-sm sm:p-3">
-              <Link
-                to={`/student/courses/${courseId}/lessons/${mural.recommended.lessonId}`}
-                className="group flex items-start justify-between gap-2 text-sm font-semibold leading-snug text-foreground transition-colors hover:text-primary"
-              >
-                <span className="line-clamp-2 min-w-0">{normalizePtBrText(mural.recommended.title)}</span>
-                <ChevronRight
-                  className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
-                  aria-hidden
-                />
-              </Link>
-              <p className="mt-1 text-[11px] text-muted-foreground sm:text-xs">
-                <span className="font-medium text-foreground/80">Módulo:</span>{' '}
-                {normalizePtBrText(mural.recommended.moduleTitle)}
-              </p>
-            </div>
-          </section>
-        ) : null}
-
         <div
           className="grid grid-cols-3 gap-2"
           role="group"
           aria-label="Resumo rápido: aulas na fila, materiais complementares e módulos acompanhados."
         >
-          <div className="flex flex-col items-center gap-1 rounded-lg border border-border/70 bg-muted/25 px-1.5 py-2.5 text-center sm:px-2 sm:py-3">
+          <div className="flex flex-col items-center gap-1 rounded-lg border border-border/60 bg-background/80 px-1.5 py-2.5 text-center dark:bg-background/40 sm:px-2 sm:py-3">
             <LayoutList className="h-3.5 w-3.5 text-primary/80" aria-hidden />
-            <p className="text-lg font-bold tabular-nums leading-none text-foreground sm:text-xl">{nextTotal}</p>
+            <p className="text-lg font-bold tabular-nums leading-none text-foreground sm:text-xl">{mural.nextUp.length}</p>
             <p className="text-[10px] font-medium leading-tight text-muted-foreground sm:text-[11px]">Na fila</p>
           </div>
-          <div className="flex flex-col items-center gap-1 rounded-lg border border-border/70 bg-muted/25 px-1.5 py-2.5 text-center sm:px-2 sm:py-3">
+          <div className="flex flex-col items-center gap-1 rounded-lg border border-border/60 bg-background/80 px-1.5 py-2.5 text-center dark:bg-background/40 sm:px-2 sm:py-3">
             <BookMarked className="h-3.5 w-3.5 text-primary/80" aria-hidden />
-            <p className="text-lg font-bold tabular-nums leading-none text-foreground sm:text-xl">{materialsTotal}</p>
-            <p className="line-clamp-2 text-[10px] font-medium leading-tight text-muted-foreground sm:text-[11px]">Materiais extras</p>
+            <p className="text-lg font-bold tabular-nums leading-none text-foreground sm:text-xl">{mural.complementary.length}</p>
+            <p className="line-clamp-2 text-[10px] font-medium leading-tight text-muted-foreground sm:text-[11px]">
+              Materiais extras
+            </p>
           </div>
-          <div className="flex flex-col items-center gap-1 rounded-lg border border-border/70 bg-muted/25 px-1.5 py-2.5 text-center sm:px-2 sm:py-3">
+          <div className="flex flex-col items-center gap-1 rounded-lg border border-border/60 bg-background/80 px-1.5 py-2.5 text-center dark:bg-background/40 sm:px-2 sm:py-3">
             <Layers className="h-3.5 w-3.5 text-primary/80" aria-hidden />
-            <p className="text-lg font-bold tabular-nums leading-none text-foreground sm:text-xl">{modulesTotal}</p>
+            <p className="text-lg font-bold tabular-nums leading-none text-foreground sm:text-xl">{mural.modulesSummary.length}</p>
             <p className="text-[10px] font-medium leading-tight text-muted-foreground sm:text-[11px]">Módulos</p>
           </div>
         </div>
+      </CardContent>
+    </Card>
+  );
+}
 
-        <section aria-labelledby="mural-next-heading" className="space-y-1.5">
-          <h4 id="mural-next-heading" className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+function RecommendedLessonCard({
+  courseId,
+  mural,
+}: {
+  courseId: string;
+  mural: StudentDashboardMural;
+}) {
+  const recommended = mural.recommended;
+
+  return (
+    <Card
+      role="region"
+      aria-labelledby="mural-recommended-title"
+      className="flex h-full min-w-0 flex-col overflow-hidden border border-border/50 bg-muted/60 shadow-none dark:bg-muted/30"
+    >
+      <CardHeader className="space-y-0 border-b border-border/40 px-3 py-3 sm:px-4 sm:py-3.5">
+        <div className="flex items-start gap-2.5 sm:gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Sparkles className="h-4 w-4" aria-hidden />
+          </span>
+          <div className="min-w-0 flex-1 space-y-0.5">
+            <CardTitle
+              id="mural-recommended-title"
+              className="font-display text-sm font-bold leading-tight sm:text-base"
+            >
+              Aula recomendada
+            </CardTitle>
+            <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">
+              Continue de onde paramos sua jornada.
+            </p>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="flex flex-1 flex-col gap-2 px-3 pb-4 pt-3 text-sm sm:px-4 sm:pb-4 sm:pt-3.5">
+        {recommended ? (
+          <div className="flex flex-1 flex-col rounded-lg border border-primary/25 bg-primary/[0.06] p-2.5 shadow-sm sm:p-3">
+            <Link
+              to={`/student/courses/${courseId}/lessons/${recommended.lessonId}`}
+              className="group flex items-start justify-between gap-2 text-sm font-semibold leading-snug text-foreground transition-colors hover:text-primary"
+            >
+              <span className="line-clamp-3 min-w-0">{normalizePtBrText(recommended.title)}</span>
+              <ChevronRight
+                className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+                aria-hidden
+              />
+            </Link>
+            <p className="mt-2 text-[11px] text-muted-foreground sm:text-xs">
+              <span className="font-medium text-foreground/80">Módulo:</span>{' '}
+              {normalizePtBrText(recommended.moduleTitle)}
+            </p>
+            <div className="mt-auto pt-3">
+              <Link
+                to={`/student/courses/${courseId}/lessons/${recommended.lessonId}`}
+                className={cn(buttonVariants({ size: 'sm' }), 'w-full gap-1.5')}
+              >
+                <PlayCircle className="h-4 w-4" aria-hidden />
+                Continuar aula
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <p className="flex flex-1 items-center justify-center rounded-md border border-dashed border-muted-foreground/25 bg-background/70 px-2.5 py-4 text-center text-[11px] leading-relaxed text-muted-foreground dark:bg-background/30 sm:text-xs">
+            Nenhuma recomendação personalizada no momento. Conforme você avança, sugeriremos a próxima aula aqui.
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function CourseMuralExtrasCard({
+  courseId,
+  mural,
+}: {
+  courseId: string;
+  mural: StudentDashboardMural;
+}) {
+  const nextLessons = mural.nextUp.slice(0, 3);
+  const materials = mural.complementary.slice(0, 3);
+  const bulletins = mural.bulletins.slice(0, 1);
+
+  return (
+    <Card
+      role="region"
+      aria-labelledby="mural-extras-title"
+      className="flex min-w-0 flex-col overflow-hidden border border-border/50 bg-muted/60 shadow-none dark:bg-muted/30"
+    >
+      <CardHeader className="space-y-0 border-b border-border/40 px-3 py-3 sm:px-4 sm:py-3.5">
+        <div className="flex items-start gap-2.5 sm:gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <LayoutList className="h-4 w-4" aria-hidden />
+          </span>
+          <div className="min-w-0 flex-1 space-y-0.5">
+            <CardTitle
+              id="mural-extras-title"
+              className="font-display text-sm font-bold leading-tight sm:text-base"
+            >
+              Próximos passos e materiais
+            </CardTitle>
+            <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">
+              Aulas na fila, materiais complementares e avisos do curso.
+            </p>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3 px-3 pb-4 pt-3 text-sm sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4 sm:pb-4 sm:pt-3.5">
+        <section aria-labelledby="mural-next-heading" className="min-w-0 space-y-1.5">
+          <h4
+            id="mural-next-heading"
+            className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground"
+          >
             <LayoutList className="h-3.5 w-3.5 shrink-0 text-primary/70" aria-hidden />
             Próximas na sua fila
           </h4>
           {nextLessons.length === 0 ? (
-            <p className="rounded-md border border-dashed border-muted-foreground/25 bg-muted/15 px-2.5 py-2 text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
-              Nenhuma outra aula aparece na fila neste momento. Quando houver próximos passos, eles surgirão aqui.
+            <p className="rounded-md border border-dashed border-muted-foreground/25 bg-background/70 px-2.5 py-2 text-[11px] leading-relaxed text-muted-foreground dark:bg-background/30 sm:text-xs">
+              Nenhuma outra aula aparece na fila neste momento.
             </p>
           ) : (
             <ul className="space-y-1 text-[11px] sm:text-xs">
@@ -947,10 +1072,16 @@ function InfoMural({ courseId, mural, courseTitle }: { courseId: string; mural: 
                 <li key={l.lessonId}>
                   <Link
                     to={`/student/courses/${courseId}/lessons/${l.lessonId}`}
-                    className="flex items-center justify-between gap-2 rounded-md border border-transparent px-2 py-1.5 transition-colors hover:border-border/80 hover:bg-muted/50"
+                    className="flex items-center justify-between gap-2 rounded-md border border-transparent px-2 py-1.5 transition-colors hover:border-border/80 hover:bg-background/80 dark:hover:bg-background/40"
                   >
                     <span className="line-clamp-1 min-w-0 font-medium leading-snug">{normalizePtBrText(l.title)}</span>
-                    <Badge variant="outline" className="shrink-0 px-1.5 py-0 text-[9px] font-semibold">
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        'shrink-0 px-1.5 py-0 text-[9px] font-semibold',
+                        lessonStatusBadgeClass(l.status),
+                      )}
+                    >
                       {lessonStatusLabel(l.status)}
                     </Badge>
                   </Link>
@@ -960,16 +1091,20 @@ function InfoMural({ courseId, mural, courseTitle }: { courseId: string; mural: 
           )}
         </section>
 
-        <section aria-labelledby="mural-materials-heading" className="space-y-1.5">
-          <h4 id="mural-materials-heading" className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+        <section aria-labelledby="mural-materials-heading" className="min-w-0 space-y-1.5">
+          <h4
+            id="mural-materials-heading"
+            className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground"
+          >
+            <BookMarked className="h-3.5 w-3.5 shrink-0 text-primary/70" aria-hidden />
             Materiais complementares
           </h4>
           {materials.length === 0 ? (
-            <p className="rounded-md border border-dashed border-muted-foreground/25 bg-muted/15 px-2.5 py-2 text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
-              Nenhum material complementar listado para este curso no mural.
+            <p className="rounded-md border border-dashed border-muted-foreground/25 bg-background/70 px-2.5 py-2 text-[11px] leading-relaxed text-muted-foreground dark:bg-background/30 sm:text-xs">
+              Sem materiais complementares listados.
             </p>
           ) : (
-            <ul className="space-y-1 rounded-md border border-border/50 bg-muted/10 p-1.5 text-[11px] sm:text-xs">
+            <ul className="space-y-1 rounded-md border border-border/50 bg-background/70 p-1.5 text-[11px] dark:bg-background/30 sm:text-xs">
               {materials.map((c) => (
                 <li key={c.lessonId} className="min-w-0">
                   <Link
@@ -989,18 +1124,22 @@ function InfoMural({ courseId, mural, courseTitle }: { courseId: string; mural: 
           )}
         </section>
 
-        <section aria-labelledby="mural-bulletin-heading" className="space-y-1.5">
-          <h4 id="mural-bulletin-heading" className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+        <section aria-labelledby="mural-bulletin-heading" className="min-w-0 space-y-1.5">
+          <h4
+            id="mural-bulletin-heading"
+            className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground"
+          >
+            <MapPin className="h-3.5 w-3.5 shrink-0 text-primary/70" aria-hidden />
             Avisos do curso
           </h4>
           {bulletins.length > 0 ? (
             <div className="flex gap-2 rounded-lg border border-border/60 bg-background/70 px-2.5 py-2 text-[11px] leading-relaxed text-muted-foreground shadow-sm sm:text-xs">
               <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />
-              <p className="line-clamp-3 min-w-0">{normalizePtBrText(bulletins[0])}</p>
+              <p className="line-clamp-3 min-w-0">{renderBulletinText(normalizePtBrText(bulletins[0]))}</p>
             </div>
           ) : (
-            <p className="rounded-md border border-dashed border-muted-foreground/25 bg-muted/15 px-2.5 py-2 text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
-              Sem avisos publicados no mural por enquanto.
+            <p className="rounded-md border border-dashed border-muted-foreground/25 bg-background/70 px-2.5 py-2 text-[11px] leading-relaxed text-muted-foreground dark:bg-background/30 sm:text-xs">
+              Sem avisos publicados no momento.
             </p>
           )}
         </section>
@@ -1010,14 +1149,6 @@ function InfoMural({ courseId, mural, courseTitle }: { courseId: string; mural: 
 }
 
 type Props = { home: StudentDashboardSingleCourseHome };
-
-function lessonFeaturedGridClass(slotCount: number): string {
-  if (slotCount <= 0) return 'grid-cols-1';
-  if (slotCount === 1) return 'grid-cols-1';
-  if (slotCount === 2) return 'grid-cols-1 min-[440px]:grid-cols-2';
-  if (slotCount === 3) return 'grid-cols-1 min-[440px]:grid-cols-2 md:grid-cols-3';
-  return 'grid-cols-1 min-[440px]:grid-cols-2 lg:grid-cols-4';
-}
 
 export function SingleCourseHomeExperience({ home }: Props) {
   const facultySlots: (StudentDashboardFacultyMember | null)[] = [...home.faculty];
@@ -1029,7 +1160,6 @@ export function SingleCourseHomeExperience({ home }: Props) {
     ...(home.lessonFourth ? [home.lessonFourth] : []),
   ];
   const fourthLessonPlaceholder = home.lessonRowTop.length === 3 && !home.lessonFourth;
-  const lessonGridSlots = featuredLessons.length + (fourthLessonPlaceholder ? 1 : 0);
 
   // Camada leve de pré-carregamento (preconnect YouTube + posters + hint de
   // vídeos hospedados). Roda em background assim que o Dashboard recebe os
@@ -1044,6 +1174,18 @@ export function SingleCourseHomeExperience({ home }: Props) {
   );
   useVideoPreviewPreload(preloadEntries);
 
+  const facultyVisible = facultySlots.slice(0, 4);
+  // Embla é mais leve quando há slides suficientes para rolar. Em desktop, o
+  // grid mostra tudo de uma vez, então o carrossel se torna inerte.
+  const facultyCarouselOptions = useMemo(
+    () => ({ align: 'start' as const, dragFree: true, containScroll: 'trimSnaps' as const }),
+    [],
+  );
+  const lessonsCarouselOptions = useMemo(
+    () => ({ align: 'start' as const, dragFree: true, containScroll: 'trimSnaps' as const }),
+    [],
+  );
+
   return (
     <div className="w-full min-w-0 space-y-4 sm:space-y-5">
       <section aria-labelledby="faculty-heading" className="space-y-2 sm:space-y-2.5">
@@ -1055,8 +1197,26 @@ export function SingleCourseHomeExperience({ home }: Props) {
             Toque para ver formação, certificações e aulas ligadas a cada professor.
           </p>
         </div>
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-4">
-          {facultySlots.slice(0, 4).map((member, idx) =>
+
+        {/* Mobile: carrossel horizontal para evitar excesso de conteúdo vertical. */}
+        <div className="sm:hidden">
+          <Carousel opts={facultyCarouselOptions} className="w-full">
+            <CarouselContent className="-ml-3">
+              {facultyVisible.map((member, idx) => (
+                <CarouselItem
+                  key={member ? member.userId : `ph-${idx}`}
+                  className="basis-[82%] pl-3 min-[420px]:basis-[60%]"
+                >
+                  {member ? <FacultyCard member={member} /> : <PlaceholderFacultyCard index={idx} />}
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        </div>
+
+        {/* Desktop/tablet: grade tradicional, mantendo o padrão visual existente. */}
+        <div className="hidden grid-cols-2 gap-2.5 sm:grid sm:gap-3 lg:grid-cols-4">
+          {facultyVisible.map((member, idx) =>
             member ? (
               <FacultyCard key={member.userId} member={member} />
             ) : (
@@ -1071,30 +1231,75 @@ export function SingleCourseHomeExperience({ home }: Props) {
           Início do módulo — aulas em destaque
         </h2>
 
-        <div className={cn('grid min-w-0 gap-3 sm:gap-4', lessonFeaturedGridClass(lessonGridSlots))}>
-          {featuredLessons.map((lesson, idx) => (
-            <LessonPreviewCard
-              key={lesson.id}
-              courseId={home.courseId}
-              courseTitle={home.courseTitle}
-              courseCover={home.courseCover}
-              audioPreferenceEnabled={audioPreferenceEnabled}
-              onAudioPreferenceChange={setAudioPreferenceEnabled}
-              lesson={lesson}
-              preloadOrder={idx}
-              visualOnly
-            />
-          ))}
-          {fourthLessonPlaceholder ? (
-            <Card className="flex aspect-[4/5] min-h-0 min-w-0 flex-col items-center justify-center border-dashed border-muted-foreground/25 bg-muted/10 px-3 text-center text-xs text-muted-foreground sm:aspect-[3/4] sm:text-sm">
-              <p>Sem quarta aula publicada neste módulo.</p>
-            </Card>
-          ) : null}
-        </div>
+        <Carousel opts={lessonsCarouselOptions} className="w-full">
+          <CarouselContent className="-ml-3 sm:-ml-4">
+            {featuredLessons.map((lesson, idx) => (
+              <CarouselItem
+                key={lesson.id}
+                className="basis-[78%] pl-3 min-[420px]:basis-[58%] sm:basis-1/2 sm:pl-4 lg:basis-1/4"
+              >
+                <LessonPreviewCard
+                  courseId={home.courseId}
+                  courseTitle={home.courseTitle}
+                  courseCover={home.courseCover}
+                  audioPreferenceEnabled={audioPreferenceEnabled}
+                  onAudioPreferenceChange={setAudioPreferenceEnabled}
+                  lesson={lesson}
+                  preloadOrder={idx}
+                  visualOnly
+                />
+              </CarouselItem>
+            ))}
+            {fourthLessonPlaceholder ? (
+              <CarouselItem
+                key="lesson-placeholder"
+                className="basis-[78%] pl-3 min-[420px]:basis-[58%] sm:basis-1/2 sm:pl-4 lg:basis-1/4"
+              >
+                <Card className="flex aspect-[4/5] min-h-0 min-w-0 flex-col items-center justify-center border-dashed border-muted-foreground/25 bg-muted/10 px-3 text-center text-xs text-muted-foreground sm:aspect-[3/4] sm:text-sm">
+                  <p>Sem quarta aula publicada neste módulo.</p>
+                </Card>
+              </CarouselItem>
+            ) : null}
+          </CarouselContent>
+        </Carousel>
 
-        <div className="mt-4 min-h-0 sm:mt-5">
-          <InfoMural courseId={home.courseId} mural={home.mural} courseTitle={home.courseTitle} />
-        </div>
+        <Card
+          role="region"
+          aria-labelledby="mural-section-heading"
+          className="mt-4 flex min-w-0 flex-col overflow-hidden border border-primary/15 bg-gradient-to-b from-card via-card to-primary/[0.035] shadow-sm sm:mt-5"
+        >
+          <CardHeader className="space-y-0 border-b border-border/50 bg-muted/20 px-4 py-3.5 sm:px-5 sm:py-4">
+            <div className="flex items-start gap-2.5 sm:gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-primary/15 bg-primary/10 text-primary">
+                <LayoutList className="h-4 w-4" aria-hidden />
+              </span>
+              <div className="min-w-0 flex-1 space-y-0.5">
+                <CardTitle
+                  id="mural-section-heading"
+                  className="font-display text-base font-bold leading-tight sm:text-lg"
+                >
+                  Mural do curso
+                </CardTitle>
+                <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">
+                  <span className="sr-only">Curso: </span>
+                  <strong className="font-semibold text-foreground">
+                    {normalizePtBrText(home.courseTitle)}
+                  </strong>
+                </p>
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-3 px-4 pb-4 pt-4 sm:space-y-4 sm:px-5 sm:pb-5 sm:pt-4">
+            {/* Mobile: cards empilhados. Desktop: progresso à esquerda, recomendada à direita. */}
+            <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 md:items-stretch">
+              <CourseProgressCard mural={home.mural} />
+              <RecommendedLessonCard courseId={home.courseId} mural={home.mural} />
+            </div>
+
+            <CourseMuralExtrasCard courseId={home.courseId} mural={home.mural} />
+          </CardContent>
+        </Card>
       </section>
     </div>
   );
