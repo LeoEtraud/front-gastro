@@ -4,7 +4,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { AlertCircle, ImagePlus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useCreateCourse, useCreateLesson, useCreateModule } from "@/hooks/use-teacher";
+import {
+  useCreateCourse,
+  useCreateLesson,
+  useCreateModule,
+  useUpdateModule,
+} from "@/hooks/use-teacher";
 import type { CourseLevel, LessonType } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import {
@@ -467,6 +472,101 @@ export function CreateModuleModal({ open, onOpenChange, courseId, defaultOrder }
           {form.formState.errors.order ? (
             <p className="text-xs font-medium text-destructive">{form.formState.errors.order.message}</p>
           ) : null}
+        </div>
+      </div>
+    </ModalShell>
+  );
+}
+
+// SCHEMA PARA EDITAR UM MÓDULO
+const editModuleSchema = z.object({
+  title: z.string().trim().min(1, "Título é obrigatório"),
+  description: z.string().trim().optional(),
+});
+
+// PROPS PARA EDITAR UM MÓDULO
+type EditModuleModalProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  module: { id: string; title: string; description?: string | null } | null;
+  courseId: string;
+};
+
+// FORM VALUES PARA EDITAR UM MÓDULO
+type EditModuleFormValues = z.infer<typeof editModuleSchema>;
+
+// COMPONENTE PARA EDITAR UM MÓDULO
+export function EditModuleModal({ open, onOpenChange, module, courseId }: EditModuleModalProps) {
+  const updateModule = useUpdateModule();
+  const { toast } = useToast();
+  const [requestError, setRequestError] = useState<string | null>(null);
+
+  const form = useForm<EditModuleFormValues>({
+    resolver: zodResolver(editModuleSchema),
+    defaultValues: { title: "", description: "" },
+  });
+
+  useEffect(() => {
+    if (open && module) {
+      setRequestError(null);
+      form.reset({
+        title: module.title ?? "",
+        description: module.description ?? "",
+      });
+    }
+    if (!open) {
+      setRequestError(null);
+    }
+  }, [open, module, form]);
+
+  const onSubmit = form.handleSubmit(async (values) => {
+    if (!module) return;
+    setRequestError(null);
+    try {
+      await updateModule.mutateAsync({
+        id: module.id,
+        courseId,
+        data: {
+          title: values.title,
+          description: values.description ? values.description : null,
+        },
+      });
+      toast({ variant: "success", title: "Módulo atualizado com sucesso" });
+      onOpenChange(false);
+    } catch (error) {
+      setRequestError(parseRequestError(error, "Erro inesperado ao atualizar módulo"));
+    }
+  });
+
+  return (
+    // MODAL PARA EDITAR UM MÓDULO
+    <ModalShell
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Editar Módulo"
+      description="Atualize o título e a descrição do módulo."
+      onSubmit={onSubmit}
+      isSubmitting={updateModule.isPending}
+      errorMessage={requestError}
+      submitLabel="Salvar alterações"
+    >
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div className="space-y-2 sm:col-span-2">
+          <label className="text-sm font-medium">Título *</label>
+          <Input className="bg-background" {...form.register("title")} placeholder="Ex.: Fundamentos de ECG" />
+          {form.formState.errors.title ? (
+            <p className="text-xs font-medium text-destructive">{form.formState.errors.title.message}</p>
+          ) : null}
+        </div>
+
+        <div className="space-y-2 sm:col-span-2">
+          <label className="text-sm font-medium">Descrição</label>
+          <Textarea
+            rows={3}
+            className="bg-background"
+            {...form.register("description")}
+            placeholder="Resumo do conteúdo do módulo"
+          />
         </div>
       </div>
     </ModalShell>

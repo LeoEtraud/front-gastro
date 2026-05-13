@@ -79,6 +79,50 @@ export function useCreateModule() {
   });
 }
 
+// FUNÇÃO PARA ATUALIZAR UM MÓDULO EXISTENTE
+export function useUpdateModule() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { title?: string; description?: string | null; order?: number };
+      courseId?: string;
+    }) => {
+      const res = await api.put(`/teacher/modules/${id}`, data);
+      return res.data;
+    },
+    onSuccess: (_, variables) => {
+      if (variables.courseId) {
+        queryClient.invalidateQueries({ queryKey: ['teacher-course', variables.courseId] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['teacher-course'] });
+      }
+    },
+  });
+}
+
+// FUNÇÃO PARA EXCLUIR UM MÓDULO (CASCATA REMOVE AS AULAS VINCULADAS)
+export function useDeleteModule() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id }: { id: string; courseId?: string }) => {
+      const res = await api.delete(`/teacher/modules/${id}`);
+      return res.data;
+    },
+    onSuccess: (_, variables) => {
+      if (variables.courseId) {
+        queryClient.invalidateQueries({ queryKey: ['teacher-course', variables.courseId] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['teacher-course'] });
+      }
+      queryClient.invalidateQueries({ queryKey: ['teacher-courses'] });
+    },
+  });
+}
+
 // FUNÇÃO PARA CRIAR UMA NOVA AULA NO CURSO
 export function useCreateLesson() {
   const queryClient = useQueryClient();
@@ -214,6 +258,24 @@ export function useUpdateLesson() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teacher-course'] });
+    },
+  });
+}
+
+// FUNÇÃO PARA EXCLUIR UMA AULA
+export function useDeleteLesson() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id }: { id: string; courseId?: string }) => {
+      const res = await api.delete(`/teacher/lessons/${id}`);
+      return res.data;
+    },
+    onSuccess: (_, variables) => {
+      if (variables.courseId) {
+        queryClient.invalidateQueries({ queryKey: ['teacher-course', variables.courseId] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['teacher-course'] });
+      }
     },
   });
 }
