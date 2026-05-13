@@ -9,16 +9,19 @@ import type { CourseLevel, LessonType } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -59,25 +62,56 @@ function ModalShell({
 }: ModalShellProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[620px]">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+      {/*
+       * `overflow-hidden` no DialogContent garante que o border-radius nunca
+       * seja interceptado pela scrollbar. O scroll real fica apenas no corpo
+       * (form > div), enquanto header e footer permanecem fixos.
+       *
+       * `hideCloseButton` desativa o "X" padrão (posicionado pelo `top-4` do
+       * DialogContent) para podermos renderizar nosso próprio close button
+       * alinhado verticalmente ao bloco título + subtítulo.
+       */}
+      <DialogContent
+        hideCloseButton
+        className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden bg-card p-0 sm:max-w-[760px]"
+      >
+        <DialogHeader className="shrink-0 px-5 pb-3 pt-4 sm:px-6 sm:pt-5">
+          <div className="relative space-y-1.5 pr-10 sm:pr-12">
+            <DialogTitle className="text-xl sm:text-2xl">{title}</DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed text-muted-foreground">
+              {description}
+            </DialogDescription>
+            <DialogClose
+              aria-label="Fechar"
+              className="absolute right-0 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-sm text-muted-foreground opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Fechar</span>
+            </DialogClose>
+          </div>
+          <Separator className="mt-3" />
         </DialogHeader>
 
-        <form className="space-y-4" onSubmit={onSubmit}>
-          {errorMessage ? (
-            <Alert variant="destructive" className="gap-2">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Não foi possível salvar</AlertTitle>
-              <AlertDescription>{errorMessage}</AlertDescription>
-            </Alert>
-          ) : null}
+        <form className="flex min-h-0 flex-1 flex-col" onSubmit={onSubmit}>
+          <div className="flex-1 space-y-5 overflow-y-auto overscroll-contain px-6 py-5 sm:px-8">
+            {errorMessage ? (
+              <Alert variant="destructive" className="gap-2">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Não foi possível salvar</AlertTitle>
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            ) : null}
 
-          {children}
+            {children}
+          </div>
 
-          <DialogFooter className="gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <DialogFooter className="shrink-0 gap-2 border-t border-border/60 bg-card px-6 py-4 sm:px-8">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="border-slate-200 bg-slate-50 text-white transition-colors hover:bg-slate-100 hover:text-white dark:border-slate-700 dark:bg-slate-800/60 dark:text-white dark:hover:bg-slate-700 dark:hover:text-white"
+            >
               Cancelar
             </Button>
             <Button type="submit" isLoading={isSubmitting}>
@@ -201,22 +235,22 @@ export function CreateCourseModal({ open, onOpenChange }: CreateCourseModalProps
       errorMessage={requestError}
       submitLabel="Criar curso"
     >
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1.5 sm:col-span-2">
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div className="space-y-2 sm:col-span-2">
           <label className="text-sm font-medium">Título *</label>
-          <Input {...form.register("title")} placeholder="Ex.: Fisiologia Cardiovascular" />
+          <Input className="bg-background" {...form.register("title")} placeholder="Ex.: Fisiologia Cardiovascular" />
           {form.formState.errors.title ? (
             <p className="text-xs font-medium text-destructive">{form.formState.errors.title.message}</p>
           ) : null}
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <label className="text-sm font-medium">Nível</label>
           <Select
             value={form.watch("level")}
             onValueChange={(value) => form.setValue("level", value as CourseLevel, { shouldValidate: true })}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-background">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -227,26 +261,32 @@ export function CreateCourseModal({ open, onOpenChange }: CreateCourseModalProps
           </Select>
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <label className="text-sm font-medium">Carga horária (horas)</label>
-          <Input type="number" min={1} placeholder="Ex.: 40" {...form.register("workloadHours")} />
+          <Input
+            type="number"
+            min={1}
+            placeholder="Ex.: 40"
+            className="bg-background"
+            {...form.register("workloadHours")}
+          />
           {form.formState.errors.workloadHours ? (
             <p className="text-xs font-medium text-destructive">{form.formState.errors.workloadHours.message}</p>
           ) : null}
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <label className="text-sm font-medium">Subtítulo</label>
-          <Input {...form.register("subtitle")} placeholder="Resumo curto do curso" />
+          <Input className="bg-background" {...form.register("subtitle")} placeholder="Resumo curto do curso" />
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <label className="text-sm font-medium">Especialidade *</label>
           <Select
             value={form.watch("specialty") || undefined}
             onValueChange={(value) => form.setValue("specialty", value, { shouldValidate: true })}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-background">
               <SelectValue placeholder="Selecione uma especialidade" />
             </SelectTrigger>
             <SelectContent>
@@ -262,20 +302,30 @@ export function CreateCourseModal({ open, onOpenChange }: CreateCourseModalProps
           ) : null}
         </div>
 
-        <div className="space-y-1.5 sm:col-span-2">
+        <div className="space-y-2 sm:col-span-2">
           <label className="text-sm font-medium">Descrição curta *</label>
-          <Textarea rows={2} {...form.register("shortDescription")} placeholder="Descrição breve para listagens" />
+          <Textarea
+            rows={2}
+            className="bg-background"
+            {...form.register("shortDescription")}
+            placeholder="Descrição breve para listagens"
+          />
           {form.formState.errors.shortDescription ? (
             <p className="text-xs font-medium text-destructive">{form.formState.errors.shortDescription.message}</p>
           ) : null}
         </div>
 
-        <div className="space-y-1.5 sm:col-span-2">
+        <div className="space-y-2 sm:col-span-2">
           <label className="text-sm font-medium">Descrição completa</label>
-          <Textarea rows={4} {...form.register("description")} placeholder="Detalhes completos do curso" />
+          <Textarea
+            rows={4}
+            className="bg-background"
+            {...form.register("description")}
+            placeholder="Detalhes completos do curso"
+          />
         </div>
 
-        <div className="space-y-1.5 sm:col-span-2">
+        <div className="space-y-2 sm:col-span-2">
           <label className="text-sm font-medium">Capa do curso (opcional)</label>
           <input
             ref={fileInputRef}
@@ -284,7 +334,7 @@ export function CreateCourseModal({ open, onOpenChange }: CreateCourseModalProps
             className="hidden"
             onChange={handleCoverChange}
           />
-          <div className="space-y-2 rounded-lg border border-border/70 p-3">
+          <div className="space-y-2 rounded-lg border border-border/70 bg-background p-2.5">
             {coverPreview ? (
               <div className="overflow-hidden rounded-md border border-border/70 bg-muted">
                 <img src={coverPreview} alt="Pré-visualização da capa" className="h-36 w-full object-cover" />
@@ -294,13 +344,23 @@ export function CreateCourseModal({ open, onOpenChange }: CreateCourseModalProps
                 Nenhuma imagem selecionada
               </div>
             )}
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="bg-green-600 text-white hover:bg-green-700 dark:bg-green-600 dark:text-white dark:hover:bg-green-700"
+              >
                 <ImagePlus className="mr-2 h-4 w-4" />
-                {coverPreview ? "Trocar imagem" : "Selecionar imagem"}
+                {coverPreview ? "Trocar imagem da capa" : "Selecionar imagem da capa"}
               </Button>
               {coverPreview ? (
-                <Button type="button" variant="ghost" size="sm" onClick={handleRemoveCover}>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleRemoveCover}
+                  className="bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:text-white dark:hover:bg-red-700"
+                >
                   <Trash2 className="mr-2 h-4 w-4" />
                   Remover
                 </Button>
@@ -311,9 +371,9 @@ export function CreateCourseModal({ open, onOpenChange }: CreateCourseModalProps
           <p className="text-xs text-muted-foreground">Formatos aceitos: JPEG, PNG, WebP ou GIF (até 3 MB).</p>
         </div>
 
-        <div className="space-y-1.5 sm:col-span-2">
+        <div className="space-y-2 sm:col-span-2">
           <label className="text-sm font-medium">Tags</label>
-          <Input {...form.register("tags")} placeholder="cardio, ecg, emergência" />
+          <Input className="bg-background" {...form.register("tags")} placeholder="cardio, ecg, emergência" />
           <p className="text-xs text-muted-foreground">Separe por vírgula.</p>
         </div>
       </div>
@@ -387,23 +447,28 @@ export function CreateModuleModal({ open, onOpenChange, courseId, defaultOrder }
       errorMessage={requestError}
       submitLabel="Criar módulo"
     >
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1.5 sm:col-span-2">
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div className="space-y-2 sm:col-span-2">
           <label className="text-sm font-medium">Título *</label>
-          <Input {...form.register("title")} placeholder="Ex.: Fundamentos de ECG" />
+          <Input className="bg-background" {...form.register("title")} placeholder="Ex.: Fundamentos de ECG" />
           {form.formState.errors.title ? (
             <p className="text-xs font-medium text-destructive">{form.formState.errors.title.message}</p>
           ) : null}
         </div>
 
-        <div className="space-y-1.5 sm:col-span-2">
+        <div className="space-y-2 sm:col-span-2">
           <label className="text-sm font-medium">Descrição</label>
-          <Textarea rows={3} {...form.register("description")} placeholder="Resumo do conteúdo do módulo" />
+          <Textarea
+            rows={3}
+            className="bg-background"
+            {...form.register("description")}
+            placeholder="Resumo do conteúdo do módulo"
+          />
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <label className="text-sm font-medium">Ordem</label>
-          <Input type="number" min={0} {...form.register("order")} />
+          <Input type="number" min={0} className="bg-background" {...form.register("order")} />
           {form.formState.errors.order ? (
             <p className="text-xs font-medium text-destructive">{form.formState.errors.order.message}</p>
           ) : null}
@@ -513,14 +578,14 @@ export function CreateLessonModal({
       errorMessage={requestError}
       submitLabel="Criar aula"
     >
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1.5 sm:col-span-2">
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div className="space-y-2 sm:col-span-2">
           <label className="text-sm font-medium">Módulo *</label>
           <Select
             value={form.watch("moduleId")}
             onValueChange={(value) => form.setValue("moduleId", value, { shouldValidate: true })}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-background">
               <SelectValue placeholder="Selecione um módulo" />
             </SelectTrigger>
             <SelectContent>
@@ -536,26 +601,26 @@ export function CreateLessonModal({
           ) : null}
         </div>
 
-        <div className="space-y-1.5 sm:col-span-2">
+        <div className="space-y-2 sm:col-span-2">
           <label className="text-sm font-medium">Título *</label>
-          <Input {...form.register("title")} placeholder="Ex.: Anatomia do Coração" />
+          <Input className="bg-background" {...form.register("title")} placeholder="Ex.: Anatomia do Coração" />
           {form.formState.errors.title ? (
             <p className="text-xs font-medium text-destructive">{form.formState.errors.title.message}</p>
           ) : null}
         </div>
 
-        <div className="space-y-1.5 sm:col-span-2">
+        <div className="space-y-2 sm:col-span-2">
           <label className="text-sm font-medium">Descrição</label>
-          <Textarea rows={3} {...form.register("description")} />
+          <Textarea rows={3} className="bg-background" {...form.register("description")} />
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <label className="text-sm font-medium">Tipo</label>
           <Select
             value={form.watch("type")}
             onValueChange={(value) => form.setValue("type", value as LessonType, { shouldValidate: true })}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-background">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -568,17 +633,17 @@ export function CreateLessonModal({
           </Select>
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <label className="text-sm font-medium">Ordem</label>
-          <Input type="number" min={0} {...form.register("order")} />
+          <Input type="number" min={0} className="bg-background" {...form.register("order")} />
           {form.formState.errors.order ? (
             <p className="text-xs font-medium text-destructive">{form.formState.errors.order.message}</p>
           ) : null}
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <label className="text-sm font-medium">Duração (minutos)</label>
-          <Input type="number" min={1} {...form.register("duration")} />
+          <Input type="number" min={1} className="bg-background" {...form.register("duration")} />
           {form.formState.errors.duration ? (
             <p className="text-xs font-medium text-destructive">{form.formState.errors.duration.message}</p>
           ) : null}
