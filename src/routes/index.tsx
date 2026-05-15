@@ -39,12 +39,16 @@ export function AppRoutes() {
         <Route path="/student/courses/:courseId/lessons/:lessonId" element={<LessonViewer />} />
       </Route>
 
-      {/* Teacher */}
-      <Route element={<PrivateRoute allowedRoles={["TEACHER"]} />}>
+      {/* Teacher / Admin (área de gestão de cursos) */}
+      <Route element={<PrivateRoute allowedRoles={["TEACHER", "ADMIN"]} />}>
         <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
         <Route path="/teacher/courses" element={<CoursesList />} />
         <Route path="/teacher/courses/:id/edit" element={<CourseEditor />} />
         <Route path="/teacher/profile" element={<TeacherProfile />} />
+      </Route>
+
+      {/* Gestão de usuários — somente ADMIN */}
+      <Route element={<PrivateRoute allowedRoles={["ADMIN"]} />}>
         <Route path="/teacher/users" element={<UserManagement />} />
       </Route>
 

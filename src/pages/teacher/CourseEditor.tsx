@@ -11,6 +11,8 @@ import {
 } from '@/hooks/use-teacher';
 import type { Lesson } from '@/types/api';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { useAuth } from '@/hooks/use-auth';
+import { canManageCourseStructure, canPublishCourse } from '@/lib/permissions';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -225,7 +227,15 @@ function lessonSourceBadgeClass(status: 'hosted' | 'external' | 'none'): string 
 }
 
 // COMPONENTE PARA EDITAR UMA AULA — linha compacta + área expansível.
-function LessonEditorRow({ lesson, courseId }: { lesson: Lesson; courseId: string }) {
+function LessonEditorRow({
+  lesson,
+  courseId,
+  readOnly = false,
+}: {
+  lesson: Lesson;
+  courseId: string;
+  readOnly?: boolean;
+}) {
   const presign = usePresignLessonVideo();
   const updateLesson = useUpdateLesson();
   const deleteLesson = useDeleteLesson();
@@ -431,6 +441,19 @@ function LessonEditorRow({ lesson, courseId }: { lesson: Lesson; courseId: strin
           {/* Área expandida — edição de mídia + menu único de ações da aula */}
           <Accordion.Panel>
             <Accordion.Body className="border-t border-border/70 px-3 pb-3 pt-3 sm:px-4 sm:pb-4">
+              {readOnly ? (
+                previewUrl ? (
+                  <div className="w-full max-w-md overflow-hidden rounded-md bg-black/90">
+                    <video src={previewUrl} controls preload="metadata" className="aspect-video w-full" />
+                  </div>
+                ) : (
+                  <p className="rounded-md border border-dashed border-border bg-muted/30 px-3 py-4 text-center text-xs text-muted-foreground sm:text-sm">
+                    Nenhum vídeo disponível para esta aula.
+                  </p>
+                )
+              ) : null}
+              {!readOnly ? (
+              <>
               <input
                 type="file"
                 ref={fileRef}
@@ -575,11 +598,15 @@ function LessonEditorRow({ lesson, courseId }: { lesson: Lesson; courseId: strin
                   ) : null}
                 </TabsContent>
               </Tabs>
+              </>
+              ) : null}
             </Accordion.Body>
           </Accordion.Panel>
         </Accordion.Item>
       </Accordion>
 
+      {!readOnly ? (
+      <>
       {/* Diálogo: confirmar exclusão do vídeo */}
       <AlertDialog open={isDeleteVideoDialogOpen} onOpenChange={setIsDeleteVideoDialogOpen}>
         <AlertDialogContent>
@@ -694,6 +721,8 @@ function LessonEditorRow({ lesson, courseId }: { lesson: Lesson; courseId: strin
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </>
+      ) : null}
     </>
   );
 }
@@ -716,7 +745,10 @@ const courseInfoSchema = z.object({
 export default function CourseEditor() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { data: course, isLoading, isError, error, refetch, isRefetching } = useTeacherCourse(id!);
+  const canStructure = user ? canManageCourseStructure(user.role) : false;
+  const canPublish = user ? canPublishCourse(user.role) : false;
   const showLoading = useDelayedFlag(isLoading);
   const updateCourse = useUpdateCourse();
   const setCourseStatus = useSetCourseStatus();
@@ -1030,25 +1062,27 @@ export default function CourseEditor() {
             <p className="mb-1 text-sm font-bold uppercase tracking-wider text-muted-foreground">Editor de Curso</p>
             <h1 className="font-display text-xl font-bold sm:text-2xl md:text-3xl">{course.title}</h1>
           </div>
-          <Button
-            className={cn(
-              course.status === 'PUBLISHED'
-                ? 'w-full shrink-0 sm:w-auto bg-purple-600 text-white hover:bg-purple-700 focus-visible:ring-purple-600 border-transparent'
-                : 'w-full shrink-0 sm:w-auto bg-[#1D8035] text-white hover:bg-[#176C2C] focus-visible:ring-[#1D8035] border-transparent',
-              publishDisabledWithoutModules && 'cursor-not-allowed !pointer-events-auto',
-            )}
-            isLoading={setCourseStatus.isPending}
-            disabled={publishDisabledWithoutModules}
-            title={
-              publishDisabledWithoutModules
-                ? 'Adicione pelo menos um módulo para publicar o curso.'
-                : undefined
-            }
-            onClick={() => setIsStatusDialogOpen(true)}
-          >
-            <BookCheck className="mr-2 h-4 w-4" />
-            {course.status === 'PUBLISHED' ? 'Despublicar curso' : 'Publicar curso'}
-          </Button>
+          {canPublish ? (
+            <Button
+              className={cn(
+                course.status === 'PUBLISHED'
+                  ? 'w-full shrink-0 sm:w-auto bg-purple-600 text-white hover:bg-purple-700 focus-visible:ring-purple-600 border-transparent'
+                  : 'w-full shrink-0 sm:w-auto bg-[#1D8035] text-white hover:bg-[#176C2C] focus-visible:ring-[#1D8035] border-transparent',
+                publishDisabledWithoutModules && 'cursor-not-allowed !pointer-events-auto',
+              )}
+              isLoading={setCourseStatus.isPending}
+              disabled={publishDisabledWithoutModules}
+              title={
+                publishDisabledWithoutModules
+                  ? 'Adicione pelo menos um módulo para publicar o curso.'
+                  : undefined
+              }
+              onClick={() => setIsStatusDialogOpen(true)}
+            >
+              <BookCheck className="mr-2 h-4 w-4" />
+              {course.status === 'PUBLISHED' ? 'Despublicar curso' : 'Publicar curso'}
+            </Button>
+          ) : null}
         </div>
 
         <div className="flex gap-1 border-b pb-px sm:gap-2">
@@ -1223,16 +1257,20 @@ export default function CourseEditor() {
               <div className="min-w-0">
                 <h2 className="text-base font-semibold text-foreground sm:text-lg">Estrutura do curso</h2>
                 <p className="text-xs text-muted-foreground sm:text-sm">
-                  Organize módulos e aulas. Expanda uma aula para gerenciar o vídeo pelo menu de ações.
+                  {canStructure
+                    ? 'Organize módulos e aulas. Expanda uma aula para gerenciar o vídeo pelo menu de ações.'
+                    : 'Visualize módulos e aulas. Expanda uma aula para assistir ao vídeo.'}
                 </p>
               </div>
-              <Button
-                type="button"
-                onClick={handleAddModule}
-                className="w-full bg-primary text-primary-foreground shadow-sm shadow-primary/30 hover:bg-primary/90 sm:w-auto"
-              >
-                <Plus className="mr-2 h-4 w-4" /> Novo Módulo
-              </Button>
+              {canStructure ? (
+                <Button
+                  type="button"
+                  onClick={handleAddModule}
+                  className="w-full bg-primary text-primary-foreground shadow-sm shadow-primary/30 hover:bg-primary/90 sm:w-auto"
+                >
+                  <Plus className="mr-2 h-4 w-4" /> Novo Módulo
+                </Button>
+              ) : null}
             </div>
 
             <div className="space-y-4">
@@ -1262,6 +1300,7 @@ export default function CourseEditor() {
                         </div>
                       </div>
                       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+                        {canStructure ? (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
@@ -1310,25 +1349,33 @@ export default function CourseEditor() {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
+                        ) : null}
                       </div>
                     </div>
                     <div className="bg-card p-3 sm:p-4">
                       {lessonsCount === 0 ? (
                         <div className="flex flex-col items-center gap-2 rounded-md border border-dashed border-border bg-muted/30 px-4 py-6 text-center">
                           <p className="text-sm text-muted-foreground">Nenhuma aula neste módulo.</p>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleAddLesson(mod.id)}
-                          >
-                            <Plus className="mr-1 h-4 w-4" /> Adicionar primeira aula
-                          </Button>
+                          {canStructure ? (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleAddLesson(mod.id)}
+                            >
+                              <Plus className="mr-1 h-4 w-4" /> Adicionar primeira aula
+                            </Button>
+                          ) : null}
                         </div>
                       ) : (
                         <div className="space-y-2">
                           {mod.lessons?.map((lesson) => (
-                            <LessonEditorRow key={lesson.id} lesson={lesson as Lesson} courseId={id!} />
+                            <LessonEditorRow
+                              key={lesson.id}
+                              lesson={lesson as Lesson}
+                              courseId={id!}
+                              readOnly={!canStructure}
+                            />
                           ))}
                         </div>
                       )}
@@ -1338,7 +1385,9 @@ export default function CourseEditor() {
               })}
               {(!course.modules || course.modules.length === 0) && (
                 <div className="rounded-xl border-2 border-dashed border-border py-12 text-center text-muted-foreground">
-                  Comece adicionando seu primeiro módulo.
+                  {canStructure
+                    ? 'Comece adicionando seu primeiro módulo.'
+                    : 'Este curso ainda não possui módulos cadastrados.'}
                 </div>
               )}
             </div>

@@ -1,10 +1,10 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
-
-type UserRole = "STUDENT" | "TEACHER";
+import type { Role } from "@/types/api";
+import { isStaffRole } from "@/lib/permissions";
 
 interface PrivateRouteProps {
-  allowedRoles?: UserRole[];
+  allowedRoles?: Role[];
 }
 
 export function PrivateRoute({ allowedRoles }: PrivateRouteProps) {
@@ -18,7 +18,7 @@ export function PrivateRoute({ allowedRoles }: PrivateRouteProps) {
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    const fallback = user.role === "TEACHER" ? "/teacher/dashboard" : "/student/dashboard";
+    const fallback = isStaffRole(user.role) ? "/teacher/dashboard" : "/student/dashboard";
     return <Navigate to={fallback} replace />;
   }
 

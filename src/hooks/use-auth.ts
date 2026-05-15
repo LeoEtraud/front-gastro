@@ -7,6 +7,7 @@ import {
   setAuthTokenCookie,
 } from "@/lib/auth-cookie";
 import { UserProfile } from "@/types/api";
+import { isStaffRole } from "@/lib/permissions";
 
 // FUNÇÃO PARA GERENCIAR AUTENTICAÇÃO E SESSÃO NO FRONTEND
 export function useAuth() {
@@ -42,7 +43,7 @@ export function useAuth() {
       if (!data?.token || !data?.user) return;
       setAuthTokenCookie(data.token);
       queryClient.setQueryData(["auth", "me"], data.user);
-      navigate(data.user.role === "TEACHER" ? "/teacher/dashboard" : "/student/dashboard", {
+      navigate(isStaffRole(data.user.role) ? "/teacher/dashboard" : "/student/dashboard", {
         replace: true,
       });
     },

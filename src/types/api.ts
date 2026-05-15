@@ -1,5 +1,5 @@
 // Core types inferred from OpenAPI spec to ensure self-contained stability 
-export type Role = 'STUDENT' | 'TEACHER';
+export type Role = 'STUDENT' | 'TEACHER' | 'ADMIN';
 
 export type UserStatus = 'PENDING' | 'ACTIVE';
 

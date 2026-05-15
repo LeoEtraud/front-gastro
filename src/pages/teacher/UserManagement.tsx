@@ -42,7 +42,7 @@ function StatusBadge({ status }: { status: ManagedUser['status'] }) {
 function RoleBadge({ role }: { role: ManagedUser['role'] }) {
   return (
     <Badge variant="outline" className="text-xs">
-      {role === 'TEACHER' ? 'Professor' : 'Estudante'}
+      {role === 'ADMIN' ? 'Administrador' : role === 'TEACHER' ? 'Professor' : 'Estudante'}
     </Badge>
   );
 }

@@ -40,15 +40,21 @@ const registerSchema = z.object({
 
 type RegisterForm = z.infer<typeof registerSchema>;
 
+  // PÁGINA DE REGISTRO DE USUÁRIO
 export default function Register() {
+  // HOOK PARA REGISTRAR UM NOVO USUÁRIO
   const { register: registerUser } = useAuth();
+  // NAVEGAÇÃO ENTRE AS PÁGINAS
   const navigate = useNavigate();
   const [errorMsg, setErrorMsg] = useState('');
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  // CHAVE DE MONTAGEM DO RECAPTCHA
   const [recaptchaMountKey, setRecaptchaMountKey] = useState(0);
 
+  // VERIFICA SE A CHAVE DO RECAPTCHA ESTÁ CONFIGURADA
   const hasRecaptchaSiteKey = Boolean(getRecaptchaSiteKey());
 
+  // HOOK PARA GERENCIAR O FORMULÁRIO DE REGISTRO
   const {
     register,
     handleSubmit,
@@ -59,21 +65,26 @@ export default function Register() {
     defaultValues: { role: 'STUDENT', name: '', email: '', cpf: '', phone: '' },
   });
 
+  // MÁSCARAS PARA CPF E TELEFONE
   const cpfRegister = register('cpf', { maxLength: CPF_MASK_MAX_LENGTH });
   const phoneRegister = register('phone', { maxLength: PHONE_BR_MASK_MAX_LENGTH });
 
+  // FUNÇÃO PARA SUBMETER O FORMULÁRIO DE REGISTRO
   const onSubmit = async (data: RegisterForm) => {
     if (!hasRecaptchaSiteKey) {
       setErrorMsg('reCAPTCHA não está configurado neste ambiente.');
       return;
     }
+    // VERIFICA SE O TOKEN DO RECAPTCHA ESTÁ PREENCHIDO
     if (!recaptchaToken) {
       setErrorMsg('Marque a caixa do reCAPTCHA antes de enviar.');
       return;
     }
 
     try {
+      // LIMPA A MENSAGEM DE ERRO
       setErrorMsg('');
+      // REGISTRA O USUÁRIO
       await registerUser.mutateAsync({
         name: data.name,
         email: data.email,
@@ -82,6 +93,7 @@ export default function Register() {
         phone: data.phone,
         recaptchaToken,
       });
+      // REDIRECIONA PARA A PÁGINA DE LOGIN
       navigate('/login', {
         replace: true,
         state: { registrationSuccess: true },
@@ -135,7 +147,7 @@ export default function Register() {
               )}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Nome completo</label>
-                <Input {...register('name')} placeholder="Dra. Ana Silva" className="sm:h-12" autoComplete="name" />
+                <Input {...register('name')} placeholder="Ana Silva Souza" className="sm:h-12" autoComplete="name" />
                 {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
               </div>
               <div className="space-y-2">
@@ -182,7 +194,7 @@ export default function Register() {
                   className="flex h-11 min-h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-12 sm:text-sm touch-manipulation"
                 >
                   <option value="STUDENT">Estudante</option>
-                  <option value="TEACHER">Professor / Coordenador</option>
+                  <option value="TEACHER">Professor</option>
                 </select>
               </div>
               <div className="space-y-2">

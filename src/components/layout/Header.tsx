@@ -10,6 +10,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { UserProfile } from "@/types/api";
 import { displayFirstLastName } from "@/lib/display-name";
+import { isStaffRole } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
 interface HeaderProps {
@@ -35,14 +36,16 @@ function routeLabel(pathname: string) {
 }
 
 function roleLabel(role: UserProfile["role"]) {
-  return role === "TEACHER" ? "Professor" : "Estudante";
+  if (role === "ADMIN") return "Administrador";
+  if (role === "TEACHER") return "Professor";
+  return "Estudante";
 }
 
 export function Header({ user, location, theme, onMenuToggle, onToggleTheme, onLogout }: HeaderProps) {
   const navigate = useNavigate();
   const shortName = displayFirstLastName(user.name);
   const firstLetter = shortName?.charAt(0)?.toUpperCase() || user.name?.charAt(0)?.toUpperCase() || "U";
-  const profileHref = user.role === "TEACHER" ? "/teacher/profile" : "/student/profile";
+  const profileHref = isStaffRole(user.role) ? "/teacher/profile" : "/student/profile";
   const rLabel = roleLabel(user.role);
 
   return (

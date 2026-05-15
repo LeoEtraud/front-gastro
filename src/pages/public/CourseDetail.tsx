@@ -56,7 +56,7 @@ export default function CourseDetail() {
         title: "Apenas alunos podem se inscrever",
         description: "Redirecionando para seu painel.",
       });
-      navigate(user.role === 'TEACHER' ? '/teacher/dashboard' : '/');
+      navigate(user.role === 'TEACHER' || user.role === 'ADMIN' ? '/teacher/dashboard' : '/');
       return;
     }
     try {

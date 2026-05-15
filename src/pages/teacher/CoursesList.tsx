@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { useAuth } from '@/hooks/use-auth';
 import { useDeleteCourse, useTeacherCourses } from '@/hooks/use-teacher';
+import { canCreateCourse, canDeleteCourse } from '@/lib/permissions';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Plus, Edit2, Clock3, FileText, Trash2 } from 'lucide-react';
@@ -23,7 +25,10 @@ import {
 
 // PÁGINA DE LISTA DE CURSOS - PÁGINA PARA LISTAR OS CURSOS DO PROFESSOR
 export default function CoursesList() {
+  const { user } = useAuth();
   const { data: courses, isLoading } = useTeacherCourses();
+  const showCreate = user ? canCreateCourse(user.role) : false;
+  const showDelete = user ? canDeleteCourse(user.role) : false;
   const deleteCourse = useDeleteCourse();
   const showLoading = useDelayedFlag(isLoading);
   const [isCreateCourseOpen, setIsCreateCourseOpen] = useState(false);
@@ -96,14 +101,16 @@ export default function CoursesList() {
             <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Gerenciar Cursos</h1>
             <div className="h-1 w-full rounded-full bg-primary/80" />
           </div>
-          <Button
-            className="h-11 w-11 shrink-0 px-0 sm:h-auto sm:w-auto sm:px-4"
-            onClick={() => setIsCreateCourseOpen(true)}
-            aria-label="Novo Curso"
-          >
-            <Plus className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Novo Curso</span>
-          </Button>
+          {showCreate ? (
+            <Button
+              className="h-11 w-11 shrink-0 px-0 sm:h-auto sm:w-auto sm:px-4"
+              onClick={() => setIsCreateCourseOpen(true)}
+              aria-label="Novo Curso"
+            >
+              <Plus className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Novo Curso</span>
+            </Button>
+          ) : null}
         </div>
 
         {isLoading && showLoading ? (
@@ -114,7 +121,9 @@ export default function CoursesList() {
           <div className="text-center py-20 bg-white rounded-xl border border-dashed">
             <h3 className="text-xl font-bold mb-2">Você ainda não possui cursos</h3>
             <p className="text-slate-500 mb-6">Comece criando seu primeiro curso para seus alunos.</p>
-            <Button onClick={() => setIsCreateCourseOpen(true)}>Criar Meu Primeiro Curso</Button>
+            {showCreate ? (
+              <Button onClick={() => setIsCreateCourseOpen(true)}>Criar Meu Primeiro Curso</Button>
+            ) : null}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -174,16 +183,18 @@ export default function CoursesList() {
                         <Edit2 className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" /> Editar
                       </Button>
                     </Link>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="flex-1 min-w-full text-xs sm:min-w-[8.5rem] sm:text-sm border-destructive/30 text-destructive hover:border-destructive hover:bg-destructive hover:text-destructive-foreground focus-visible:ring-destructive"
-                      onClick={() => setCourseToDelete({ id: course.id, title: course.title })}
-                      aria-label={`Excluir curso ${course.title}`}
-                    >
-                      <Trash2 className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
-                      Excluir curso
-                    </Button>
+                    {showDelete ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1 min-w-full text-xs sm:min-w-[8.5rem] sm:text-sm border-destructive/30 text-destructive hover:border-destructive hover:bg-destructive hover:text-destructive-foreground focus-visible:ring-destructive"
+                        onClick={() => setCourseToDelete({ id: course.id, title: course.title })}
+                        aria-label={`Excluir curso ${course.title}`}
+                      >
+                        <Trash2 className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
+                        Excluir curso
+                      </Button>
+                    ) : null}
                   </div>
                 </CardContent>
               </Card>

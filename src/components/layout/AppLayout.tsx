@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { BookOpen, FileVideo, GraduationCap, LayoutDashboard, Users } from 'lucide-react';
+import { canManageUsers, isStaffRole } from '@/lib/permissions';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 const SIDEBAR_COLLAPSED_KEY = 'medlearn_sidebar_collapsed';
@@ -19,11 +20,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: '/student/courses', label: 'Meus Cursos', icon: BookOpen },
     { href: '/courses', label: 'Catálogo', icon: GraduationCap },
   ], []);
-  const teacherLinks = useMemo(() => [
-    { href: '/teacher/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/teacher/courses', label: 'Gerenciar Cursos', icon: FileVideo },
-    { href: '/teacher/users', label: 'Gestão de Usuários', icon: Users },
-  ], []);
+  const teacherLinks = useMemo(
+    () => [
+      { href: '/teacher/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/teacher/courses', label: 'Gerenciar Cursos', icon: FileVideo },
+      ...(user?.role && canManageUsers(user.role)
+        ? [{ href: '/teacher/users', label: 'Gestão de Usuários', icon: Users }]
+        : []),
+    ],
+    [user?.role],
+  );
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -42,7 +48,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     return null;
   }
 
-  const links = user.role === 'TEACHER' ? teacherLinks : studentLinks;
+  const links = isStaffRole(user.role) ? teacherLinks : studentLinks;
   const handleLogout = () => {
     setIsMobileMenuOpen(false);
     logout();
