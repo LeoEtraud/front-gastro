@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 export function HeroCarousel() {
   const { index, goTo, next, prev, setPaused, onTouchStart, onTouchEnd, reducedMotion } = useCarousel({
     length: heroSlides.length,
-    autoplayMs: 3200,
+    autoplayMs: 4000,
   });
 
   const slide = heroSlides[index];
