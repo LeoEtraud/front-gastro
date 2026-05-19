@@ -1,38 +1,36 @@
-import { Link } from 'react-router-dom';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { GastroButton } from '@/components/gastrocentro/GastroButton';
+import { GastroContainer, GastroSection } from '@/components/gastrocentro/GastroLayout';
 
 export function CTASection() {
   return (
-    <section className="border-y border-cyan-900/10 bg-gradient-to-r from-cyan-800 via-cyan-900 to-slate-900 py-14 text-white sm:py-16">
-      <div className="mx-auto flex max-w-[1600px] flex-col items-center gap-6 px-4 text-center sm:px-6 lg:flex-row lg:justify-between lg:gap-10 lg:px-10 lg:text-left">
-        <div className="max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-wide text-cyan-200/90">Próximo passo</p>
-          <h2 className="mt-2 font-display text-2xl font-bold sm:text-3xl">Agende sua consulta ou explore o conteúdo</h2>
-          <p className="mt-3 text-sm leading-relaxed text-cyan-50/90 sm:text-base">
-            Unimos cuidado presencial e educação digital. Fale com a equipe ou entre na plataforma para continuar de onde parou.
-          </p>
+    <GastroSection className="bg-gc-ice py-16 sm:py-20 lg:py-24">
+      <GastroContainer>
+        <div className="relative overflow-hidden rounded-[20px] bg-gradient-to-br from-gc-navy via-gc-deep to-gc-mid px-6 py-10 shadow-[0_12px_48px_-12px_rgba(4,27,58,0.35)] sm:px-10 sm:py-12 lg:px-12">
+          <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+            <div className="absolute -right-16 top-0 h-56 w-56 rounded-full bg-gc-teal/15 blur-3xl" />
+            <div className="absolute bottom-0 left-0 h-40 w-40 rounded-full bg-gc-coral/10 blur-3xl" />
+          </div>
+
+          <div className="relative grid min-w-0 grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-12">
+            <div className="min-w-0">
+              <h2 className="text-2xl font-extrabold leading-snug text-white sm:text-[1.75rem] lg:text-3xl">
+                Aprofunde seus conhecimentos e transforme sua prática clínica.
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-white/65 sm:text-base">
+                Assine a plataforma e tenha acesso ilimitado a todos os conteúdos.
+              </p>
+            </div>
+            <div className="flex min-w-0 flex-col gap-3 sm:flex-row lg:flex-col lg:items-stretch">
+              <GastroButton href="/login" variant="primary" size="lg" className="w-full sm:min-w-[220px] lg:w-full">
+                Acessar plataforma
+              </GastroButton>
+              <GastroButton href="/register" variant="secondary" size="lg" className="w-full sm:min-w-[220px] lg:w-full">
+                Ver planos
+              </GastroButton>
+            </div>
+          </div>
         </div>
-        <div className="flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center lg:w-auto lg:max-w-none lg:flex-col lg:items-stretch">
-          <a href="https://gastrocentroslz.com.br/" className="w-full sm:w-auto lg:w-full">
-            <Button
-              size="lg"
-              className="h-12 w-full rounded-xl border-0 bg-white font-semibold text-cyan-900 shadow-lg hover:bg-cyan-50"
-            >
-              Agendar atendimento
-            </Button>
-          </a>
-          <Link
-            to="/login"
-            className={cn(
-              buttonVariants({ variant: 'outline', size: 'lg' }),
-              'h-12 w-full rounded-xl border-2 border-white/55 bg-white/10 font-semibold text-white shadow-md backdrop-blur-md transition-all hover:border-cyan-100/90 hover:bg-white/20 hover:text-white hover:shadow-lg sm:w-auto lg:w-full',
-            )}
-          >
-            Acessar plataforma
-          </Link>
-        </div>
-      </div>
-    </section>
+      </GastroContainer>
+    </GastroSection>
   );
 }

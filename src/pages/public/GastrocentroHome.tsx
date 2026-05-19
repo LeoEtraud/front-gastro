@@ -1,40 +1,29 @@
-import { GastroHeader } from '@/components/gastrocentro/GastroHeader';
-import { GastroHero } from '@/components/gastrocentro/GastroHero';
-import { SectionCarousel } from '@/components/gastrocentro/SectionCarousel';
-import { ContentCard } from '@/components/gastrocentro/ContentCard';
+import { BenefitsSection } from '@/components/gastrocentro/BenefitsSection';
 import { CTASection } from '@/components/gastrocentro/CTASection';
+import { FeaturedCoursesSection } from '@/components/gastrocentro/FeaturedCoursesSection';
 import { GastroFooter } from '@/components/gastrocentro/GastroFooter';
-import { gastrocentroShowcaseSections } from '@/data/gastrocentro-showcase';
+import { GastroHeader } from '@/components/gastrocentro/GastroHeader';
+import { HeroCarousel } from '@/components/gastrocentro/HeroCarousel';
+import { SpecialistsSection } from '@/components/gastrocentro/SpecialistsSection';
+import { SpecialtiesSection } from '@/components/gastrocentro/SpecialtiesSection';
+import { StartHereSection } from '@/components/gastrocentro/StartHereSection';
+import { StatsBar } from '@/components/gastrocentro/StatsBar';
+import { TestimonialsSection } from '@/components/gastrocentro/TestimonialsSection';
 
-/** Landing institucional / vitrine de conteúdo — inspirada em composição tipo showcase, sem copiar identidade de terceiros. */
+/** Landing institucional GastroCentro — plataforma de educação médica em saúde digestiva. */
 export default function GastrocentroHome() {
   return (
-    <div className="min-h-dvh bg-slate-50 text-slate-900 antialiased selection:bg-cyan-200/60">
+    <div className="gc-font min-h-dvh w-full min-w-0 overflow-x-hidden bg-gc-ice text-gc-text antialiased selection:bg-gc-teal/20">
       <GastroHeader />
-      <main>
-        <GastroHero />
-        <div className="bg-slate-50">
-          {gastrocentroShowcaseSections.map((section) => (
-            <SectionCarousel
-              key={section.id}
-              id={section.id}
-              title={section.title}
-              description={section.description}
-              className={section.id === 'mais-acessados' ? 'pb-4' : undefined}
-            >
-              {section.cards.map((card) => (
-                <ContentCard
-                  key={card.id}
-                  title={card.title}
-                  subtitle={card.subtitle}
-                  category={card.category}
-                  imageSrc={card.imageSrc}
-                  href={card.href}
-                />
-              ))}
-            </SectionCarousel>
-          ))}
-        </div>
+      <main className="w-full min-w-0">
+        <HeroCarousel />
+        <StatsBar />
+        <StartHereSection />
+        <SpecialtiesSection />
+        <FeaturedCoursesSection />
+        <SpecialistsSection />
+        <TestimonialsSection />
+        <BenefitsSection />
         <CTASection />
       </main>
       <GastroFooter />
