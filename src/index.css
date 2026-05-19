@@ -200,7 +200,7 @@
   }
 
   .gc-ken-burns {
-    animation: gc-ken-burns 8s ease-out forwards;
+    animation: gc-ken-burns 5s ease-out forwards;
   }
 
   @keyframes gc-ken-burns {
@@ -213,7 +213,7 @@
   }
 
   .gc-slide-up {
-    animation: gc-slide-up 0.7s ease-out forwards;
+    animation: gc-slide-up 0.5s ease-out forwards;
   }
 
   @keyframes gc-slide-up {

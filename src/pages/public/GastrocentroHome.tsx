@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { BenefitsSection } from '@/components/gastrocentro/BenefitsSection';
+import { scrollToGastroAnchor } from '@/components/gastrocentro/gastro-nav';
 import { CTASection } from '@/components/gastrocentro/CTASection';
 import { FeaturedCoursesSection } from '@/components/gastrocentro/FeaturedCoursesSection';
 import { GastroFooter } from '@/components/gastrocentro/GastroFooter';
@@ -12,8 +14,17 @@ import { TestimonialsSection } from '@/components/gastrocentro/TestimonialsSecti
 
 /** Landing institucional GastroCentro — plataforma de educação médica em saúde digestiva. */
 export default function GastrocentroHome() {
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (!hash) return;
+
+    requestAnimationFrame(() => {
+      scrollToGastroAnchor(hash, 'auto');
+    });
+  }, []);
+
   return (
-    <div className="gc-font min-h-dvh w-full min-w-0 overflow-x-hidden bg-gc-ice text-gc-text antialiased selection:bg-gc-teal/20">
+    <div className="gc-font min-h-dvh w-full min-w-0 scroll-smooth scroll-pt-[88px] overflow-x-hidden bg-gc-ice text-gc-text antialiased selection:bg-gc-teal/20">
       <GastroHeader />
       <main className="w-full min-w-0">
         <HeroCarousel />

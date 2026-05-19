@@ -5,6 +5,16 @@ import { cn } from '@/lib/utils';
 /** Padding lateral responsivo da seção — conteúdo interno usa gc-container. */
 export const GC_SECTION = 'gc-section w-full min-w-0';
 
+/** Espaçamento vertical padrão entre seções da landing. */
+export const GC_SECTION_Y = 'py-7 sm:py-9 lg:py-11';
+
+/** Card de mídia em destaque (especialidades e cursos) — altura e proporção unificadas. */
+export const GC_MEDIA_CARD =
+  'group relative min-h-[360px] min-w-0 overflow-hidden rounded-[18px] shadow-[0_4px_24px_-4px_rgba(4,27,58,0.18)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_-8px_rgba(4,27,58,0.22)] sm:min-h-[400px]';
+
+/** Compensa header fixo ao navegar por âncoras (scroll-margin + scrollIntoView). */
+export const GC_SCROLL_ANCHOR = 'scroll-mt-[88px]';
+
 /** Container centralizado: min(100%, 1240px) com margem automática. */
 export const GC_CONTAINER = 'gc-container min-w-0';
 
@@ -32,7 +42,7 @@ type GastroSectionProps = {
 
 export function GastroSection({ children, className, as: Tag = 'section', id }: GastroSectionProps) {
   return (
-    <Tag id={id} className={cn(GC_SECTION, className)}>
+    <Tag id={id} className={cn(GC_SECTION, id && GC_SCROLL_ANCHOR, className)}>
       {children}
     </Tag>
   );

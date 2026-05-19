@@ -1,6 +1,7 @@
 import { Quote } from 'lucide-react';
 import {
   GC_GRID_TESTIMONIALS,
+  GC_SECTION_Y,
   GastroContainer,
   GastroSection,
   SectionHeader,
@@ -12,7 +13,7 @@ export function TestimonialsSection() {
   return (
     <GastroSection
       id="depoimentos"
-      className="relative overflow-hidden bg-gc-navy pb-28 pt-16 sm:pb-32 sm:pt-20 lg:pt-24"
+      className={cn('relative overflow-hidden bg-gc-navy pb-14 sm:pb-16', GC_SECTION_Y)}
     >
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
         <div className="absolute left-0 top-0 h-64 w-64 rounded-full bg-gc-teal/8 blur-3xl" />

@@ -1,7 +1,31 @@
-/** Conteúdo editorial da landing GastroCentro — substitua imagens por assets institucionais quando disponíveis. */
+/** Conteúdo editorial da landing GastroCentro — imagens via [Unsplash](https://unsplash.com/pt-br). */
 
 const img = (id: string, w = 1400) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
+
+/** IDs verificados no Unsplash Source (images.unsplash.com). */
+const unsplash = {
+  endoscopyEquipment: 'photo-1582719478250-c89cae4dc85b',
+  stethoscope: 'photo-1584982751601-97dcc096659c',
+  liverAnatomy: 'photo-1715529282042-75cc2f360a73',
+  digestiveIllustration: 'photo-1649073586428-e288125d930a',
+  medicalStethoscope: 'photo-1505751172876-fa1923c5c528',
+  healthyFood: 'photo-1490645935967-10de6ba17061',
+  hospitalIv: 'photo-1774456566976-73ffc4527173',
+  pediatricCare: 'photo-1576091160550-2173dba999ef',
+  emergencyRoom: 'photo-1723513198534-c3cd2e033815',
+  cprTraining: 'photo-1572996489045-96ed977a73b4',
+  hospitalIcu: 'photo-1519494026892-80bbd2d6fd0d',
+  surgeryTeam: 'photo-1551601651-2a8555f1a136',
+  medicalPills: 'photo-1587854692152-cbe660dbde88',
+  doctorPortrait: 'photo-1612349317150-e413f6a5b16d',
+  doctorFemale: 'photo-1559839734-2b71ea197ec2',
+  doctorMale: 'photo-1622253692010-333f2da6031d',
+  clinicalTeam: 'photo-1576091160399-112ba8d25d1d',
+  medicalResearch: 'photo-1454165804606-c3d57bc86b40',
+  brainScan: 'photo-1559757148-5c350d0d3c56',
+  medicalSupplies: 'photo-1643660527074-0ddcec3bda96',
+} as const;
 
 export type HeroSlide = {
   id: string;
@@ -43,7 +67,6 @@ export type FeaturedCourse = {
   id: string;
   title: string;
   category: string;
-  progress: number;
   badge?: string;
   imageSrc: string;
 };
@@ -130,14 +153,14 @@ export const showcaseThumbs: ShowcaseThumb[] = [
     id: 'thumb-1',
     title: 'Técnicas em APH',
     category: 'Urgência',
-    imageSrc: img('photo-1530497610728-7e399052a590', 600),
+    imageSrc: img(unsplash.emergencyRoom, 600),
     href: '/login',
   },
   {
     id: 'thumb-2',
     title: 'Endoscopia Avançada',
     category: 'Procedimentos',
-    imageSrc: img('photo-1584982751601-97dcc096659c', 600),
+    imageSrc: img(unsplash.endoscopyEquipment, 600),
     href: '/login',
   },
   {
@@ -165,7 +188,7 @@ export const showcaseThumbs: ShowcaseThumb[] = [
     id: 'thumb-6',
     title: 'Colonoscopia e Preparo',
     category: 'Exames',
-    imageSrc: img('photo-1551190822-a9333d879079', 600),
+    imageSrc: img(unsplash.endoscopyEquipment, 600),
     href: '/login',
   },
 ];
@@ -209,12 +232,12 @@ export const startHereCards: StartHereCard[] = [
 ];
 
 export const specialties: Specialty[] = [
-  { id: 'endo', name: 'Endoscopia', count: 26, imageSrc: img('photo-1584982751601-97dcc096659c', 800) },
-  { id: 'hepato', name: 'Hepatologia', count: 24, imageSrc: img('photo-1628597465204-d94b5a0e9e70', 800) },
-  { id: 'motil', name: 'Motilidade', count: 18, imageSrc: img('photo-1505751172876-fa1923c5c528', 800) },
-  { id: 'nutri', name: 'Nutrição', count: 22, imageSrc: img('photo-1490645935967-10de6ba17061', 800) },
-  { id: 'onco', name: 'Oncologia', count: 30, imageSrc: img('photo-1579684385127-1ef15d5081de', 800) },
-  { id: 'ped', name: 'Pediatria', count: 16, imageSrc: img('photo-1587854692152-cbe660dbde88', 800) },
+  { id: 'endo', name: 'Endoscopia', count: 26, imageSrc: img(unsplash.endoscopyEquipment, 800) },
+  { id: 'hepato', name: 'Hepatologia', count: 24, imageSrc: img(unsplash.liverAnatomy, 800) },
+  { id: 'motil', name: 'Motilidade', count: 18, imageSrc: img(unsplash.digestiveIllustration, 800) },
+  { id: 'nutri', name: 'Nutrição', count: 22, imageSrc: img(unsplash.healthyFood, 800) },
+  { id: 'onco', name: 'Oncologia', count: 30, imageSrc: img(unsplash.hospitalIv, 800) },
+  { id: 'ped', name: 'Pediatria', count: 16, imageSrc: img(unsplash.pediatricCare, 800) },
 ];
 
 export const featuredCourses: FeaturedCourse[] = [
@@ -222,29 +245,25 @@ export const featuredCourses: FeaturedCourse[] = [
     id: 'aph',
     title: 'Técnicas em APH',
     category: 'Urgência',
-    progress: 60,
     badge: 'Mais assistido',
-    imageSrc: img('photo-1530497610728-7e399052a590', 900),
+    imageSrc: img(unsplash.cprTraining, 900),
   },
   {
     id: 'injecoes',
     title: 'Aplicação de Injeções',
     category: 'Procedimentos',
-    progress: 100,
     imageSrc: img('photo-1587854692152-cbe660dbde88', 900),
   },
   {
     id: 'perfusao',
     title: 'Perfusão Extracorpórea',
     category: 'Terapia Intensiva',
-    progress: 85,
     imageSrc: img('photo-1519494026892-80bbd2d6fd0d', 900),
   },
   {
     id: 'via-aerea',
     title: 'Via Aérea e Ventilação',
     category: 'Emergências',
-    progress: 100,
     imageSrc: img('photo-1551601651-2a8555f1a136', 900),
   },
 ];
@@ -284,7 +303,7 @@ export const specialists: Specialist[] = [
     registration: 'CRM 22222',
     initials: 'CE',
     color: '#082A4F',
-    photoSrc: img('photo-1582750433449-648ed127fbfe', 200),
+    photoSrc: img(unsplash.doctorPortrait, 200),
   },
 ];
 

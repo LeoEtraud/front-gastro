@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { GastroButton } from '@/components/gastrocentro/GastroButton';
-import { GastroContainer, GastroSection } from '@/components/gastrocentro/GastroLayout';
+import { GC_SCROLL_ANCHOR, GastroContainer, GastroSection } from '@/components/gastrocentro/GastroLayout';
 import { heroSlides } from '@/data/gastrocentro-landing';
 import { useCarousel } from '@/hooks/use-carousel';
 import { cn } from '@/lib/utils';
@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 export function HeroCarousel() {
   const { index, goTo, next, prev, setPaused, onTouchStart, onTouchEnd, reducedMotion } = useCarousel({
     length: heroSlides.length,
-    autoplayMs: 4500,
+    autoplayMs: 3200,
   });
 
   const slide = heroSlides[index];
@@ -16,7 +16,7 @@ export function HeroCarousel() {
   return (
     <section
       id="topo"
-      className="gc-font relative w-full overflow-hidden bg-gc-navy"
+      className={cn('gc-font relative w-full overflow-hidden bg-gc-navy', GC_SCROLL_ANCHOR)}
       aria-roledescription="carrossel"
       aria-label="Conteúdos em destaque"
       onMouseEnter={() => setPaused(true)}
@@ -29,7 +29,7 @@ export function HeroCarousel() {
           <div
             key={s.id}
             className={cn(
-              'absolute inset-0 transition-opacity duration-700 ease-in-out',
+              'absolute inset-0 transition-opacity duration-500 ease-in-out',
               i === index ? 'z-[1] opacity-100' : 'z-0 opacity-0',
             )}
             aria-hidden={i !== index}
@@ -52,7 +52,7 @@ export function HeroCarousel() {
           <div className="absolute bottom-12 left-8 h-40 w-40 rounded-full bg-gc-coral/12 blur-3xl" />
         </div>
 
-        <GastroSection className="relative z-[3] flex min-h-[inherit] items-center py-16 sm:py-20 lg:py-24">
+        <GastroSection className="relative z-[3] flex min-h-[inherit] items-center py-8 sm:py-10 lg:py-12">
           <GastroContainer className="w-full">
             <div key={slide.id} className={cn('min-w-0 max-w-3xl', !reducedMotion && 'gc-slide-up')}>
               <span className="inline-flex rounded-full border border-gc-teal/30 bg-gc-teal/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-gc-teal">

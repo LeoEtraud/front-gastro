@@ -1,9 +1,10 @@
 import { GastroButton } from '@/components/gastrocentro/GastroButton';
-import { GastroContainer, GastroSection } from '@/components/gastrocentro/GastroLayout';
+import { GC_SECTION_Y, GastroContainer, GastroSection } from '@/components/gastrocentro/GastroLayout';
+import { cn } from '@/lib/utils';
 
 export function CTASection() {
   return (
-    <GastroSection className="bg-gc-ice py-16 sm:py-20 lg:py-24">
+    <GastroSection className={cn('bg-gc-ice', GC_SECTION_Y)}>
       <GastroContainer>
         <div className="relative overflow-hidden rounded-[20px] bg-gradient-to-br from-gc-navy via-gc-deep to-gc-mid px-6 py-10 shadow-[0_12px_48px_-12px_rgba(4,27,58,0.35)] sm:px-10 sm:py-12 lg:px-12">
           <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>

@@ -14,6 +14,10 @@ function isInternal(href: string) {
   return href.startsWith('/') && !href.startsWith('//');
 }
 
+function isExternal(href: string) {
+  return href.startsWith('http://') || href.startsWith('https://');
+}
+
 export function GastroButton({
   variant = 'primary',
   size = 'default',
@@ -47,7 +51,12 @@ export function GastroButton({
   }
 
   return (
-    <a href={href} aria-label={ariaLabel} className={cls}>
+    <a
+      href={href}
+      aria-label={ariaLabel}
+      className={cls}
+      {...(isExternal(href) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+    >
       {children}
     </a>
   );

@@ -1,7 +1,7 @@
 import { CalendarDays, FileText, Route, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
-  GC_GRID,
+  GC_SECTION_Y,
   GastroCard,
   GastroContainer,
   GastroSection,
@@ -33,14 +33,15 @@ function CardLink({ href, children }: { href: string; children: React.ReactNode 
 
 export function StartHereSection() {
   return (
-    <GastroSection id="comece-aqui" className="bg-gc-ice py-16 sm:py-20 lg:py-24">
-      <GastroContainer>
+    <GastroSection id="comece-aqui" className={cn('bg-gc-ice', GC_SECTION_Y)}>
+      <GastroContainer className="w-full">
         <SectionHeader
           title="Comece por aqui"
           subtitle="Navegue pelos principais caminhos da plataforma."
           viewAllHref="/login"
+          className="text-left"
         />
-        <div className={cn(GC_GRID, 'mt-8')}>
+        <div className="mt-6 grid grid-cols-1 gap-5 sm:mt-8 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4 lg:gap-7">
           {startHereCards.map((card, i) => {
             const Icon = iconMap[card.icon];
             return (

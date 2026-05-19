@@ -19,7 +19,7 @@ const iconStyles = [
 
 export function BenefitsSection() {
   return (
-    <GastroSection className="relative z-20 -mt-16 sm:-mt-20">
+    <GastroSection className="relative z-20 -mt-12 sm:-mt-14">
       <GastroContainer>
         <div className="overflow-hidden rounded-[18px] border border-gc-border bg-white shadow-[0_8px_40px_-8px_rgba(4,27,58,0.12)]">
           <div className="grid grid-cols-1 divide-y divide-gc-border sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">

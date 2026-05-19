@@ -2,6 +2,8 @@ import { Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   GC_GRID_LARGE,
+  GC_MEDIA_CARD,
+  GC_SECTION_Y,
   GastroContainer,
   GastroSection,
   SectionHeader,
@@ -11,7 +13,7 @@ import { cn } from '@/lib/utils';
 
 export function FeaturedCoursesSection() {
   return (
-    <GastroSection id="cursos-destaque" className="bg-gc-ice py-16 sm:py-20 lg:py-24">
+    <GastroSection id="cursos-destaque" className={cn('bg-gc-ice', GC_SECTION_Y)}>
       <GastroContainer>
         <SectionHeader
           title="Cursos em destaque"
@@ -24,7 +26,7 @@ export function FeaturedCoursesSection() {
             <Link
               key={course.id}
               to="/login"
-              className="group relative min-h-[360px] min-w-0 overflow-hidden rounded-[18px] shadow-[0_4px_24px_-4px_rgba(4,27,58,0.18)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_-8px_rgba(4,27,58,0.22)] sm:min-h-[400px]"
+              className={GC_MEDIA_CARD}
             >
               <img
                 src={course.imageSrc}
@@ -49,21 +51,9 @@ export function FeaturedCoursesSection() {
                 <Play className="ml-0.5 h-4 w-4 fill-gc-text" aria-hidden />
               </div>
 
-              <div className="absolute inset-x-0 bottom-0 min-w-0 p-4 pt-16">
+              <div className="absolute inset-x-0 bottom-0 min-w-0 p-4 sm:p-5">
                 <span className="text-[11px] font-semibold uppercase tracking-wide text-gc-teal">{course.category}</span>
                 <h3 className="mt-1 text-base font-bold leading-snug text-white">{course.title}</h3>
-                <div className="mt-3 border-t border-white/10 pt-3">
-                  <div className="flex items-center justify-between text-[11px] text-white/60">
-                    <span>Progresso</span>
-                    <span>{course.progress}%</span>
-                  </div>
-                  <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/15">
-                    <div
-                      className={cn('h-full rounded-full', course.progress === 100 ? 'bg-gc-teal' : 'bg-gc-coral')}
-                      style={{ width: `${course.progress}%` }}
-                    />
-                  </div>
-                </div>
               </div>
             </Link>
           ))}

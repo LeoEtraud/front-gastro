@@ -1,12 +1,19 @@
-import { GastroCard, GastroContainer, GastroSection, SectionHeader } from '@/components/gastrocentro/GastroLayout';
+import {
+  GC_SECTION_Y,
+  GastroCard,
+  GastroContainer,
+  GastroSection,
+  SectionHeader,
+} from '@/components/gastrocentro/GastroLayout';
+import { cn } from '@/lib/utils';
 import { specialists } from '@/data/gastrocentro-landing';
 
 export function SpecialistsSection() {
   return (
-    <GastroSection id="especialistas" className="bg-white py-16 sm:py-20 lg:py-24">
+    <GastroSection id="especialistas" className={cn('bg-white', GC_SECTION_Y)}>
       <GastroContainer>
         <SectionHeader
-          title="Aprenda com especialistas referência"
+          title="Aprenda com especialistas de referência"
           subtitle="Corpo docente altamente qualificado e com ampla experiência clínica."
           viewAllHref="/login"
         />
