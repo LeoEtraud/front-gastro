@@ -21,6 +21,18 @@ interface SidebarProps {
   onToggleCollapse?: () => void;
 }
 
+const navItemClass = (isActive: boolean, collapsed: boolean, mobile: boolean) =>
+  cn(
+    "flex cursor-pointer items-center rounded-xl transition-colors",
+    collapsed && !mobile ? "justify-center px-0 py-3" : "gap-3 px-4 py-3",
+    isActive
+      ? "bg-sidebar-active font-semibold text-sidebar-active-foreground shadow-md"
+      : "font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+  );
+
+const iconButtonClass =
+  "shrink-0 rounded-xl p-2 text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground";
+
 export function Sidebar({
   links,
   location,
@@ -34,7 +46,7 @@ export function Sidebar({
   const footer = (mobile: boolean) => (
     <div
       className={cn(
-        "mt-auto border-t border-border pt-4",
+        "mt-auto border-t border-sidebar-border pt-4",
         collapsed && !mobile ? "px-2" : "px-3",
       )}
     >
@@ -43,11 +55,11 @@ export function Sidebar({
           <button
             type="button"
             onClick={() => setTermsOpen(true)}
-            className="block w-full text-center text-xs font-medium text-primary transition-colors hover:text-primary/90"
+            className="block w-full text-center text-xs font-medium text-sidebar-foreground/90 transition-colors hover:text-sidebar-foreground"
           >
             Termos de Uso e Privacidade
           </button>
-          <p className="text-center text-xs font-medium text-muted-foreground">Versão {APP_VERSION}</p>
+          <p className="text-center text-xs font-medium text-sidebar-muted">Versão {APP_VERSION}</p>
         </div>
       ) : (
         <Tooltip>
@@ -55,7 +67,7 @@ export function Sidebar({
             <button
               type="button"
               onClick={() => setTermsOpen(true)}
-              className="flex w-full justify-center rounded-xl py-2 text-primary transition-colors hover:bg-muted"
+              className={cn(iconButtonClass, "flex w-full justify-center")}
               aria-label="Termos de uso"
             >
               <FileText className="h-5 w-5" />
@@ -76,15 +88,7 @@ export function Sidebar({
 
           const linkContent = (
             <Link to={item.href} onClick={mobile ? onClose : undefined}>
-              <span
-                className={cn(
-                  "flex cursor-pointer items-center rounded-xl transition-colors",
-                  collapsed && !mobile ? "justify-center px-0 py-3" : "gap-3 px-4 py-3",
-                  isActive
-                    ? "bg-primary font-semibold text-primary-foreground shadow-md"
-                    : "font-medium text-foreground hover:bg-muted hover:text-foreground",
-                )}
-              >
+              <span className={navItemClass(isActive, collapsed, mobile)}>
                 <Icon className="h-5 w-5 shrink-0" />
                 {(!collapsed || mobile) && <span>{item.label}</span>}
               </span>
@@ -109,16 +113,21 @@ export function Sidebar({
     </nav>
   );
 
-  /* Mesma superfície do header (principalmente no tema light). */
   const shellClass = cn(
-    "flex h-full flex-col rounded-2xl border border-border bg-card text-card-foreground shadow-md transition-all duration-300",
+    "flex h-full flex-col rounded-2xl border border-sidebar-border bg-sidebar text-sidebar-foreground shadow-md transition-all duration-300",
+  );
+
+  const logoIcon = (
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-gc-teal to-gc-coral">
+      <BookOpen className="h-[18px] w-[18px] text-white" aria-hidden />
+    </span>
   );
 
   const desktopSidebar = (
     <aside className={cn(shellClass, collapsed ? "w-[4.5rem]" : "w-64")}>
       <div
         className={cn(
-          "shrink-0 rounded-t-2xl border-b border-border",
+          "shrink-0 rounded-t-2xl border-b border-sidebar-border bg-sidebar-header",
           collapsed
             ? "flex h-16 items-center justify-center gap-1 px-1.5"
             : "flex h-16 items-center px-3",
@@ -127,8 +136,8 @@ export function Sidebar({
         {!collapsed ? (
           <>
             <div className="flex min-w-0 flex-1 items-center gap-2">
-              <BookOpen className="h-6 w-6 shrink-0 text-primary" />
-              <span className="truncate font-display text-lg font-bold">GastroCentro</span>
+              {logoIcon}
+              <span className="truncate font-display text-lg font-bold text-sidebar-foreground">GastroCentro</span>
             </div>
             {onToggleCollapse && (
               <Tooltip>
@@ -136,7 +145,7 @@ export function Sidebar({
                   <button
                     type="button"
                     onClick={onToggleCollapse}
-                    className="ml-auto shrink-0 rounded-xl p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    className={cn(iconButtonClass, "ml-auto")}
                     aria-label="Recolher menu"
                   >
                     <PanelLeftClose className="h-5 w-5" />
@@ -148,14 +157,14 @@ export function Sidebar({
           </>
         ) : (
           <>
-            <BookOpen className="h-6 w-6 shrink-0 text-primary" aria-hidden />
+            {logoIcon}
             {onToggleCollapse && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
                     type="button"
                     onClick={onToggleCollapse}
-                    className="shrink-0 rounded-xl p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    className={iconButtonClass}
                     aria-label="Expandir menu"
                   >
                     <PanelLeftOpen className="h-5 w-5" />
@@ -174,15 +183,15 @@ export function Sidebar({
 
   const mobileSidebar = (
     <aside className={cn(shellClass, "w-64")}>
-      <div className="flex h-16 items-center justify-between rounded-t-2xl border-b border-border px-3">
+      <div className="flex h-16 items-center justify-between rounded-t-2xl border-b border-sidebar-border bg-sidebar-header px-3">
         <div className="flex min-w-0 items-center gap-2">
-          <BookOpen className="h-6 w-6 shrink-0 text-primary" />
-          <span className="truncate font-display text-lg font-bold">GastroCentro</span>
+          {logoIcon}
+          <span className="truncate font-display text-lg font-bold text-sidebar-foreground">GastroCentro</span>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className={iconButtonClass}
           aria-label="Fechar menu"
         >
           <X className="h-5 w-5" />
