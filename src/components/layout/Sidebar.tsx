@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { type LucideIcon, BookOpen, FileText, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
+import { type LucideIcon, FileText, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { TermsOfUseModal } from "@/components/common/TermsOfUseModal";
@@ -117,10 +117,16 @@ export function Sidebar({
     "flex h-full flex-col rounded-2xl border border-sidebar-border bg-sidebar text-sidebar-foreground shadow-md transition-all duration-300",
   );
 
-  const logoIcon = (
-    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-gc-teal to-gc-coral">
-      <BookOpen className="h-[18px] w-[18px] text-white" aria-hidden />
-    </span>
+  const clinicLogo = (compact = false) => (
+    <img
+      src={compact ? "/logo-menu-recolhido.png" : "/logo-menu.png"}
+      alt="GastroCentro"
+      className={cn(
+        compact
+          ? "h-5 w-5 shrink-0 bg-transparent object-contain"
+          : "block w-72 bg-transparent h-20 object-contain min-w-0",
+      )}
+    />
   );
 
   const desktopSidebar = (
@@ -129,15 +135,14 @@ export function Sidebar({
         className={cn(
           "shrink-0 rounded-t-2xl border-b border-sidebar-border bg-sidebar-header",
           collapsed
-            ? "flex h-16 items-center justify-center gap-1 px-1.5"
-            : "flex h-16 items-center px-3",
+            ? "flex h-16 flex-col items-center justify-start gap-0.5 px-1 pb-1.5 pt-3"
+            : "relative flex h-16 items-stretch px-2",
         )}
       >
         {!collapsed ? (
           <>
-            <div className="flex min-w-0 flex-1 items-center gap-2">
-              {logoIcon}
-              <span className="truncate font-display text-lg font-bold text-sidebar-foreground">GastroCentro</span>
+            <div className="flex min-h-0 min-w-0 flex-1 items-center overflow-hidden py-1 pr-9">
+              {clinicLogo()}
             </div>
             {onToggleCollapse && (
               <Tooltip>
@@ -145,7 +150,7 @@ export function Sidebar({
                   <button
                     type="button"
                     onClick={onToggleCollapse}
-                    className={cn(iconButtonClass, "ml-auto")}
+                    className={cn(iconButtonClass, "absolute right-1 top-1/2 -translate-y-1/2")}
                     aria-label="Recolher menu"
                   >
                     <PanelLeftClose className="h-5 w-5" />
@@ -157,7 +162,7 @@ export function Sidebar({
           </>
         ) : (
           <>
-            {logoIcon}
+            {clinicLogo(true)}
             {onToggleCollapse && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -184,9 +189,8 @@ export function Sidebar({
   const mobileSidebar = (
     <aside className={cn(shellClass, "w-64")}>
       <div className="flex h-16 items-center justify-between rounded-t-2xl border-b border-sidebar-border bg-sidebar-header px-3">
-        <div className="flex min-w-0 items-center gap-2">
-          {logoIcon}
-          <span className="truncate font-display text-lg font-bold text-sidebar-foreground">GastroCentro</span>
+        <div className="flex min-w-0 flex-1 items-center overflow-hidden pr-1">
+          {clinicLogo()}
         </div>
         <button
           type="button"
