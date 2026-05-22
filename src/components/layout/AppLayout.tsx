@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { BookOpen, FileVideo, GraduationCap, LayoutDashboard, Users } from 'lucide-react';
+import { BookOpen, FileVideo, LayoutDashboard, Users } from 'lucide-react';
 import { canManageUsers, isStaffRole } from '@/lib/permissions';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
@@ -18,7 +18,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const studentLinks = useMemo(() => [
     { href: '/student/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/student/courses', label: 'Meus Cursos', icon: BookOpen },
-    { href: '/courses', label: 'Catálogo', icon: GraduationCap },
   ], []);
   const teacherLinks = useMemo(
     () => [
