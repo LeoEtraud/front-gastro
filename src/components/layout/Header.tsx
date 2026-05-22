@@ -15,24 +15,10 @@ import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   user: UserProfile;
-  location: string;
   theme: "light" | "dark";
   onMenuToggle: () => void;
   onToggleTheme: () => void;
   onLogout: () => void;
-}
-
-function routeLabel(pathname: string) {
-  const section = pathname.split("/")[2];
-  if (!section) return "Dashboard";
-
-  const map: Record<string, string> = {
-    dashboard: "Dashboard",
-    courses: "Cursos",
-    profile: "Perfil",
-  };
-
-  return map[section] ?? section.charAt(0).toUpperCase() + section.slice(1);
 }
 
 function roleLabel(role: UserProfile["role"]) {
@@ -41,7 +27,7 @@ function roleLabel(role: UserProfile["role"]) {
   return "Estudante";
 }
 
-export function Header({ user, location, theme, onMenuToggle, onToggleTheme, onLogout }: HeaderProps) {
+export function Header({ user, theme, onMenuToggle, onToggleTheme, onLogout }: HeaderProps) {
   const navigate = useNavigate();
   const shortName = displayFirstLastName(user.name);
   const firstLetter = shortName?.charAt(0)?.toUpperCase() || user.name?.charAt(0)?.toUpperCase() || "U";
@@ -54,8 +40,16 @@ export function Header({ user, location, theme, onMenuToggle, onToggleTheme, onL
         "h-12 shrink-0 rounded-2xl border border-border bg-card text-card-foreground shadow-md sm:h-16",
       )}
     >
-      <div className="flex h-full items-center justify-between gap-3 px-4 sm:px-6">
-        <div className="flex min-w-0 flex-1 items-center gap-2">
+      <div className="flex h-full items-center justify-between gap-3 pl-1 pr-4 sm:pl-1.5 sm:pr-6">
+        <div className="flex h-full min-w-0 flex-1 items-center gap-2 overflow-hidden sm:gap-3">
+          <div className="flex h-full shrink-0 items-center py-1 sm:py-1.5">
+            <img
+              src="/header-fellowship.jpg"
+              alt="Fellowship Endoscopia Digestiva Alta"
+              className="h-full w-auto object-contain object-left"
+            />
+          </div>
+
           <button
             type="button"
             onClick={onMenuToggle}
@@ -64,8 +58,6 @@ export function Header({ user, location, theme, onMenuToggle, onToggleTheme, onL
           >
             <Menu className="h-5 w-5" />
           </button>
-
-          <h1 className="min-w-0 truncate font-display text-base font-semibold md:text-lg">{routeLabel(location)}</h1>
         </div>
 
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">

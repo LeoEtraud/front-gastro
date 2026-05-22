@@ -75,7 +75,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="shrink-0 overflow-visible">
           <Header
             user={user}
-            location={location.pathname}
             theme={theme}
             onMenuToggle={() => setIsMobileMenuOpen((prev) => !prev)}
             onToggleTheme={() => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}

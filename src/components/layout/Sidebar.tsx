@@ -135,7 +135,7 @@ export function Sidebar({
         className={cn(
           "shrink-0 rounded-t-2xl border-b border-sidebar-border bg-sidebar-header",
           collapsed
-            ? "flex h-16 flex-col items-center justify-start gap-0.5 px-1 pb-1.5 pt-3"
+            ? "flex h-16 flex-col items-center justify-start gap-0.5 px-1 pb-1.5 pt-2"
             : "relative flex h-16 items-stretch px-2",
         )}
       >
