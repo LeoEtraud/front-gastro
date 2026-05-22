@@ -3,8 +3,8 @@ import type { MouseEvent } from 'react';
 /** Site institucional — agendamento de atendimento. */
 export const GASTRO_APPOINTMENT_URL = 'https://gastrocentroslz.com.br/';
 
-/** Altura do header fixo (px) — manter em sync com `h-[72px]` no GastroHeader. */
-export const GASTRO_HEADER_HEIGHT_PX = 72;
+/** Altura do header fixo (px) — manter em sync com `h-[84px]` no GastroHeader. */
+export const GASTRO_HEADER_HEIGHT_PX = 84;
 
 /** Espaço extra acima da seção ao rolar via âncora (header + respiro). */
 export const GASTRO_SCROLL_OFFSET_PX = GASTRO_HEADER_HEIGHT_PX + 16;

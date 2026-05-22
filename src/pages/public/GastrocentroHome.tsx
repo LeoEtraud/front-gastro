@@ -24,7 +24,7 @@ export default function GastrocentroHome() {
   }, []);
 
   return (
-    <div className="gc-font min-h-dvh w-full min-w-0 scroll-smooth scroll-pt-[88px] overflow-x-hidden bg-gc-ice text-gc-text antialiased selection:bg-gc-teal/20">
+    <div className="gc-font min-h-dvh w-full min-w-0 scroll-smooth scroll-pt-[100px] overflow-x-hidden bg-gc-ice text-gc-text antialiased selection:bg-gc-teal/20">
       <GastroHeader />
       <main className="w-full min-w-0">
         <HeroCarousel />

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { GastroButton } from '@/components/gastrocentro/GastroButton';
@@ -12,7 +12,7 @@ import {
 } from '@/components/gastrocentro/gastro-nav';
 import { cn } from '@/lib/utils';
 
-const HEADER_HEIGHT = 'h-[72px]';
+const HEADER_HEIGHT = 'h-[84px]';
 
 function NavLink({
   item,
@@ -79,12 +79,13 @@ export function GastroHeader() {
           <a
             href="#topo"
             onClick={(e) => handleGastroAnchorClick(e, '#topo')}
-            className="flex min-w-0 shrink-0 items-center gap-2.5 justify-self-start"
+            className="flex min-w-0 shrink-0 items-center justify-self-start"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-gc-teal to-gc-coral">
-              <Activity className="h-[18px] w-[18px] text-white" aria-hidden />
-            </span>
-            <span className="truncate text-lg font-bold tracking-tight text-white">GastroCentro</span>
+            <img
+              src="/logo-menu.png"
+              alt="GastroCentro"
+              className="h-[4.5rem] w-auto max-w-[min(75vw,20rem)] object-contain object-left sm:h-[4.75rem] lg:h-20 lg:max-w-[26rem]"
+            />
           </a>
 
           {/* Navegação — centro (desktop) */}

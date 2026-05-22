@@ -13,7 +13,7 @@ export const GC_MEDIA_CARD =
   'group relative min-h-[360px] min-w-0 overflow-hidden rounded-[18px] shadow-[0_4px_24px_-4px_rgba(4,27,58,0.18)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_-8px_rgba(4,27,58,0.22)] sm:min-h-[400px]';
 
 /** Compensa header fixo ao navegar por âncoras (scroll-margin + scrollIntoView). */
-export const GC_SCROLL_ANCHOR = 'scroll-mt-[88px]';
+export const GC_SCROLL_ANCHOR = 'scroll-mt-[100px]';
 
 /** Container centralizado: min(100%, 1240px) com margem automática. */
 export const GC_CONTAINER = 'gc-container min-w-0';
