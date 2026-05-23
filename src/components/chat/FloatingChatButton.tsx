@@ -175,7 +175,7 @@ export function FloatingChatButton({
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl transition hover:scale-[1.03] hover:bg-primary/90"
+          className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-gc-coral text-white shadow-[0_8px_24px_-6px_rgba(255,107,53,0.45)] transition hover:scale-[1.03] hover:bg-[#e85f2d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gc-coral focus-visible:ring-offset-2"
           aria-label="Abrir chat"
         >
           <MessageCircle className="h-6 w-6" />

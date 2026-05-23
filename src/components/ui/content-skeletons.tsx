@@ -1,121 +1,94 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
+/** Banner de boas-vindas — espelha o cartão superior de `SingleCourseHomeExperience`. */
+function SingleCourseWelcomeBannerSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-xl border border-border/80 bg-gradient-to-br from-card via-gc-ice/90 to-primary/[0.06] shadow-sm dark:from-card dark:via-muted/80 dark:to-primary/10">
+      <div className="flex flex-col sm:flex-row sm:items-stretch">
+        <div className="flex flex-1 flex-col justify-center border-b border-border/40 px-5 py-5 sm:border-b-0 sm:border-r sm:px-7 sm:py-6">
+          <Skeleton className="h-8 w-56 sm:h-9 md:h-10" />
+          <Skeleton className="mt-2 h-4 w-full max-w-md" />
+          <Skeleton className="mt-1.5 h-4 w-full max-w-sm" />
+        </div>
+        <div className="flex min-h-36 shrink-0 self-stretch overflow-hidden bg-gradient-to-br from-primary/[0.04] to-gc-teal/[0.06] sm:min-h-0 sm:w-44 md:w-52 lg:w-60">
+          <Skeleton className="h-full min-h-0 w-full rounded-none" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Grade de 4 cards informativos horizontais (ícone à esquerda, texto à direita). */
+function SingleCourseInfoCardsSkeleton() {
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 [&>*]:h-full [&>*]:min-w-0">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <Card key={`info-${index}`} className="h-full border-border/80">
+          <CardContent className="flex h-[7.75rem] items-center gap-3 overflow-hidden p-3 sm:h-[8rem] sm:p-4">
+            <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+            <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
+              <Skeleton className="h-6 w-16 sm:h-7" />
+              <Skeleton className="h-3 w-24" />
+              {index === 0 ? <Skeleton className="mt-0.5 h-1 w-full rounded-full" /> : null}
+              <Skeleton className="h-2.5 w-28" />
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+/** Carrossel horizontal de cards de aula (`visualOnly`, aspecto 4/5 → 3/4). */
+function SingleCourseLessonCarouselSkeleton() {
+  return (
+    <section className="space-y-2 sm:space-y-2.5">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-baseline gap-x-1.5">
+          <Skeleton className="h-6 w-32 sm:h-7" />
+          <Skeleton className="h-6 w-40 sm:h-7" />
+        </div>
+        <Skeleton className="h-4 w-36 shrink-0" />
+      </div>
+      <div className="-ml-3 flex gap-3 overflow-hidden pl-3 sm:-ml-4 sm:gap-4 sm:pl-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div
+            key={`lesson-${index}`}
+            className="min-w-0 shrink-0 basis-[78%] pl-0 min-[420px]:basis-[58%] sm:basis-1/2 lg:basis-1/4"
+          >
+            <div className="overflow-hidden rounded-2xl border border-border/80">
+              <Skeleton className="aspect-[4/5] w-full rounded-none sm:aspect-[3/4]" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 /**
  * Skeleton do dashboard do aluno com experiência de curso único —
- * espelha `SingleCourseHomeExperience` (corpo docente, grade de aulas 3/4, mural em largura total).
+ * espelha `SingleCourseHomeExperience` (banner, 4 cards informativos, carrossel de aulas).
  */
 export function StudentDashboardSkeleton() {
   return (
     <div className="mx-auto min-w-0 max-w-[92rem] space-y-4 sm:space-y-5">
-      <section className="space-y-2 sm:space-y-2.5">
-        <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
-          <Skeleton className="h-7 w-40 sm:h-8" />
-          <Skeleton className="h-3 w-full max-w-2xl sm:h-3.5 sm:max-w-md" />
-        </div>
+      <SingleCourseWelcomeBannerSkeleton />
+      <SingleCourseInfoCardsSkeleton />
+      <SingleCourseLessonCarouselSkeleton />
+    </div>
+  );
+}
 
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <Card key={`faculty-${index}`} className="h-full overflow-hidden border-border/80">
-              <Skeleton className="h-12 w-full rounded-none sm:h-14" />
-              <CardContent className="space-y-1.5 p-2 pb-1 sm:p-2.5 sm:pb-1.5">
-                <div className="flex items-start gap-2.5">
-                  <Skeleton className="h-8 w-8 shrink-0 rounded-full sm:h-9 sm:w-9" />
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <Skeleton className="h-3.5 w-4/5 sm:h-4" />
-                    <Skeleton className="h-2.5 w-1/2 sm:h-3" />
-                  </div>
-                </div>
-              </CardContent>
-              <CardContent className="space-y-1.5 p-2 pt-0 sm:p-2.5 sm:pt-0">
-                <Skeleton className="h-2.5 w-full sm:h-3" />
-                <Skeleton className="h-2.5 w-full sm:h-3" />
-                <Skeleton className="h-2.5 w-[92%] sm:h-3" />
-                <Skeleton className="mt-1 h-2.5 w-24 sm:h-3" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      <section className="space-y-2 sm:space-y-2.5">
-        <Skeleton className="h-7 w-[min(100%,22rem)] sm:h-8 sm:w-[28rem]" />
-
-        <div className="grid grid-cols-1 gap-4 min-[440px]:grid-cols-2 lg:grid-cols-4 sm:gap-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <div
-              key={`lesson-${index}`}
-              className={
-                index === 3
-                  ? "flex aspect-[3/4] min-h-0 min-w-0 flex-col items-center justify-center rounded-2xl border border-dashed border-muted-foreground/25 bg-muted/10 px-3"
-                  : "overflow-hidden rounded-2xl border border-cyan-950/10 bg-card shadow-sm"
-              }
-            >
-              {index === 3 ? (
-                <Skeleton className="h-4 w-4/5 max-w-[12rem]" />
-              ) : (
-                <Skeleton className="aspect-[3/4] w-full rounded-none" />
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-4 min-h-0 sm:mt-5">
-          <Card className="flex max-h-[23rem] flex-col border-primary/15 sm:max-h-[24rem]">
-            <CardContent className="space-y-2 px-3 py-2.5 sm:px-3.5 sm:py-3">
-              <div className="flex items-center gap-2">
-                <Skeleton className="h-4 w-4 shrink-0 rounded-sm" />
-                <Skeleton className="h-4 w-40 sm:h-5 sm:w-48" />
-              </div>
-              <Skeleton className="h-2.5 w-3/5 max-w-xs sm:h-3" />
-            </CardContent>
-            <CardContent className="flex min-h-0 flex-1 flex-col gap-2 px-3 pb-3 pt-0 sm:px-3.5 sm:pb-3.5">
-              <div className="flex justify-between gap-2">
-                <Skeleton className="h-2.5 w-16 sm:h-3" />
-                <Skeleton className="h-2.5 w-8 sm:h-3" />
-              </div>
-              <Skeleton className="h-1.5 w-full rounded-full" />
-              <Skeleton className="h-2.5 w-4/5 sm:h-3" />
-
-              <Skeleton className="h-px w-full shrink-0" />
-
-              <div className="rounded-md border border-primary/20 bg-primary/5 px-2.5 py-2 sm:px-3">
-                <Skeleton className="mb-1 h-2 w-24 sm:h-2.5" />
-                <Skeleton className="h-3.5 w-full sm:h-4" />
-                <Skeleton className="mt-1 h-2 w-1/3 sm:h-2.5" />
-              </div>
-
-              <div className="grid grid-cols-3 gap-1.5">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={`mural-stat-${i}`} className="rounded border border-border/60 bg-muted/30 px-2 py-2">
-                    <Skeleton className="mx-auto mb-1 h-3 w-4 sm:h-3.5" />
-                    <Skeleton className="mx-auto h-2 w-14 sm:h-2.5" />
-                  </div>
-                ))}
-              </div>
-
-              <div>
-                <Skeleton className="mb-1 h-2.5 w-28 sm:h-3" />
-                <div className="space-y-1">
-                  {Array.from({ length: 2 }).map((_, idx) => (
-                    <Skeleton key={`next-${idx}`} className="h-6 w-full rounded-md sm:h-7" />
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <Skeleton className="mb-1 h-2.5 w-20 sm:h-3" />
-                <Skeleton className="h-3.5 w-[92%] sm:h-4" />
-              </div>
-
-              <div className="flex gap-1.5 rounded border border-border/40 bg-background/60 px-2 py-1.5">
-                <Skeleton className="mt-0.5 h-3 w-3 shrink-0" />
-                <Skeleton className="h-8 w-full flex-1 sm:h-9" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+/** Carregamento curto do curso único (antes do `useDelayedFlag`). */
+export function StudentSingleCourseHomeOverviewSkeleton() {
+  return (
+    <div className="mx-auto min-w-0 max-w-[92rem] space-y-4 sm:space-y-5">
+      <SingleCourseWelcomeBannerSkeleton />
+      <SingleCourseInfoCardsSkeleton />
+      <Skeleton className="h-6 w-[min(100%,20rem)] sm:h-7" />
+      <Skeleton className="h-48 w-full rounded-2xl sm:h-56" />
     </div>
   );
 }

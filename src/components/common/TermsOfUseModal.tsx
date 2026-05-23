@@ -22,7 +22,8 @@ export function TermsOfUseModal({ open, onOpenChange }: TermsOfUseModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="flex max-h-[90dvh] min-h-0 flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl lg:max-w-5xl"
+        frameless
+        className="max-h-[90dvh] min-h-0 gap-0 overflow-hidden rounded-2xl border-0 bg-card p-0 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.45)] sm:max-w-4xl lg:max-w-5xl"
         hideCloseButton
       >
         <div className="relative shrink-0 overflow-hidden rounded-t-2xl bg-gradient-to-br from-primary via-primary to-indigo-900 px-4 pb-4 pt-4 sm:px-6 sm:pb-5 sm:pt-5">
@@ -54,11 +55,9 @@ export function TermsOfUseModal({ open, onOpenChange }: TermsOfUseModalProps) {
           </DialogHeader>
         </div>
 
-        <div
-          className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden border-t border-border pr-1 [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:hsl(var(--border))_hsl(var(--background))] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
-        >
-          <div className="space-y-4 px-4 py-4 text-sm sm:px-6 [&_p]:text-justify">
-            <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain bg-card [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:hsl(var(--border))_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border">
+          <div className="divide-y divide-border text-sm [&_p]:text-justify">
+            <section className="px-4 py-4 sm:px-6 sm:py-5">
               <h3 className="mb-2 flex items-center gap-2 text-left font-semibold text-foreground">
                 <FileText className="h-4 w-4 shrink-0 text-primary" />
                 1. Objeto e aceite
@@ -74,7 +73,7 @@ export function TermsOfUseModal({ open, onOpenChange }: TermsOfUseModalProps) {
               </p>
             </section>
 
-            <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+            <section className="px-4 py-4 sm:px-6 sm:py-5">
               <h3 className="mb-2 flex items-center gap-2 text-left font-semibold text-foreground">
                 <Scale className="h-4 w-4 shrink-0 text-primary" />
                 2. LGPD — dados pessoais e direitos do titular
@@ -99,7 +98,7 @@ export function TermsOfUseModal({ open, onOpenChange }: TermsOfUseModalProps) {
               </p>
             </section>
 
-            <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+            <section className="px-4 py-4 sm:px-6 sm:py-5">
               <h3 className="mb-2 flex items-center gap-2 text-left font-semibold text-foreground">
                 <FileText className="h-4 w-4 shrink-0 text-primary" />
                 3. LAI — transparência e acesso à informação
@@ -114,7 +113,7 @@ export function TermsOfUseModal({ open, onOpenChange }: TermsOfUseModalProps) {
               </p>
             </section>
 
-            <section className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+            <section className="bg-destructive/[0.04] px-4 py-4 sm:px-6 sm:py-5">
               <h3 className="mb-2 flex items-center gap-2 text-left font-semibold text-destructive">
                 <AlertTriangle className="h-4 w-4 shrink-0" />
                 4. Uso aceitável e responsabilidades
@@ -127,7 +126,7 @@ export function TermsOfUseModal({ open, onOpenChange }: TermsOfUseModalProps) {
               </p>
             </section>
 
-            <section className="rounded-xl border border-border bg-muted/40 p-4">
+            <section className="bg-muted/40 px-4 py-4 sm:px-6 sm:py-5">
               <h3 className="mb-2 text-left font-semibold text-foreground">5. Atualizações deste documento</h3>
               <p className="text-pretty leading-relaxed text-muted-foreground">
                 Este texto poderá ser atualizado para refletir mudanças legais ou na plataforma; a versão vigente
@@ -138,7 +137,7 @@ export function TermsOfUseModal({ open, onOpenChange }: TermsOfUseModalProps) {
           </div>
         </div>
 
-        <div className="shrink-0 border-t border-border px-4 py-3 text-justify text-xs leading-relaxed text-muted-foreground sm:px-6">
+        <div className="shrink-0 overflow-hidden rounded-b-2xl border-t border-border bg-muted px-4 py-3 text-justify text-xs leading-relaxed text-muted-foreground sm:px-6">
           Documento informativo (v{APP_VERSION}) — não dispensa assessoria jurídica nem substitui contratos,
           políticas de privacidade ou termos específicos firmados com instituições parceiras.
         </div>

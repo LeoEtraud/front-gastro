@@ -268,6 +268,8 @@ export interface StudentDashboardSingleCourseHome {
   faculty: StudentDashboardFacultyMember[];
   lessonRowTop: StudentDashboardLessonPreview[];
   lessonFourth?: StudentDashboardLessonPreview | null;
+  /** Somatório da duração de todas as aulas publicadas do curso, em minutos. */
+  totalDurationMinutes: number;
   mural: StudentDashboardMural;
 }
 

@@ -5,25 +5,42 @@ import { BookOpen, Award, Clock, PlayCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Link } from 'react-router-dom';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { StudentDashboardOverviewSkeleton, StudentDashboardSkeleton } from '@/components/ui/content-skeletons';
+import {
+  StudentDashboardOverviewSkeleton,
+  StudentDashboardSkeleton,
+  StudentSingleCourseHomeOverviewSkeleton,
+} from '@/components/ui/content-skeletons';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { normalizePtBrText } from '@/lib/normalize-ptbr';
 import { cn } from '@/lib/utils';
 import { SingleCourseHomeExperience } from '@/components/student/SingleCourseHomeExperience';
+import { useQueryClient } from '@tanstack/react-query';
+import type { StudentDashboard as StudentDashboardData } from '@/types/api';
 
 // PÁGINA DE DASHBOARD DO ALUNO - PÁGINA PARA MOSTRAR O DASHBOARD DO ALUNO
 export default function StudentDashboard() {
+  const queryClient = useQueryClient();
   const { data, isLoading } = useStudentDashboard();
   const showLoading = useDelayedFlag(isLoading);
   const isWaitingData = isLoading && !data;
 
-  if (isWaitingData && showLoading) return <AppLayout><StudentDashboardSkeleton /></AppLayout>;
+  const cachedDashboard = queryClient.getQueryData<StudentDashboardData>(['student-dashboard']);
+  const isSingleCourseHome =
+    cachedDashboard != null ? cachedDashboard.singleCourseHome != null : true;
+
   if (isWaitingData) {
-    return (
-      <AppLayout>
+    const skeleton = showLoading ? (
+      isSingleCourseHome ? (
+        <StudentDashboardSkeleton />
+      ) : (
         <StudentDashboardOverviewSkeleton />
-      </AppLayout>
+      )
+    ) : isSingleCourseHome ? (
+      <StudentSingleCourseHomeOverviewSkeleton />
+    ) : (
+      <StudentDashboardOverviewSkeleton />
     );
+    return <AppLayout>{skeleton}</AppLayout>;
   }
   if (!data) return <AppLayout><div>Erro ao carregar dados.</div></AppLayout>;
 
