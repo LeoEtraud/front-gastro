@@ -54,18 +54,6 @@ function lessonStatusLabel(status: StudentDashboardLessonPreview['status']): str
   return 'Disponível';
 }
 
-/**
- * Formata duração em minutos para uma string legível (ex: "2h 30min" ou "45min").
- * Retorna "—" quando não há duração disponível.
- */
-function formatDuration(minutes: number): string {
-  if (minutes <= 0) return '—';
-  if (minutes < 60) return `${minutes}min`;
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return m > 0 ? `${h}h ${m}min` : `${h}h`;
-}
-
 function LessonPreviewCard({
   courseId,
   courseTitle,
@@ -743,7 +731,7 @@ export function SingleCourseHomeExperience({ home }: Props) {
           footer={<p className="text-[10px] leading-snug text-muted-foreground">De conteúdo completo</p>}
         >
           <p className="text-xl font-bold tabular-nums leading-none text-foreground sm:text-2xl">
-            {formatDuration(home.totalDurationMinutes)}
+            {home.workloadHours != null && home.workloadHours > 0 ? `${home.workloadHours}h` : '—'}
           </p>
           <p className="text-xs font-medium text-muted-foreground">Carga Horária Total</p>
         </DashboardInfoCard>
