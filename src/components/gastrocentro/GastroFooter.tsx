@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Activity, Instagram, Linkedin, Youtube } from 'lucide-react';
+import { Instagram, Linkedin, Youtube } from 'lucide-react';
 import { GC_SCROLL_ANCHOR, GastroContainer, GastroSection } from '@/components/gastrocentro/GastroLayout';
 import { handleGastroAnchorClick } from '@/components/gastrocentro/gastro-nav';
 import { cn } from '@/lib/utils';
@@ -52,13 +52,14 @@ export function GastroFooter() {
         <GastroContainer>
           <div className="grid min-w-0 gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
             <div className="min-w-0">
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-gc-teal to-gc-coral">
-                  <Activity className="h-[18px] w-[18px] text-white" aria-hidden />
-                </span>
-                <span className="text-lg font-bold text-gc-text">GastroCentro</span>
+              <div className="flex min-w-0 items-start">
+                <img
+                  src="/logo.jpg"
+                  alt="GastroCentro"
+                  className="h-14 w-auto max-w-[min(100%,12rem)] object-contain object-left sm:h-16 sm:max-w-[14rem] lg:h-[4.5rem] lg:max-w-[15rem]"
+                />
               </div>
-              <p className="mt-4 max-w-sm text-sm leading-relaxed">
+              <p className="mt-4 max-w-sm text-sm leading-relaxed text-gc-text">
                 Referência em ensino, pesquisa e cuidado em saúde digestiva. Conteúdo de qualidade para profissionais e
                 pacientes.
               </p>
