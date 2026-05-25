@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Instagram, Linkedin, Youtube } from 'lucide-react';
 import { GC_SCROLL_ANCHOR, GastroContainer, GastroSection } from '@/components/gastrocentro/GastroLayout';
 import { handleGastroAnchorClick } from '@/components/gastrocentro/gastro-nav';
+import { useLegalDocuments } from '@/hooks/use-legal-documents';
 import { cn } from '@/lib/utils';
 
 const institutional = [
@@ -22,8 +23,11 @@ const platform = [
 const support = [
   { label: 'Central de ajuda', href: '/login' },
   { label: 'Fale conosco', href: '#contato' },
-  { label: 'Política de privacidade', href: '/login' },
-  { label: 'Termos de uso', href: '/login' },
+] as const;
+
+const legalLinks = [
+  { label: 'Política de privacidade', document: 'privacy' as const },
+  { label: 'Termos de uso', document: 'terms' as const },
 ];
 
 function FooterLink({ href, label }: { href: string; label: string }) {
@@ -46,6 +50,8 @@ function FooterLink({ href, label }: { href: string; label: string }) {
 }
 
 export function GastroFooter() {
+  const { openTerms, openPrivacy, modals } = useLegalDocuments();
+
   return (
     <footer id="contato" className={cn('gc-font w-full border-t border-gc-border bg-white text-gc-gray-text', GC_SCROLL_ANCHOR)}>
       <GastroSection className="pt-8 pb-8 sm:pt-10">
@@ -111,9 +117,22 @@ export function GastroFooter() {
                     <FooterLink {...item} />
                   </li>
                 ))}
+                {legalLinks.map((item) => (
+                  <li key={item.label}>
+                    <button
+                      type="button"
+                      onClick={item.document === 'terms' ? openTerms : openPrivacy}
+                      className="transition hover:text-gc-coral"
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
+
+          {modals}
 
           <div className="mt-12 border-t border-gc-border pt-6 text-center text-xs">
             © 2026 GastroCentro. Todos os direitos reservados.

@@ -18,6 +18,7 @@ import {
   isValidPhoneBR,
 } from '@/lib/profile-formatters';
 import { RecaptchaWidget, getRecaptchaSiteKey } from '@/components/auth/RecaptchaWidget';
+import { LegalDocumentLinks } from '@/components/common/LegalDocumentLinks';
 import '@/styles/animations/text-focus-in.css';
 
 const registerSchema = z.object({
@@ -216,12 +217,16 @@ export default function Register() {
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="flex flex-col gap-2 pb-8 text-center">
+          <CardFooter className="flex flex-col gap-3 pb-8 text-center">
             <p className="text-sm text-slate-600">
               Já tem uma conta?{' '}
               <Link to="/login" className="text-primary hover:underline font-semibold">
                 Entrar
               </Link>
+            </p>
+            <p className="text-xs leading-relaxed text-slate-500">
+              Ao cadastrar-se, você concorda com os{' '}
+              <LegalDocumentLinks linkClassName="font-medium text-primary underline-offset-2 hover:underline" />.
             </p>
           </CardFooter>
         </Card>

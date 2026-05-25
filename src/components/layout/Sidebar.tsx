@@ -1,8 +1,13 @@
-import { useState } from "react";
 import { type LucideIcon, FileText, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
 import { Link } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { TermsOfUseModal } from "@/components/common/TermsOfUseModal";
+import { useLegalDocuments } from "@/hooks/use-legal-documents";
 import { APP_VERSION } from "@/lib/app-version";
 import { cn } from "@/lib/utils";
 
@@ -41,7 +46,7 @@ export function Sidebar({
   collapsed = false,
   onToggleCollapse,
 }: SidebarProps) {
-  const [termsOpen, setTermsOpen] = useState(false);
+  const { openTerms, openPrivacy, modals } = useLegalDocuments();
 
   const footer = (mobile: boolean) => (
     <div
@@ -52,29 +57,45 @@ export function Sidebar({
     >
       {!collapsed || mobile ? (
         <div className="space-y-2">
-          <button
-            type="button"
-            onClick={() => setTermsOpen(true)}
-            className="block w-full text-center text-xs font-medium text-sidebar-foreground/90 transition-colors hover:text-sidebar-foreground"
-          >
-            Termos de Uso e Privacidade
-          </button>
+          <div className="flex flex-col gap-1 text-center text-xs font-medium text-sidebar-foreground/90">
+            <button
+              type="button"
+              onClick={openTerms}
+              className="transition-colors hover:text-sidebar-foreground"
+            >
+              Termos de Uso
+            </button>
+            <button
+              type="button"
+              onClick={openPrivacy}
+              className="transition-colors hover:text-sidebar-foreground"
+            >
+              Política de Privacidade
+            </button>
+          </div>
           <p className="text-center text-xs font-medium text-sidebar-muted">Versão {APP_VERSION}</p>
         </div>
       ) : (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              type="button"
-              onClick={() => setTermsOpen(true)}
-              className={cn(iconButtonClass, "flex w-full justify-center")}
-              aria-label="Termos de uso"
-            >
-              <FileText className="h-5 w-5" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="right">Termos de uso</TooltipContent>
-        </Tooltip>
+        <DropdownMenu>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className={cn(iconButtonClass, "flex w-full justify-center")}
+                  aria-label="Termos de uso e privacidade"
+                >
+                  <FileText className="h-5 w-5" />
+                </button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="right">Termos e privacidade</TooltipContent>
+          </Tooltip>
+          <DropdownMenuContent side="right" align="end" className="min-w-[12rem]">
+            <DropdownMenuItem onSelect={openTerms}>Termos de Uso</DropdownMenuItem>
+            <DropdownMenuItem onSelect={openPrivacy}>Política de Privacidade</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
     </div>
   );
@@ -208,7 +229,7 @@ export function Sidebar({
 
   return (
     <>
-      <TermsOfUseModal open={termsOpen} onOpenChange={setTermsOpen} />
+      {modals}
       <div className="hidden shrink-0 py-2 pl-2 transition-all duration-300 sm:py-3 sm:pl-3 lg:py-4 lg:pl-5 md:flex">
         {desktopSidebar}
       </div>

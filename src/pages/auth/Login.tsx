@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/hooks/use-auth';
 import { RecaptchaWidget, getRecaptchaSiteKey } from '@/components/auth/RecaptchaWidget';
-import { TermsOfUseModal } from '@/components/common/TermsOfUseModal';
+import { LegalDocumentLinks } from '@/components/common/LegalDocumentLinks';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
@@ -34,17 +34,21 @@ export default function Login() {
   const [isPending, setIsPending] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   const [recaptchaMountKey, setRecaptchaMountKey] = useState(0);
-  const [termsOpen, setTermsOpen] = useState(false);
-
   const hasRecaptchaSiteKey = Boolean(getRecaptchaSiteKey());
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   });
 
+  /** Formulário de login sempre em tema claro para contraste legível (evita título branco em card branco). */
   useEffect(() => {
-    const isDark = localStorage.getItem(THEME_KEY) === 'dark';
-    document.documentElement.classList.toggle('dark', isDark);
+    const wasDark = document.documentElement.classList.contains('dark');
+    document.documentElement.classList.remove('dark');
+    return () => {
+      if (wasDark || localStorage.getItem(THEME_KEY) === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -124,10 +128,10 @@ export default function Login() {
 
       <div className="flex min-w-0 items-center justify-center p-4 sm:p-6">
         <div className="flex w-full max-w-md flex-col gap-4">
-          <Card className="w-full border-slate-200 shadow-xl dark:border-slate-400/14 dark:bg-[#1E293B] dark:text-slate-50 dark:shadow-[0_20px_45px_rgba(15,23,42,0.25)]">
+          <Card className="w-full border-slate-200 bg-white text-slate-900 shadow-xl">
             <CardHeader className="space-y-4 pt-6 text-center sm:space-y-5 sm:pt-8">
               <div className="flex justify-center pb-0.5">
-                <div className="inline-flex max-w-[260px] rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200/80 dark:bg-white/98 dark:px-5 dark:py-3.5 dark:shadow-[0_4px_24px_rgba(15,23,42,0.2)] dark:ring-slate-400/12">
+                <div className="inline-flex max-w-[260px] rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200/80">
                   <img
                     src="/logo-login.png"
                     alt="GastroCentro — Instituto de Ensino e Pesquisa"
@@ -138,10 +142,10 @@ export default function Login() {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <CardTitle className="font-display text-2xl font-bold text-foreground sm:text-3xl dark:text-slate-50">
+                <CardTitle className="!text-gc-text font-display text-2xl font-bold">
                   Entrar
                 </CardTitle>
-                <CardDescription className="text-slate-600 dark:text-slate-300">
+                <CardDescription className="text-slate-600">
                   Acesse sua conta para continuar.
                 </CardDescription>
               </div>
@@ -169,7 +173,7 @@ export default function Login() {
                   </div>
                 )}
                 <div className="space-y-2.5">
-                  <label htmlFor="login-email" className="text-sm font-medium text-foreground dark:text-slate-200">
+                  <label htmlFor="login-email" className="text-sm font-medium text-slate-900">
                     E-mail
                   </label>
                   <Input
@@ -189,7 +193,7 @@ export default function Login() {
                   )}
                 </div>
                 <div className="space-y-2.5">
-                  <label htmlFor="login-password" className="text-sm font-medium text-foreground dark:text-slate-200">
+                  <label htmlFor="login-password" className="text-sm font-medium text-slate-900">
                     Senha
                   </label>
                   <PasswordInput
@@ -244,13 +248,9 @@ export default function Login() {
               </p>
               <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                 Ao entrar, você concorda com os{' '}
-                <button
-                  type="button"
-                  onClick={() => setTermsOpen(true)}
-                  className="font-medium text-primary underline-offset-2 hover:underline dark:text-sky-400 dark:hover:text-sky-300"
-                >
-                  Termos de Uso e Privacidade
-                </button>
+                <LegalDocumentLinks
+                  linkClassName="font-medium text-primary underline-offset-2 hover:underline dark:text-sky-400 dark:hover:text-sky-300"
+                />
                 .
               </p>
             </CardFooter>
@@ -258,7 +258,6 @@ export default function Login() {
         </div>
       </div>
 
-      <TermsOfUseModal open={termsOpen} onOpenChange={setTermsOpen} />
     </div>
   );
 }
