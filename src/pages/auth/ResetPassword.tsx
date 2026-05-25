@@ -10,7 +10,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { PasswordResetTimeline, type ResetTimelineStepStatus } from '@/components/auth/PasswordResetTimeline';
 import { PasswordStrengthHints } from '@/components/auth/PasswordStrengthHints';
 import { resetPasswordMeetsAllCriteria } from '@/lib/password-reset-criteria';
-import { BookOpen } from 'lucide-react';
 
 const passwordField = z
   .string()
@@ -147,14 +146,18 @@ export default function ResetPassword() {
 
       <div className="flex min-w-0 items-center justify-center p-4 sm:p-6">
         <Card className="w-full max-w-md border-slate-200 shadow-xl">
-          <CardHeader className="space-y-3 pt-6 text-center sm:pt-8">
-            <div className="flex justify-center mb-5 md:hidden">
-              <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
-                <BookOpen className="h-6 w-6 text-white" />
-              </div>
+          <CardHeader className="space-y-4 pt-6 text-center sm:pt-8">
+            <div className="flex justify-center pb-3">
+              <img
+                src="/logo-menu-login.png"
+                alt="Gastrocentro"
+                className="h-20 w-20 object-contain"
+                width={100}
+                height={100}
+              />
             </div>
             <CardTitle className="font-display text-2xl font-bold sm:text-3xl">Redefinir senha</CardTitle>
-            <CardDescription>
+            <CardDescription className="pt-1">
               Siga as etapas abaixo. Os critérios da senha são validados em tempo real enquanto você digita.
             </CardDescription>
           </CardHeader>
