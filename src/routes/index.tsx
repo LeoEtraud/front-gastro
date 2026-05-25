@@ -1,4 +1,5 @@
 import { Route, Routes } from "react-router-dom";
+import { PublicAuthThemeLayout } from "@/components/auth/PublicAuthThemeLayout";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
@@ -24,10 +25,12 @@ export function AppRoutes() {
       {/* Public */}
       <Route path="/" element={<GastrocentroHome />} />
       <Route path="/gastrocentro" element={<GastrocentroHome />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route element={<PublicAuthThemeLayout />}>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+      </Route>
 
       {/* Student */}
       <Route element={<PrivateRoute allowedRoles={["STUDENT"]} />}>

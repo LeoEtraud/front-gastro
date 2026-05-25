@@ -14,8 +14,6 @@ import { Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import '@/styles/animations/text-focus-in.css';
 
-const THEME_KEY = 'medlearn_theme';
-
 const loginFieldClass =
   'h-11 rounded-lg border-slate-200 sm:h-12 dark:h-11 dark:rounded-[10px] dark:border-slate-600 dark:bg-slate-700 dark:text-slate-50 dark:placeholder:text-slate-400 dark:focus-visible:border-sky-400 dark:focus-visible:ring-sky-400/40 sm:dark:h-12';
 
@@ -39,17 +37,6 @@ export default function Login() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   });
-
-  /** Formulário de login sempre em tema claro para contraste legível (evita título branco em card branco). */
-  useEffect(() => {
-    const wasDark = document.documentElement.classList.contains('dark');
-    document.documentElement.classList.remove('dark');
-    return () => {
-      if (wasDark || localStorage.getItem(THEME_KEY) === 'dark') {
-        document.documentElement.classList.add('dark');
-      }
-    };
-  }, []);
 
   useEffect(() => {
     const state = location.state as { registrationSuccess?: boolean } | null;

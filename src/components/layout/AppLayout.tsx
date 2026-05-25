@@ -5,8 +5,9 @@ import { BookOpen, FileVideo, LayoutDashboard, Users } from 'lucide-react';
 import { canManageUsers, isStaffRole } from '@/lib/permissions';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
+import { THEME_KEY, applyTheme, getStoredTheme, type ThemeMode } from '@/lib/theme';
+
 const SIDEBAR_COLLAPSED_KEY = 'medlearn_sidebar_collapsed';
-const THEME_KEY = 'medlearn_theme';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, logout, isLoading } = useAuth();
@@ -14,7 +15,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true');
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light'));
+  const [theme, setTheme] = useState<ThemeMode>(() => getStoredTheme());
   const studentLinks = useMemo(() => [
     { href: '/student/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/student/courses', label: 'Meus Cursos', icon: BookOpen },
@@ -31,7 +32,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
+    applyTheme(theme);
     localStorage.setItem(THEME_KEY, theme);
   }, [theme]);
 
