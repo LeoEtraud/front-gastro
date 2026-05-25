@@ -42,11 +42,11 @@ export function Header({ user, theme, onMenuToggle, onToggleTheme, onLogout }: H
     >
       <div className="flex h-full items-center justify-between gap-3 pl-1 pr-4 sm:pl-1.5 sm:pr-6">
         <div className="flex h-full min-w-0 flex-1 items-center gap-2 overflow-hidden sm:gap-3">
-          <div className="flex h-full shrink-0 items-center py-1 sm:py-1.5">
+          <div className="flex h-full shrink-0 items-center overflow-hidden rounded-xl py-1 sm:py-1.5">
             <img
               src="/header-fellowship.jpg"
               alt="Fellowship Endoscopia Digestiva Alta"
-              className="h-full w-auto object-contain object-left"
+              className="h-full w-full object-contain object-left"
             />
           </div>
 
