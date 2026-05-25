@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import '@/styles/animations/legal-document-modal.css';
 
 interface LegalDocumentModalProps {
   open: boolean;
@@ -33,10 +34,11 @@ export function LegalDocumentModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         frameless
-        className="max-h-[90dvh] min-h-0 gap-0 overflow-hidden rounded-2xl border-0 bg-card p-0 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.45)] sm:max-w-4xl lg:max-w-5xl"
+        animationVariant="formal"
+        className="max-h-[92dvh] min-h-0 w-full gap-0 overflow-hidden rounded-2xl border-0 bg-card p-0 sm:max-w-5xl lg:max-w-6xl xl:max-w-7xl"
         hideCloseButton
       >
-        <div className="relative shrink-0 overflow-hidden rounded-t-2xl bg-gradient-to-br from-primary via-primary to-indigo-900 px-4 pb-4 pt-4 sm:px-6 sm:pb-5 sm:pt-5">
+        <div className="legal-modal-header-inner relative shrink-0 overflow-hidden rounded-t-2xl bg-gradient-to-br from-primary via-primary to-indigo-900 px-4 pb-4 pt-4 sm:px-6 sm:pb-5 sm:pt-5">
           <DialogClose
             type="button"
             className="absolute right-2 top-2 z-20 flex size-8 items-center justify-center rounded-md border border-white/30 bg-white/15 text-primary-foreground shadow-none outline-none transition-colors hover:bg-white/25 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0 sm:right-3 sm:top-3"
@@ -64,12 +66,12 @@ export function LegalDocumentModal({
           </DialogHeader>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain bg-card [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:hsl(var(--border))_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border">
+        <div className="legal-modal-body-inner min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain bg-card [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:hsl(var(--border))_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border">
           {children}
         </div>
 
         {footerNote ? (
-          <div className="shrink-0 overflow-hidden rounded-b-2xl border-t border-border bg-muted px-4 py-3 text-justify text-xs leading-relaxed text-muted-foreground sm:px-6">
+          <div className="legal-modal-body-inner shrink-0 overflow-hidden rounded-b-2xl border-t border-border bg-muted px-4 py-3 text-justify text-xs leading-relaxed text-muted-foreground sm:px-6">
             {footerNote}
           </div>
         ) : null}

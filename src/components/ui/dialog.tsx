@@ -34,26 +34,60 @@ type DialogContentProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.
   hideCloseButton?: boolean;
   /** Remove borda padrão do painel (útil para modais full-bleed com header color = bordas). */
   frameless?: boolean;
+  /** Animação de entrada: `formal` para documentos legais (mais lenta e sóbria). */
+  animationVariant?: 'default' | 'formal';
+  /** Classes extras no overlay (ex.: animação formal). */
+  overlayClassName?: string;
 };
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   DialogContentProps
->(({ className, children, closeButtonClassName, hideCloseButton, frameless, ...props }, ref) => (
+>(({ className, children, closeButtonClassName, hideCloseButton, frameless, animationVariant = 'default', overlayClassName, ...props }, ref) => {
+  const isFormal = animationVariant === 'formal';
+
+  return (
   <DialogPortal>
-    <DialogOverlay />
+    {isFormal ? (
+      <DialogPrimitive.Overlay
+        className={cn(
+          'legal-modal-overlay fixed inset-0 z-50 bg-black/70',
+          overlayClassName,
+        )}
+      />
+    ) : (
+      <DialogOverlay className={overlayClassName} />
+    )}
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-1/2 top-1/2 z-50 max-h-[90dvh] w-[calc(100vw-1.5rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-2xl bg-background p-4 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:w-full sm:p-6",
-        frameless
-          ? "flex flex-col overflow-hidden rounded-2xl border-0 border-none outline-none ring-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0"
-          : "grid overflow-y-auto border",
-        className
+        isFormal
+          ? 'legal-modal-content fixed inset-0 z-50 flex max-h-none w-auto max-w-none translate-x-0 translate-y-0 items-center justify-center gap-0 border-0 bg-transparent p-4 shadow-none outline-none sm:p-6'
+          : 'fixed left-1/2 top-1/2 z-50 max-h-[90dvh] w-[calc(100vw-1.5rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-2xl bg-background p-4 shadow-lg duration-200 sm:w-full sm:p-6 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]',
+        !isFormal && 'shadow-lg',
+        !isFormal &&
+          (frameless
+            ? 'flex flex-col overflow-hidden rounded-2xl border-0 border-none outline-none ring-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0'
+            : 'grid overflow-y-auto border'),
+        !isFormal && className,
       )}
       {...props}
     >
-      {children}
+      {isFormal ? (
+        <div
+          className={cn(
+            'legal-modal-panel pointer-events-auto flex max-h-[92dvh] w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-2xl bg-background shadow-[0_20px_60px_-15px_rgba(0,0,0,0.45)] sm:w-full',
+            frameless
+              ? 'border-0 border-none ring-0'
+              : 'border',
+            className,
+          )}
+        >
+          {children}
+        </div>
+      ) : (
+        children
+      )}
       {!hideCloseButton ? (
         <DialogPrimitive.Close
           className={cn(
@@ -67,7 +101,8 @@ const DialogContent = React.forwardRef<
       ) : null}
     </DialogPrimitive.Content>
   </DialogPortal>
-))
+  );
+})
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
 const DialogHeader = ({
