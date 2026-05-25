@@ -1,0 +1,432 @@
+/* ─────────────────────────────────────────────────
+   GastroCentro — Dashboard Dark Premium
+   Tokens e utilitários visuais (escopo .dark)
+   ───────────────────────────────────────────────── */
+
+.dark {
+  --gc-bg-main: #0b1220;
+  --gc-bg-sidebar: #071a33;
+  --gc-bg-header: rgba(15, 23, 42, 0.86);
+  --gc-bg-card: #111827;
+  --gc-bg-card-hover: #162033;
+  --gc-bg-elevated: #1b2435;
+  --gc-border-soft: rgba(148, 163, 184, 0.16);
+  --gc-border-strong: rgba(148, 163, 184, 0.26);
+  --gc-text-primary: #f8fafc;
+  --gc-text-secondary: #aab6c8;
+  --gc-text-muted: #6b778c;
+  --gc-accent-orange: #ff6b3d;
+  --gc-accent-orange-hover: #f45a2a;
+  --gc-accent-blue: #38bdf8;
+  --gc-accent-cyan: #22d3ee;
+  --gc-success: #22c55e;
+  --gc-warning: #f59e0b;
+  --gc-radius-sm: 10px;
+  --gc-radius-md: 16px;
+  --gc-radius-lg: 22px;
+  --gc-radius-xl: 28px;
+  --gc-shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.18);
+  --gc-shadow-md: 0 18px 50px rgba(0, 0, 0, 0.24);
+  --gc-shadow-lg: 0 28px 80px rgba(0, 0, 0, 0.34);
+  --gc-shadow-orange: 0 8px 28px rgba(255, 107, 61, 0.22);
+}
+
+/* Fundo geral com profundidade */
+.dark .gc-app-shell {
+  background:
+    radial-gradient(circle at top right, rgba(34, 211, 238, 0.08), transparent 32%),
+    radial-gradient(circle at bottom left, rgba(255, 107, 61, 0.05), transparent 30%),
+    var(--gc-bg-main);
+}
+
+.dark .gc-main-surface {
+  background: linear-gradient(180deg, rgba(11, 18, 32, 0.55) 0%, rgba(11, 18, 32, 0.72) 100%);
+  border-color: var(--gc-border-soft);
+  box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.06);
+}
+
+/* Cards premium */
+.dark .premium-card {
+  background: linear-gradient(180deg, rgba(17, 24, 39, 0.96), rgba(15, 23, 42, 0.96));
+  border: 1px solid var(--gc-border-soft);
+  border-radius: var(--gc-radius-lg);
+  box-shadow: var(--gc-shadow-sm);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dark .premium-card {
+    transition:
+      transform 220ms ease,
+      box-shadow 220ms ease,
+      border-color 220ms ease,
+      background-color 220ms ease;
+  }
+
+  .dark .premium-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(56, 189, 248, 0.28);
+    box-shadow: var(--gc-shadow-md);
+  }
+}
+
+/* Sidebar */
+.dark .gc-sidebar-shell {
+  background: linear-gradient(180deg, #071a33 0%, #061528 100%);
+  border-color: rgba(148, 163, 184, 0.12);
+  box-shadow: var(--gc-shadow-sm);
+}
+
+.dark .gc-sidebar-header {
+  background: linear-gradient(180deg, rgba(6, 21, 40, 0.98) 0%, rgba(7, 26, 51, 0.92) 100%);
+  border-color: rgba(148, 163, 184, 0.1);
+}
+
+.dark .gc-sidebar-item {
+  border-radius: 16px;
+  font-size: 0.9375rem;
+  letter-spacing: 0.01em;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dark .gc-sidebar-item {
+    transition:
+      background-color 220ms ease,
+      color 220ms ease,
+      box-shadow 220ms ease,
+      transform 220ms ease;
+  }
+
+.dark .gc-sidebar-item:not(.gc-sidebar-item--active):hover {
+  background: rgba(148, 163, 184, 0.1);
+  color: #fff;
+}
+}
+
+.dark .gc-sidebar-item--active {
+  background: linear-gradient(135deg, #ff6b3d 0%, #f45a2a 100%);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: var(--gc-shadow-orange);
+}
+
+.dark .gc-sidebar-item:not(.gc-sidebar-item--active) {
+  color: rgba(248, 250, 252, 0.88);
+}
+
+.dark .gc-sidebar-footer {
+  border-color: rgba(148, 163, 184, 0.1);
+}
+
+.dark .gc-sidebar-footer button {
+  color: rgba(170, 182, 200, 0.72);
+  font-size: 0.75rem;
+}
+
+.dark .gc-sidebar-footer button:hover {
+  color: rgba(248, 250, 252, 0.9);
+}
+
+.dark .gc-sidebar-footer .gc-version {
+  color: rgba(107, 119, 140, 0.85);
+  font-size: 0.6875rem;
+}
+
+/* Header */
+.dark .gc-header-shell {
+  background: var(--gc-bg-header);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: var(--gc-radius-lg);
+  box-shadow: var(--gc-shadow-sm);
+}
+
+.dark .gc-theme-toggle {
+  border-radius: 12px;
+  border: 1px solid var(--gc-border-soft);
+  background: rgba(27, 36, 53, 0.6);
+  color: var(--gc-text-secondary);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dark .gc-theme-toggle {
+    transition: background-color 220ms ease, border-color 220ms ease, color 220ms ease, box-shadow 220ms ease;
+  }
+}
+
+.dark .gc-theme-toggle:hover {
+  background: rgba(27, 36, 53, 0.95);
+  border-color: rgba(56, 189, 248, 0.28);
+  color: var(--gc-text-primary);
+}
+
+.dark .gc-theme-toggle:focus-visible {
+  outline: 2px solid var(--gc-accent-blue);
+  outline-offset: 2px;
+}
+
+.dark .gc-user-trigger {
+  border-radius: 14px;
+  border: 1px solid transparent;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dark .gc-user-trigger {
+    transition: background-color 220ms ease, border-color 220ms ease;
+  }
+}
+
+.dark .gc-user-trigger:hover {
+  background: rgba(27, 36, 53, 0.75);
+  border-color: var(--gc-border-soft);
+}
+
+.dark .gc-user-avatar {
+  border-color: rgba(56, 189, 248, 0.35);
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.12), 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* Banner de boas-vindas */
+.dark .gc-welcome-banner {
+  border-radius: var(--gc-radius-lg);
+  border: 1px solid var(--gc-border-soft);
+  background:
+    radial-gradient(circle at 86% 50%, rgba(34, 211, 238, 0.18), transparent 32%),
+    radial-gradient(circle at 92% 30%, rgba(255, 107, 61, 0.14), transparent 24%),
+    linear-gradient(135deg, #111827 0%, #0b2447 100%);
+  box-shadow: var(--gc-shadow-md);
+  overflow: hidden;
+}
+
+.dark .gc-welcome-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/logo-menu-recolhido.png") no-repeat 92% 50%;
+  background-size: clamp(5rem, 18vw, 9rem);
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+.dark .gc-welcome-name {
+  background: linear-gradient(90deg, var(--gc-accent-blue), var(--gc-accent-cyan));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Métricas */
+.dark .gc-metric-card {
+  min-height: 8.5rem;
+}
+
+.dark .gc-metric-value {
+  font-size: clamp(1.625rem, 2.5vw, 2rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--gc-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.dark .gc-metric-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--gc-text-secondary);
+}
+
+.dark .gc-metric-icon-wrap {
+  border: 1px solid var(--gc-border-soft);
+  backdrop-filter: blur(8px);
+}
+
+.dark .gc-progress-premium {
+  height: 0.5rem;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.14);
+}
+
+.dark .gc-progress-premium > div {
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--gc-accent-orange), var(--gc-accent-blue)) !important;
+}
+
+/* Seção de aulas */
+.dark .gc-section-title-accent {
+  color: var(--gc-accent-orange);
+}
+
+.dark .gc-section-link {
+  color: var(--gc-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dark .gc-section-link {
+    transition: color 220ms ease;
+  }
+
+  .dark .gc-section-link svg {
+    transition: transform 220ms ease;
+  }
+
+  .dark .gc-section-link:hover {
+    color: var(--gc-accent-cyan);
+  }
+
+  .dark .gc-section-link:hover svg {
+    transform: translateX(3px);
+  }
+}
+
+/* Cards de aula — layout empilhado (dark) */
+.dark .gc-lesson-card--stacked {
+  border: 1px solid var(--gc-border-soft);
+  box-shadow: var(--gc-shadow-sm);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dark .gc-lesson-card--stacked {
+    transition:
+      transform 220ms ease,
+      box-shadow 220ms ease,
+      border-color 220ms ease;
+  }
+
+  .dark .gc-lesson-card--stacked:hover {
+    transform: translateY(-3px);
+    border-color: rgba(34, 211, 238, 0.32);
+    box-shadow: var(--gc-shadow-md);
+  }
+}
+
+.dark .gc-lesson-module-badge {
+  border-color: rgba(56, 189, 248, 0.28);
+  background: rgba(56, 189, 248, 0.1);
+  color: var(--gc-accent-cyan);
+}
+
+.dark .gc-lesson-card-title {
+  color: var(--gc-text-primary);
+}
+
+.dark .gc-lesson-card-desc {
+  color: var(--gc-text-secondary);
+}
+
+.dark .gc-lesson-card-media-wrap {
+  background: rgba(15, 23, 42, 0.6);
+}
+
+/* Legado overlay — apenas se não usar --stacked */
+.dark .gc-lesson-card:not(.gc-lesson-card--stacked) {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--gc-radius-md);
+  border: 1px solid var(--gc-border-soft);
+  box-shadow: var(--gc-shadow-sm);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dark .gc-lesson-card:not(.gc-lesson-card--stacked) {
+    transition:
+      transform 220ms ease,
+      box-shadow 220ms ease,
+      border-color 220ms ease;
+  }
+
+  .dark .gc-lesson-card:not(.gc-lesson-card--stacked):hover {
+    transform: translateY(-3px);
+    border-color: rgba(34, 211, 238, 0.32);
+    box-shadow: var(--gc-shadow-md);
+  }
+
+  .dark .gc-lesson-card:not(.gc-lesson-card--stacked):hover .gc-lesson-card-media {
+    transform: scale(1.03);
+  }
+}
+
+.dark .gc-lesson-card-media {
+  object-fit: cover;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dark .gc-lesson-card-media {
+    transition: transform 280ms ease;
+  }
+}
+
+.dark .gc-lesson-card-overlay {
+  background: linear-gradient(
+    180deg,
+    transparent 35%,
+    rgba(2, 8, 23, 0.45) 65%,
+    rgba(2, 8, 23, 0.92) 100%
+  );
+}
+
+.dark .gc-lesson-badge {
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(2, 8, 23, 0.55);
+  backdrop-filter: blur(10px);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(248, 250, 252, 0.92);
+}
+
+.dark .gc-lesson-play-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.92);
+  color: #0b2447;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dark .gc-lesson-play-btn {
+    transition: transform 220ms ease, opacity 220ms ease;
+  }
+
+  .dark .gc-lesson-card:hover .gc-lesson-play-btn {
+    transform: scale(1.08);
+  }
+}
+
+/* Chat flutuante */
+.dark .gc-chat-fab {
+  background: linear-gradient(135deg, #ff6b3d 0%, #f45a2a 100%);
+  box-shadow: 0 10px 28px rgba(255, 107, 61, 0.28);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dark .gc-chat-fab {
+    transition: transform 220ms ease, box-shadow 220ms ease;
+  }
+
+  .dark .gc-chat-fab:hover {
+    transform: scale(1.04);
+    box-shadow: 0 14px 36px rgba(255, 107, 61, 0.34);
+  }
+}
+
+.dark .gc-chat-header {
+  background: linear-gradient(135deg, #0b2447 0%, #111827 100%);
+  border-color: var(--gc-border-soft);
+  color: var(--gc-text-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dark .premium-card:hover,
+  .dark .gc-sidebar-item:not(.gc-sidebar-item--active):hover,
+  .dark .gc-lesson-card:not(.gc-lesson-card--stacked):hover,
+  .dark .gc-lesson-card--stacked:hover,
+  .dark .gc-lesson-card:not(.gc-lesson-card--stacked):hover .gc-lesson-card-media,
+  .dark .gc-lesson-card--stacked:hover .gc-lesson-card-media-wrap .gc-lesson-card-media,
+  .dark .gc-lesson-card--stacked:hover .gc-lesson-card-media-wrap video,
+  .dark .gc-chat-fab:hover,
+  .dark .gc-section-link:hover svg {
+    transform: none;
+  }
+}

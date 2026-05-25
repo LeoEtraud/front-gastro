@@ -62,14 +62,14 @@ export function FloatingChatButton({
     <div className="fixed bottom-4 right-4 z-50 sm:bottom-6 sm:right-6">
       {isOpen && (
         <div className="mb-3 flex h-[70vh] w-[calc(100vw-2rem)] max-h-[620px] max-w-sm flex-col overflow-hidden rounded-2xl border border-border/70 bg-background/95 shadow-2xl backdrop-blur supports-[backdrop-filter]:bg-background/80">
-          <header className="flex items-center justify-between border-b border-slate-600 bg-slate-700 px-4 py-3 text-white">
+          <header className="gc-chat-header flex items-center justify-between border-b px-4 py-3 text-foreground">
             <div className="flex items-center gap-2">
-              <div className="rounded-full bg-white/15 p-2 text-white">
+              <div className="rounded-full bg-primary/15 p-2 text-primary">
                 <Bot className="h-4 w-4" />
               </div>
               <div>
                 <p className="text-sm font-semibold leading-none">{title}</p>
-                <p className="text-xs text-white/80">
+                <p className="text-xs text-muted-foreground">
                   Tire suas dúvidas em tempo real
                 </p>
               </div>
@@ -78,7 +78,7 @@ export function FloatingChatButton({
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white/85 transition-colors hover:bg-white/15 hover:text-white"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               aria-label="Fechar chat"
             >
               <X className="h-4 w-4" />
@@ -175,7 +175,7 @@ export function FloatingChatButton({
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-gc-coral text-white shadow-[0_8px_24px_-6px_rgba(255,107,53,0.45)] transition hover:scale-[1.03] hover:bg-[#e85f2d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gc-coral focus-visible:ring-offset-2"
+          className="gc-chat-fab inline-flex h-[3.25rem] w-[3.25rem] items-center justify-center rounded-full bg-gc-coral text-white shadow-[0_10px_28px_rgba(255,107,61,0.28)] transition hover:bg-[#f45a2a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gc-coral/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none sm:h-14 sm:w-14"
           aria-label="Abrir chat"
         >
           <MessageCircle className="h-6 w-6" />

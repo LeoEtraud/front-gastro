@@ -258,15 +258,15 @@ function LessonPreviewCard({
       <Link
         to={`/student/courses/${courseId}/lessons/${lesson.id}`}
         className={cn(
-          'group relative flex aspect-[4/5] w-full min-w-0 cursor-pointer overflow-hidden rounded-2xl border border-border/80 bg-card shadow-md sm:aspect-[3/4]',
-          'transition-all duration-300 ease-out motion-reduce:transition-none motion-reduce:hover:translate-y-0 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/12 dark:hover:shadow-black/40',
+          'group gc-lesson-card gc-lesson-card--stacked w-full min-w-0 cursor-pointer border border-border/80 bg-card',
+          'transition-all duration-300 ease-out motion-reduce:transition-none',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           className,
         )}
         aria-label={label}
       >
         <div
-          className="absolute inset-0 cursor-pointer"
+          className="gc-lesson-card-media-wrap"
           onMouseEnter={canPreview ? handlePreviewStart : undefined}
           onMouseLeave={canPreview ? handlePreviewStop : undefined}
         >
@@ -275,10 +275,7 @@ function LessonPreviewCard({
               src={ytPoster}
               alt=""
               loading="lazy"
-              className={cn(
-                'pointer-events-none absolute inset-0 z-[1] h-full w-full object-cover transition-transform duration-500 ease-out motion-reduce:transition-none motion-reduce:group-hover:scale-100',
-                isHovering ? 'scale-[1.02]' : 'group-hover:scale-[1.03]',
-              )}
+              className={cn('gc-lesson-card-media', isHovering && 'scale-[1.03]')}
             />
           ) : null}
           {hostedSrc ? (
@@ -290,10 +287,7 @@ function LessonPreviewCard({
               preload={hostedPreloadStrategy}
               loop
               onLoadedMetadata={handleHostedMetadata}
-              className={cn(
-                'preview-video pointer-events-none absolute inset-0 z-[1] h-full w-full object-cover transition-transform duration-300 motion-reduce:transition-none',
-                isHovering ? 'scale-[1.03]' : 'scale-100 motion-reduce:group-hover:scale-100 group-hover:scale-[1.02]',
-              )}
+              className={cn('gc-lesson-card-media preview-video', isHovering && 'scale-[1.03]')}
               aria-hidden
             />
           ) : null}
@@ -302,10 +296,7 @@ function LessonPreviewCard({
               src={coverSrc}
               alt=""
               loading="lazy"
-              className={cn(
-                'pointer-events-none absolute inset-0 z-[1] h-full w-full object-cover transition-transform duration-500 motion-reduce:transition-none motion-reduce:group-hover:scale-100',
-                isHovering ? 'scale-[1.02]' : 'group-hover:scale-105',
-              )}
+              className={cn('gc-lesson-card-media', isHovering && 'scale-[1.03]')}
             />
           ) : null}
           {!ytPoster && !hostedSrc && !coverSrc ? (
@@ -330,13 +321,7 @@ function LessonPreviewCard({
             />
           ) : null}
 
-          <div
-            className={cn(
-              'pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-black/75 via-black/20 to-transparent transition-opacity duration-300 motion-reduce:transition-none',
-              isHovering ? 'opacity-100' : 'opacity-90 group-hover:opacity-100',
-            )}
-            aria-hidden
-          />
+          <div className="gc-lesson-card-media-scrim" aria-hidden />
 
           {isHovering && canPreview ? (
             <div className="pointer-events-auto absolute right-2 top-2 z-[8] flex flex-col gap-1.5">
@@ -383,22 +368,24 @@ function LessonPreviewCard({
           `}</style>
         </div>
 
-        <div className="pointer-events-none relative z-[6] mt-auto flex flex-col gap-1 p-3 sm:p-4">
-          <span className="inline-flex w-fit max-w-full truncate rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground/90 backdrop-blur-sm sm:text-[11px]">
+        <div className="gc-lesson-card-body">
+          <span className="gc-lesson-module-badge truncate">
             {normalizePtBrText(lesson.moduleTitle)}
           </span>
-          <h3 className="line-clamp-2 font-display text-sm font-bold leading-tight text-white drop-shadow-sm sm:text-base">
-            {normalizePtBrText(lesson.title).toLocaleUpperCase('pt-BR')}
+          <h3 className="gc-lesson-card-title line-clamp-2">
+            {normalizePtBrText(lesson.title)}
           </h3>
-          <p className="line-clamp-2 text-[11px] leading-relaxed text-white/90 drop-shadow-sm sm:text-xs">{subtitleText}</p>
-          <div className="flex flex-wrap gap-1 pt-0.5">
-            <span className="inline-flex rounded-full border border-white/30 bg-black/25 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/95 backdrop-blur-sm sm:text-[11px]">
+          {subtitleText ? (
+            <p className="gc-lesson-card-desc line-clamp-2">{subtitleText}</p>
+          ) : null}
+          <div className="mt-auto flex flex-wrap gap-1.5 pt-1">
+            <Badge variant="outline" className="px-2 py-0 text-[10px] font-semibold uppercase tracking-wide sm:text-[11px]">
               {lesson.type}
-            </span>
+            </Badge>
             {lesson.isCompleted ? (
-              <span className="inline-flex rounded-full bg-emerald-500/90 px-2 py-0.5 text-[10px] font-semibold text-white sm:text-[11px]">
+              <Badge className="bg-emerald-600 px-2 py-0 text-[10px] font-semibold hover:bg-emerald-600 sm:text-[11px]">
                 Assistida
-              </span>
+              </Badge>
             ) : null}
           </div>
         </div>
@@ -568,11 +555,11 @@ function DashboardInfoCard({
   href?: string;
 }) {
   const card = (
-    <Card className="h-full border-border/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:shadow-none">
-      <CardContent className="flex h-[7.75rem] items-center gap-3 overflow-hidden p-3 sm:h-[8rem] sm:p-4">
+    <Card className="premium-card gc-metric-card h-full border-border/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:shadow-none">
+      <CardContent className="flex h-[8rem] items-center gap-3.5 overflow-hidden p-4 sm:h-[8.5rem] sm:p-5">
         <div
           className={cn(
-            'flex h-10 w-10 shrink-0 items-center justify-center self-center rounded-full',
+            'gc-metric-icon-wrap flex h-11 w-11 shrink-0 items-center justify-center self-center rounded-full',
             iconWrapClass,
           )}
         >
@@ -631,9 +618,9 @@ export function SingleCourseHomeExperience({ home }: Props) {
   const totalModules = home.mural.modulesSummary.length;
 
   return (
-    <div className="w-full min-w-0 space-y-4 sm:space-y-5">
+    <div className="w-full min-w-0 space-y-6 sm:space-y-8">
       {/* Banner de boas-vindas */}
-      <div className="relative overflow-hidden rounded-xl border border-border/80 bg-gradient-to-br from-card via-gc-ice/90 to-primary/[0.06] shadow-sm dark:from-card dark:via-muted/80 dark:to-primary/10">
+      <div className="gc-welcome-banner relative overflow-hidden rounded-[22px] border border-border/80 bg-gradient-to-br from-card via-gc-ice/90 to-primary/[0.06] shadow-sm dark:border-border/80">
         <div
           className="pointer-events-none absolute -left-8 -top-8 h-32 w-32 rounded-full bg-primary/10 blur-2xl dark:bg-primary/5"
           aria-hidden
@@ -647,37 +634,28 @@ export function SingleCourseHomeExperience({ home }: Props) {
           aria-hidden
         />
 
-        <div className="relative flex flex-col sm:flex-row sm:items-stretch">
-          <div className="flex flex-1 flex-col justify-center border-b border-border/40 px-5 py-5 sm:border-b-0 sm:border-r sm:px-7 sm:py-6">
-            <h1 className="font-display text-xl font-bold leading-tight sm:text-2xl md:text-3xl">
-              <span className="text-gc-text dark:text-foreground">Olá, </span>
-              <span className="bg-gradient-to-r from-primary via-primary to-gc-teal bg-clip-text text-transparent">
-                {firstName ? normalizePtBrText(firstName) : 'visitante'}
-              </span>
-              <span className="text-gc-text dark:text-foreground">! </span>
-              <span aria-hidden>👋</span>
-            </h1>
-            <p className="mt-2 max-w-md text-sm leading-relaxed text-gc-gray-text dark:text-muted-foreground sm:text-[15px]">
-              Continue sua jornada de aprendizado e{' '}
-              <span className="font-medium text-gc-text/90 dark:text-foreground/90">evolua constantemente</span>. Cada aula concluída é um
-              passo a mais no avanço da sua carreira.
-            </p>
-          </div>
-          <div className="relative flex min-h-36 shrink-0 self-stretch overflow-hidden bg-gradient-to-br from-primary/[0.04] to-gc-teal/[0.06] sm:min-h-0 sm:w-44 md:w-52 lg:w-60">
-            <img
-              src="/boas-vindas.jpg"
-              alt=""
-              className="h-full min-h-0 w-full object-cover object-center"
-            />
-          </div>
+        <div className="relative flex flex-col justify-center px-6 py-7 sm:px-8 sm:py-9 md:px-10 md:py-10">
+          <h1 className="font-display text-[1.75rem] font-bold leading-tight sm:text-[2rem] md:text-[2.25rem]">
+            <span className="text-gc-text dark:text-foreground">Olá, </span>
+            <span className="bg-gradient-to-r from-primary via-primary to-gc-teal bg-clip-text text-transparent dark:gc-welcome-name">
+              {firstName ? normalizePtBrText(firstName) : 'visitante'}
+            </span>
+            <span className="text-gc-text dark:text-foreground">! </span>
+            <span aria-hidden className="inline-block align-middle">👋</span>
+          </h1>
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-gc-gray-text dark:text-muted-foreground sm:text-[15px] sm:leading-7">
+            Continue sua jornada de aprendizado e{' '}
+            <span className="font-medium text-gc-text/90 dark:text-foreground/90">evolua constantemente</span>. Cada aula concluída é um
+            passo a mais no avanço da sua carreira.
+          </p>
         </div>
       </div>
 
       {/* 4 cards informativos */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 [&>*]:h-full [&>*]:min-w-0">
+      <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4 [&>*]:h-full [&>*]:min-w-0">
         <DashboardInfoCard
           icon={<Target className="h-5 w-5 text-orange-500" aria-hidden />}
-          iconWrapClass="bg-orange-100 dark:bg-orange-500/15"
+          iconWrapClass="bg-orange-100 dark:bg-orange-500/12 dark:text-orange-400"
           footer={
             <p className="text-[10px] leading-snug text-muted-foreground">
               {completedLessons} de {totalPublishedLessons} aula{totalPublishedLessons !== 1 ? 's' : ''} concluída
@@ -685,14 +663,14 @@ export function SingleCourseHomeExperience({ home }: Props) {
             </p>
           }
         >
-          <p className="text-xl font-bold tabular-nums leading-none text-foreground sm:text-2xl">{progressRounded}%</p>
-          <p className="text-xs font-medium text-muted-foreground">Meu Progresso</p>
-          <Progress value={home.mural.progressPercent} className="mt-1.5 h-1" />
+          <p className="gc-metric-value">{progressRounded}%</p>
+          <p className="gc-metric-label">Meu Progresso</p>
+          <Progress value={home.mural.progressPercent} className="gc-progress-premium mt-2" />
         </DashboardInfoCard>
 
         <DashboardInfoCard
           icon={<PlayCircle className="h-5 w-5 text-teal-500" aria-hidden />}
-          iconWrapClass="bg-teal-100 dark:bg-teal-500/15"
+          iconWrapClass="bg-teal-100 dark:bg-teal-500/12 dark:text-teal-400"
           href={nextLesson && !isCourseCompleted ? `/student/courses/${home.courseId}/lessons/${nextLesson.lessonId}` : undefined}
           footer={
             nextLesson && !isCourseCompleted ? (
@@ -700,19 +678,19 @@ export function SingleCourseHomeExperience({ home }: Props) {
             ) : undefined
           }
         >
-          <p className="line-clamp-2 text-base font-bold leading-snug text-foreground sm:text-lg">
+          <p className="line-clamp-2 text-base font-bold leading-snug text-foreground sm:text-lg dark:gc-metric-value dark:text-[1.125rem] dark:sm:text-xl">
             {nextLesson && !isCourseCompleted
               ? normalizePtBrText(nextLesson.title)
               : totalPublishedLessons === 0
                 ? 'Nenhuma aula publicada'
                 : 'Curso concluído! 🎉'}
           </p>
-          <p className="text-xs font-medium text-muted-foreground">Próxima Aula</p>
+          <p className="gc-metric-label">Próxima Aula</p>
         </DashboardInfoCard>
 
         <DashboardInfoCard
           icon={<LayoutList className="h-5 w-5 text-yellow-500" aria-hidden />}
-          iconWrapClass="bg-yellow-100 dark:bg-yellow-500/15"
+          iconWrapClass="bg-yellow-100 dark:bg-yellow-500/12 dark:text-yellow-400"
           footer={
             <p className="text-[10px] leading-snug text-muted-foreground">
               {totalModules > 0
@@ -721,33 +699,38 @@ export function SingleCourseHomeExperience({ home }: Props) {
             </p>
           }
         >
-          <p className="text-xl font-bold tabular-nums leading-none text-foreground sm:text-2xl">{remainingLessons}</p>
-          <p className="text-xs font-medium text-muted-foreground">Aulas Restantes</p>
+          <p className="gc-metric-value">{remainingLessons}</p>
+          <p className="gc-metric-label">Aulas Restantes</p>
         </DashboardInfoCard>
 
         <DashboardInfoCard
           icon={<Clock className="h-5 w-5 text-slate-500 dark:text-slate-400" aria-hidden />}
-          iconWrapClass="bg-slate-100 dark:bg-slate-500/15"
+          iconWrapClass="bg-slate-100 dark:bg-slate-500/12 dark:text-slate-300"
           footer={<p className="text-[10px] leading-snug text-muted-foreground">De conteúdo completo</p>}
         >
-          <p className="text-xl font-bold tabular-nums leading-none text-foreground sm:text-2xl">
+          <p className="gc-metric-value">
             {home.workloadHours != null && home.workloadHours > 0 ? `${home.workloadHours}h` : '—'}
           </p>
-          <p className="text-xs font-medium text-muted-foreground">Carga Horária Total</p>
+          <p className="gc-metric-label">Carga Horária Total</p>
         </DashboardInfoCard>
       </div>
 
       {/* Seção de aulas em destaque */}
-      <section aria-labelledby="lessons-heading" className="space-y-2 sm:space-y-2.5">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <h2 id="lessons-heading" className="min-w-0 break-words font-display text-base font-bold sm:text-lg">
-            <span className="text-gc-coral">Início do módulo</span>
-            {" "}
-            <span className="text-foreground">— aulas em destaque</span>
-          </h2>
+      <section aria-labelledby="lessons-heading" className="space-y-4 sm:space-y-5">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0 space-y-1.5">
+            <h2 id="lessons-heading" className="min-w-0 break-words font-display text-lg font-bold sm:text-xl md:text-2xl">
+              <span className="gc-section-title-accent text-gc-coral">Início do módulo</span>
+              {' '}
+              <span className="text-foreground">— aulas em destaque</span>
+            </h2>
+            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              Continue de onde parou ou avance para os próximos conteúdos recomendados.
+            </p>
+          </div>
           <Link
             to={`/student/courses/${home.courseId}/lessons/start`}
-            className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-foreground transition-colors hover:text-primary hover:underline"
+            className="gc-section-link inline-flex shrink-0 items-center gap-1 hover:underline"
           >
             Ver todas as aulas
             <ChevronRight className="h-4 w-4" aria-hidden />
@@ -760,7 +743,7 @@ export function SingleCourseHomeExperience({ home }: Props) {
               {featuredLessons.map((lesson, idx) => (
                 <CarouselItem
                   key={lesson.id}
-                  className="basis-[78%] pl-3 min-[420px]:basis-[58%] sm:basis-1/2 sm:pl-4 lg:basis-1/4"
+                  className="basis-[88%] pl-3 min-[420px]:basis-[62%] sm:basis-[48%] sm:pl-4 md:basis-[38%] lg:basis-[28%] xl:basis-1/4"
                 >
                   <LessonPreviewCard
                     courseId={home.courseId}
@@ -777,9 +760,9 @@ export function SingleCourseHomeExperience({ home }: Props) {
               {fourthLessonPlaceholder ? (
                 <CarouselItem
                   key="lesson-placeholder"
-                  className="basis-[78%] pl-3 min-[420px]:basis-[58%] sm:basis-1/2 sm:pl-4 lg:basis-1/4"
+                  className="basis-[88%] pl-3 min-[420px]:basis-[62%] sm:basis-[48%] sm:pl-4 md:basis-[38%] lg:basis-[28%] xl:basis-1/4"
                 >
-                  <Card className="flex aspect-[4/5] min-h-0 min-w-0 flex-col items-center justify-center border-dashed border-muted-foreground/25 bg-muted/10 px-3 text-center text-xs text-muted-foreground sm:aspect-[3/4] sm:text-sm">
+                  <Card className="gc-lesson-card--stacked premium-card flex min-h-[18rem] min-w-0 flex-col items-center justify-center border-dashed border-muted-foreground/25 bg-muted/10 px-3 text-center text-xs text-muted-foreground sm:min-h-[20rem] sm:text-sm">
                     <p>Sem quarta aula publicada neste módulo.</p>
                   </Card>
                 </CarouselItem>

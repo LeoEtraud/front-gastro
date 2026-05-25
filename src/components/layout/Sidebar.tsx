@@ -28,11 +28,11 @@ interface SidebarProps {
 
 const navItemClass = (isActive: boolean, collapsed: boolean, mobile: boolean) =>
   cn(
-    "flex cursor-pointer items-center rounded-xl transition-colors",
-    collapsed && !mobile ? "justify-center px-0 py-3" : "gap-3 px-4 py-3",
+    "gc-sidebar-item flex cursor-pointer items-center",
+    collapsed && !mobile ? "justify-center px-0 py-3" : "mx-1.5 gap-3 px-4 py-2.5",
     isActive
-      ? "bg-sidebar-active font-semibold text-sidebar-active-foreground shadow-md"
-      : "font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+      ? "gc-sidebar-item--active font-semibold text-sidebar-active-foreground"
+      : "font-medium text-sidebar-foreground",
   );
 
 const iconButtonClass =
@@ -51,13 +51,13 @@ export function Sidebar({
   const footer = (mobile: boolean) => (
     <div
       className={cn(
-        "mt-auto border-t border-sidebar-border pt-4",
+        "mt-auto gc-sidebar-footer border-t border-sidebar-border pt-5",
         collapsed && !mobile ? "px-2" : "px-3",
       )}
     >
       {!collapsed || mobile ? (
-        <div className="space-y-2">
-          <div className="flex flex-col gap-1 text-center text-xs font-medium text-sidebar-foreground/90">
+        <div className="space-y-2.5">
+          <div className="flex flex-col gap-1.5 text-center text-xs font-medium text-sidebar-foreground/75">
             <button
               type="button"
               onClick={openTerms}
@@ -73,7 +73,7 @@ export function Sidebar({
               Política de Privacidade
             </button>
           </div>
-          <p className="text-center text-xs font-medium text-sidebar-muted">Versão {APP_VERSION}</p>
+          <p className="gc-version text-center text-xs font-medium text-sidebar-muted">Versão {APP_VERSION}</p>
         </div>
       ) : (
         <DropdownMenu>
@@ -101,8 +101,8 @@ export function Sidebar({
   );
 
   const renderNav = (mobile = false) => (
-    <nav className={cn("flex flex-1 flex-col overflow-y-auto py-4", collapsed && !mobile ? "px-2" : "px-3")}>
-      <ul className="flex-1 space-y-1.5">
+    <nav className={cn("flex flex-1 flex-col overflow-y-auto py-5", collapsed && !mobile ? "px-2.5" : "px-3.5")}>
+      <ul className="flex-1 space-y-2">
         {links.map((item) => {
           const Icon = item.icon;
           const isActive = location === item.href || location.startsWith(`${item.href}/`);
@@ -135,7 +135,7 @@ export function Sidebar({
   );
 
   const shellClass = cn(
-    "flex h-full flex-col rounded-2xl border border-sidebar-border bg-sidebar text-sidebar-foreground shadow-md transition-all duration-300",
+    "gc-sidebar-shell flex h-full flex-col rounded-[22px] border border-sidebar-border bg-sidebar text-sidebar-foreground shadow-md transition-all duration-300",
   );
 
   const clinicLogo = (compact = false) => (
@@ -145,7 +145,7 @@ export function Sidebar({
       className={cn(
         compact
           ? "h-5 w-5 shrink-0 bg-transparent object-contain"
-          : "block w-72 bg-transparent h-20 object-contain min-w-0",
+          : "block h-[4.25rem] w-full max-w-[15rem] bg-transparent object-contain object-left min-w-0",
       )}
     />
   );
@@ -154,10 +154,10 @@ export function Sidebar({
     <aside className={cn(shellClass, collapsed ? "w-[4.5rem]" : "w-64")}>
       <div
         className={cn(
-          "shrink-0 rounded-t-2xl border-b border-sidebar-border bg-sidebar-header",
+          "shrink-0 gc-sidebar-header rounded-t-[22px] border-b border-sidebar-border bg-sidebar-header",
           collapsed
-            ? "flex h-16 flex-col items-center justify-start gap-0.5 px-1 pb-1.5 pt-2"
-            : "relative flex h-16 items-stretch px-2",
+            ? "flex h-[4.5rem] flex-col items-center justify-start gap-1 px-1 pb-2 pt-3"
+            : "relative flex h-[4.5rem] items-stretch px-3",
         )}
       >
         {!collapsed ? (

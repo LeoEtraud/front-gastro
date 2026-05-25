@@ -55,7 +55,7 @@ function HeaderActions({
       <button
         type="button"
         onClick={onToggleTheme}
-        className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        className="gc-theme-toggle rounded-xl p-2.5 text-muted-foreground transition-colors hover:text-foreground"
         aria-label={theme === "light" ? "Ativar tema escuro" : "Ativar tema claro"}
         title={theme === "light" ? "Tema escuro" : "Tema claro"}
       >
@@ -73,7 +73,7 @@ function HeaderActions({
           <button
             type="button"
             className={cn(
-              "inline-flex min-w-0 items-center gap-2 rounded-xl p-1.5 text-left transition-colors",
+              "gc-user-trigger inline-flex min-w-0 items-center gap-2 rounded-xl p-1.5 text-left transition-colors",
               "hover:bg-muted",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card",
             )}
@@ -81,15 +81,15 @@ function HeaderActions({
             aria-haspopup="menu"
           >
             <span className="flex min-w-0 items-center gap-2 sm:gap-3">
-              <Avatar className="h-9 w-9 shrink-0 border-2 border-border sm:h-10 sm:w-10">
+              <Avatar className="gc-user-avatar h-9 w-9 shrink-0 border-2 sm:h-10 sm:w-10">
                 <AvatarImage src={user.avatarUrl ?? undefined} alt="" className="object-cover" />
                 <AvatarFallback className="bg-primary/15 text-sm font-bold text-primary">{firstLetter}</AvatarFallback>
               </Avatar>
               <span className="hidden min-w-0 max-w-[140px] flex-col sm:flex sm:max-w-[180px]">
-                <span className="truncate text-sm font-semibold uppercase leading-tight tracking-wide">
+                <span className="truncate text-sm font-semibold leading-tight tracking-wide text-foreground">
                   {shortName || user.name}
                 </span>
-                <span className="truncate text-xs leading-tight tracking-wide text-muted-foreground uppercase">
+                <span className="truncate text-[11px] leading-tight tracking-wide text-muted-foreground uppercase">
                   {rLabel}
                 </span>
               </span>
@@ -143,7 +143,7 @@ export function Header({ user, theme, onMenuToggle, onToggleTheme, onLogout }: H
   return (
     <header
       className={cn(
-        "h-12 shrink-0 rounded-2xl border border-border bg-card text-card-foreground shadow-md sm:h-16",
+        "gc-header-shell h-14 shrink-0 rounded-[22px] border border-border bg-card text-card-foreground shadow-md sm:h-[4.25rem]",
       )}
     >
       {/* ── Mobile: menu fixo + imagem centralizada ── */}

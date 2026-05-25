@@ -40,7 +40,7 @@ function SingleCourseInfoCardsSkeleton() {
   );
 }
 
-/** Carrossel horizontal de cards de aula (`visualOnly`, aspecto 4/5 → 3/4). */
+/** Carrossel horizontal de cards de aula empilhados (mídia 16:9 + corpo). */
 function SingleCourseLessonCarouselSkeleton() {
   return (
     <section className="space-y-2 sm:space-y-2.5">
@@ -55,10 +55,19 @@ function SingleCourseLessonCarouselSkeleton() {
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={`lesson-${index}`}
-            className="min-w-0 shrink-0 basis-[78%] pl-0 min-[420px]:basis-[58%] sm:basis-1/2 lg:basis-1/4"
+            className="min-w-0 shrink-0 basis-[88%] min-[420px]:basis-[62%] sm:basis-[48%] md:basis-[38%] lg:basis-[28%] xl:basis-1/4"
           >
-            <div className="overflow-hidden rounded-2xl border border-border/80">
-              <Skeleton className="aspect-[4/5] w-full rounded-none sm:aspect-[3/4]" />
+            <div className="overflow-hidden rounded-[22px] border border-border/80">
+              <Skeleton className="aspect-video min-h-[11.5rem] w-full rounded-none sm:min-h-[13rem]" />
+              <div className="space-y-2 p-4">
+                <Skeleton className="h-4 w-24 rounded-full" />
+                <Skeleton className="h-5 w-full" />
+                <Skeleton className="h-4 w-4/5" />
+                <div className="flex gap-2 pt-1">
+                  <Skeleton className="h-5 w-14 rounded-md" />
+                  <Skeleton className="h-5 w-16 rounded-md" />
+                </div>
+              </div>
             </div>
           </div>
         ))}

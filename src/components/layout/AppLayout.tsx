@@ -55,7 +55,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen gc-app-shell bg-background">
       <Sidebar
         links={links}
           location={location.pathname}
@@ -83,7 +83,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
-          <main className="min-h-0 w-full min-w-0 flex-1 overflow-y-auto overscroll-y-contain rounded-2xl border border-border/90 bg-background/70 p-3 text-card-foreground shadow-inner sm:p-5 md:p-6 lg:p-8 xl:px-10">
+          <main className="gc-main-surface min-h-0 w-full min-w-0 flex-1 overflow-y-auto overscroll-y-contain rounded-[22px] border border-border/90 bg-background/70 p-4 text-card-foreground shadow-inner sm:p-6 md:p-7 lg:p-8 xl:px-10">
             {children}
           </main>
         </div>

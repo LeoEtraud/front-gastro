@@ -1,0 +1,228 @@
+/* ─────────────────────────────────────────────────
+   GastroCentro — Dashboard Light Premium
+   Sidebar, cards de aula empilhados e utilitários compartilhados
+   ───────────────────────────────────────────────── */
+
+:root {
+  --gc-light-radius-nav: 16px;
+  --gc-light-shadow-card: 0 4px 24px -4px rgba(4, 27, 58, 0.09), 0 1px 4px rgba(4, 27, 58, 0.04);
+  --gc-light-shadow-card-hover: 0 12px 36px -8px rgba(4, 27, 58, 0.14);
+  --gc-light-shadow-nav-active: 0 6px 20px rgba(255, 107, 61, 0.32);
+}
+
+/* ── Sidebar (tema claro) ── */
+.gc-sidebar-item {
+  border-radius: var(--gc-light-radius-nav);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gc-sidebar-item {
+    transition:
+      background-color 220ms ease,
+      color 220ms ease,
+      box-shadow 220ms ease,
+      transform 220ms ease;
+  }
+}
+
+:not(.dark) .gc-sidebar-item:not(.gc-sidebar-item--active):hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+:not(.dark) .gc-sidebar-item--active {
+  background: linear-gradient(135deg, hsl(12 100% 62%) 0%, #f45a2a 100%);
+  color: #fff;
+  font-weight: 600;
+  border-radius: var(--gc-light-radius-nav);
+  box-shadow: var(--gc-light-shadow-nav-active);
+}
+
+/* ── Cards de aula empilhados (light + base compartilhada) ── */
+.gc-lesson-card--stacked {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 22px;
+  box-shadow: var(--gc-light-shadow-card);
+}
+
+.gc-lesson-card-media-wrap {
+  position: relative;
+  width: 100%;
+  flex-shrink: 0;
+  aspect-ratio: 16 / 9;
+  min-height: 11.5rem;
+  overflow: hidden;
+  background: hsl(var(--muted));
+}
+
+@media (min-width: 640px) {
+  .gc-lesson-card-media-wrap {
+    min-height: 13rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .gc-lesson-card-media-wrap {
+    min-height: 13.5rem;
+  }
+}
+
+.gc-lesson-card-media-wrap .gc-lesson-card-media,
+.gc-lesson-card-media-wrap video,
+.gc-lesson-card-media-wrap img:not([role="presentation"]) {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gc-lesson-card-media-wrap .gc-lesson-card-media,
+  .gc-lesson-card-media-wrap video,
+  .gc-lesson-card-media-wrap img:not([role="presentation"]) {
+    transition: transform 280ms ease;
+  }
+
+  .gc-lesson-card--stacked:hover .gc-lesson-card-media-wrap .gc-lesson-card-media,
+  .gc-lesson-card--stacked:hover .gc-lesson-card-media-wrap video,
+  .gc-lesson-card--stacked:hover .gc-lesson-card-media-wrap img:not([role="presentation"]) {
+    transform: scale(1.03);
+  }
+}
+
+/* Gradiente leve só na mídia (contraste do play), sem cobrir o card inteiro */
+.gc-lesson-card-media-scrim {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(
+    180deg,
+    transparent 55%,
+    rgba(7, 27, 53, 0.12) 78%,
+    rgba(7, 27, 53, 0.28) 100%
+  );
+}
+
+:not(.dark) .gc-lesson-card-media-scrim {
+  background: linear-gradient(
+    180deg,
+    transparent 60%,
+    rgba(7, 27, 53, 0.08) 85%,
+    rgba(7, 27, 53, 0.18) 100%
+  );
+}
+
+.gc-lesson-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 1.125rem 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .gc-lesson-card-body {
+    padding: 1.125rem 1.25rem 1.375rem;
+  }
+}
+
+.gc-lesson-module-badge {
+  display: inline-flex;
+  max-width: 100%;
+  width: fit-content;
+  border-radius: 999px;
+  border: 1px solid hsl(var(--primary) / 0.2);
+  background: hsl(var(--primary) / 0.08);
+  padding: 0.2rem 0.625rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: hsl(var(--primary));
+}
+
+:not(.dark) .gc-lesson-module-badge {
+  background: rgba(30, 144, 232, 0.1);
+  border-color: rgba(30, 144, 232, 0.22);
+  color: #0e3d6e;
+}
+
+.gc-lesson-card-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: hsl(var(--foreground));
+}
+
+@media (min-width: 640px) {
+  .gc-lesson-card-title {
+    font-size: 1.0625rem;
+  }
+}
+
+.gc-lesson-card-desc {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: hsl(var(--muted-foreground));
+}
+
+:not(.dark) .gc-lesson-play-btn {
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.95);
+  color: hsl(var(--primary));
+  box-shadow: 0 6px 20px rgba(7, 27, 53, 0.18);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :not(.dark) .gc-lesson-card--stacked {
+    transition:
+      transform 220ms ease,
+      box-shadow 220ms ease,
+      border-color 220ms ease;
+  }
+
+  :not(.dark) .gc-lesson-card--stacked:hover {
+    transform: translateY(-3px);
+    border-color: hsl(var(--primary) / 0.28);
+    box-shadow: var(--gc-light-shadow-card-hover);
+  }
+
+  :not(.dark) .gc-lesson-card--stacked:hover .gc-lesson-play-btn {
+    transform: scale(1.06);
+  }
+}
+
+:not(.dark) .premium-card {
+  border-radius: 22px;
+  box-shadow: var(--gc-light-shadow-card);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :not(.dark) .premium-card {
+    transition:
+      transform 220ms ease,
+      box-shadow 220ms ease,
+      border-color 220ms ease;
+  }
+
+  :not(.dark) .premium-card:hover {
+    transform: translateY(-2px);
+    border-color: hsl(var(--primary) / 0.22);
+    box-shadow: var(--gc-light-shadow-card-hover);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :not(.dark) .gc-lesson-card--stacked:hover,
+  :not(.dark) .gc-lesson-card--stacked:hover .gc-lesson-card-media-wrap .gc-lesson-card-media,
+  :not(.dark) .gc-lesson-card--stacked:hover .gc-lesson-card-media-wrap video,
+  :not(.dark) .gc-sidebar-item:not(.gc-sidebar-item--active):hover {
+    transform: none;
+  }
+}
