@@ -1,7 +1,6 @@
 import { Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
-  GC_MEDIA_CARD,
   GC_SECTION_Y,
   GastroContainer,
   GastroSection,
@@ -18,35 +17,46 @@ const COURSE_SLIDE = 'w-[min(76vw,300px)] shrink-0 snap-start';
 
 function CourseCard({ course }: { course: typeof featuredCourses[number] }) {
   return (
-    <Link to="/login" className={cn(GC_MEDIA_CARD, 'block h-full w-full')}>
+    <Link
+      to="/login"
+      className="group relative block h-full w-full min-h-[360px] overflow-hidden rounded-[22px] shadow-[var(--gc-shadow-md)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_50px_-10px_rgba(4,27,58,0.30)] sm:min-h-[400px]"
+    >
       <img
         src={course.imageSrc}
         alt={`Curso ${course.title}`}
         loading="lazy"
-        className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03] motion-reduce:group-hover:scale-100"
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-gc-navy via-gc-navy/50 to-gc-navy/15" />
+      {/* Subtle bottom-only overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-gc-navy/95 via-gc-navy/30 to-transparent" />
+      {/* Very subtle top dark edge */}
+      <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-gc-navy/25 to-transparent" />
 
+      {/* Badge */}
       {course.badge && (
-        <span className="absolute left-4 top-4 rounded-full bg-gc-coral px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+        <span className="absolute left-4 top-4 rounded-full bg-gc-coral px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-[0_2px_8px_rgba(255,107,53,0.45)]">
           {course.badge}
         </span>
       )}
 
+      {/* Play button */}
       <div
         className={cn(
-          'absolute left-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-gc-text shadow-lg transition group-hover:scale-105',
+          'absolute left-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-gc-text shadow-[0_4px_16px_rgba(4,27,58,0.25)] transition-transform duration-200 group-hover:scale-110',
           course.badge ? 'top-14' : 'top-4',
         )}
       >
         <Play className="ml-0.5 h-4 w-4 fill-gc-text" aria-hidden />
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 min-w-0 p-4 sm:p-5">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-gc-teal">
+      {/* Text overlay */}
+      <div className="absolute inset-x-0 bottom-0 min-w-0 p-5">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-gc-teal">
           {course.category}
         </span>
-        <h3 className="mt-1 text-base font-bold leading-snug text-white">{course.title}</h3>
+        <h3 className="mt-1.5 text-[15px] font-bold leading-snug text-white sm:text-base">
+          {course.title}
+        </h3>
       </div>
     </Link>
   );
@@ -81,9 +91,9 @@ export function FeaturedCoursesSection() {
         </div>
 
         {/* ── Desktop: grid ── */}
-        <div className="mt-8 hidden grid-cols-2 gap-5 sm:grid lg:grid-cols-4">
+        <div className="mt-10 hidden grid-cols-2 gap-6 sm:grid lg:grid-cols-4">
           {featuredCourses.map((course) => (
-            <div key={course.id} className="min-h-[360px] sm:min-h-[400px]">
+            <div key={course.id} className="min-h-[370px] sm:min-h-[410px]">
               <CourseCard course={course} />
             </div>
           ))}

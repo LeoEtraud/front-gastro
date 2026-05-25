@@ -28,23 +28,24 @@ export function SpecialtiesSection() {
             slideCount={specialties.length}
             aria-label="Carrossel de especialidades"
           >
-          {specialties.map((spec) => (
-            <div key={spec.id} data-carousel-slide className={GC_MEDIA_CARD_SLIDE}>
-              <Link to="/login" className={cn(GC_MEDIA_CARD, 'block h-full w-full')}>
-                <img
-                  src={spec.imageSrc}
-                  alt={`Especialidade ${spec.name}`}
-                  loading="lazy"
-                  className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03] motion-reduce:group-hover:scale-100"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-gc-navy via-gc-navy/55 to-gc-navy/20" />
-                <div className="absolute inset-x-0 bottom-0 min-w-0 p-4 sm:p-5">
-                  <h3 className="text-base font-bold text-white sm:text-lg">{spec.name}</h3>
-                  <p className="mt-1 text-xs text-white/70 sm:text-sm">{spec.count} conteúdos</p>
-                </div>
-              </Link>
-            </div>
-          ))}
+            {specialties.map((spec) => (
+              <div key={spec.id} data-carousel-slide className={GC_MEDIA_CARD_SLIDE}>
+                <Link to="/login" className={cn(GC_MEDIA_CARD, 'block h-full w-full')}>
+                  <img
+                    src={spec.imageSrc}
+                    alt={`Especialidade ${spec.name}`}
+                    loading="lazy"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
+                  />
+                  {/* Bottom-focused overlay: preserves image detail at the top */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-gc-navy/95 via-gc-navy/35 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 min-w-0 p-5">
+                    <h3 className="text-[15px] font-bold text-white sm:text-base">{spec.name}</h3>
+                    <p className="mt-1 text-xs text-white/65">{spec.count} conteúdos</p>
+                  </div>
+                </Link>
+              </div>
+            ))}
           </GastroHorizontalCarousel>
         </div>
       </GastroContainer>

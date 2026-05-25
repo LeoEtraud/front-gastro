@@ -12,7 +12,7 @@ import {
 } from '@/components/gastrocentro/gastro-nav';
 import { cn } from '@/lib/utils';
 
-const HEADER_HEIGHT = 'h-[84px]';
+const HEADER_HEIGHT = 'h-[88px]';
 
 function NavLink({
   item,
@@ -30,7 +30,7 @@ function NavLink({
       href={item.href}
       onClick={(e) => handleGastroAnchorClick(e, item.href, onNavigate)}
       className={cn(
-        'whitespace-nowrap rounded-lg px-2 py-2 text-[13px] font-bold text-white transition hover:bg-white/10 hover:text-white xl:px-3',
+        'group relative whitespace-nowrap px-2.5 py-2 text-[13px] font-semibold text-white/85 transition-colors duration-150 hover:text-white xl:px-3',
         className,
       )}
     >
@@ -42,6 +42,11 @@ function NavLink({
       ) : (
         item.label
       )}
+      {/* Animated underline indicator */}
+      <span
+        className="absolute inset-x-2.5 bottom-0 h-[2px] origin-left scale-x-0 rounded-full bg-gc-teal transition-transform duration-200 group-hover:scale-x-100 xl:inset-x-3"
+        aria-hidden
+      />
     </a>
   );
 }
@@ -65,8 +70,8 @@ export function GastroHeader() {
         className={cn(
           'gc-font fixed top-0 z-50 w-full border-b transition-all duration-300',
           scrolled
-            ? 'border-white/10 bg-gc-navy/82 shadow-[0_4px_24px_rgba(0,0,0,0.2)] backdrop-blur-md'
-            : 'border-transparent bg-gc-navy/95 backdrop-blur-sm',
+            ? 'border-white/10 bg-gc-navy/88 shadow-[0_4px_28px_rgba(0,0,0,0.22)] backdrop-blur-md'
+            : 'border-transparent bg-gc-navy/97 backdrop-blur-sm',
         )}
       >
         <div
@@ -75,7 +80,7 @@ export function GastroHeader() {
             HEADER_HEIGHT,
           )}
         >
-          {/* Logo — extremo esquerdo */}
+          {/* Logo */}
           <a
             href="#topo"
             onClick={(e) => handleGastroAnchorClick(e, '#topo')}
@@ -88,9 +93,9 @@ export function GastroHeader() {
             />
           </a>
 
-          {/* Navegação — centro (desktop) */}
+          {/* Navigation — center (desktop) */}
           <nav
-            className="hidden min-w-0 items-center justify-center gap-0.5 lg:flex xl:gap-1"
+            className="hidden min-w-0 items-center justify-center gap-0 lg:flex xl:gap-0.5"
             aria-label="Principal"
           >
             {gastroNavItems.map((item) => (
@@ -98,18 +103,26 @@ export function GastroHeader() {
             ))}
           </nav>
 
-          {/* Ações — extremo direito */}
+          {/* Actions — right */}
           <div className="flex shrink-0 items-center justify-self-end gap-1.5 sm:gap-2 lg:gap-3">
-            <div className="hidden items-center gap-3 lg:flex xl:gap-4">
-              <GastroButton href="/login" variant="secondary" className="h-10 whitespace-nowrap px-4 text-[13px] xl:px-5">
+            <div className="hidden items-center gap-3 lg:flex xl:gap-3.5">
+              <GastroButton
+                href="/login"
+                variant="secondary"
+                className="h-[42px] whitespace-nowrap border-white/30 px-5 text-[13px] font-semibold hover:border-white/50 xl:px-6"
+              >
                 Acessar plataforma
               </GastroButton>
-              <GastroButton href={GASTRO_APPOINTMENT_URL} variant="primary" className="h-10 whitespace-nowrap px-4 text-[13px] xl:px-5">
+              <GastroButton
+                href={GASTRO_APPOINTMENT_URL}
+                variant="primary"
+                className="h-[42px] whitespace-nowrap px-5 text-[13px] font-semibold xl:px-6"
+              >
                 Agendar atendimento
               </GastroButton>
             </div>
 
-            {/* Mobile / tablet: Agendar + menu (ícone à direita) */}
+            {/* Mobile / tablet */}
             <div className="flex items-center gap-1 sm:gap-1.5 lg:hidden">
               <GastroButton
                 href={GASTRO_APPOINTMENT_URL}
@@ -123,10 +136,10 @@ export function GastroHeader() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10 shrink-0 text-white hover:bg-white/10"
+                    className="h-10 w-10 shrink-0 rounded-xl text-white hover:bg-white/10"
                     aria-label="Abrir menu de navegação"
                   >
-                    <Menu className="h-6 w-6" />
+                    <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="gc-font w-[min(100vw-1rem,22rem)] border-gc-mid bg-gc-navy text-white">
@@ -139,36 +152,29 @@ export function GastroHeader() {
                         key={item.href}
                         href={item.href}
                         onClick={(e) => handleGastroAnchorClick(e, item.href, closeMobileMenu)}
-                        className="rounded-xl px-3 py-3 font-bold text-white hover:bg-white/10"
+                        className="rounded-xl px-4 py-3 text-[14px] font-semibold text-white/80 transition-colors duration-150 hover:bg-white/10 hover:text-white"
                       >
                         {item.label}
                       </a>
                     ))}
-                    <a
-                      href={GASTRO_APPOINTMENT_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={closeMobileMenu}
-                      className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-full bg-gc-coral px-6 text-sm font-semibold text-white shadow-[0_8px_24px_-6px_rgba(255,107,53,0.45)] hover:bg-[#e85f2d] sm:hidden"
-                    >
-                      Agendar atendimento
-                    </a>
-                    <Link
-                      to="/login"
-                      onClick={closeMobileMenu}
-                      className="mt-3 rounded-full border border-white/35 px-4 py-3 text-center font-semibold text-white hover:bg-white/10 sm:mt-4"
-                    >
-                      Acessar plataforma
-                    </Link>
-                    <a
-                      href={GASTRO_APPOINTMENT_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={closeMobileMenu}
-                      className="mt-2 hidden rounded-full bg-gc-coral px-4 py-3 text-center font-semibold text-white sm:block"
-                    >
-                      Agendar atendimento
-                    </a>
+                    <div className="mt-5 flex flex-col gap-2.5 border-t border-white/10 pt-5">
+                      <a
+                        href={GASTRO_APPOINTMENT_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={closeMobileMenu}
+                        className="inline-flex h-11 w-full items-center justify-center rounded-full bg-gc-coral px-6 text-sm font-semibold text-white shadow-[0_6px_20px_-4px_rgba(255,107,53,0.50)] transition-all duration-200 hover:bg-[#e85f2d] active:scale-[0.97]"
+                      >
+                        Agendar atendimento
+                      </a>
+                      <Link
+                        to="/login"
+                        onClick={closeMobileMenu}
+                        className="inline-flex h-11 w-full items-center justify-center rounded-full border border-white/30 px-6 text-sm font-semibold text-white transition-all duration-150 hover:border-white/50 hover:bg-white/10"
+                      >
+                        Acessar plataforma
+                      </Link>
+                    </div>
                   </nav>
                 </SheetContent>
               </Sheet>

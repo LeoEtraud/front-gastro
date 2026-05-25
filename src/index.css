@@ -268,11 +268,11 @@
   .gc-section {
     width: 100%;
     min-width: 0;
-    padding-inline: clamp(16px, 4vw, 48px);
+    padding-inline: clamp(16px, 4vw, 52px);
   }
 
   .gc-container {
-    width: min(100%, 1240px);
+    width: min(100%, 1280px);
     margin-inline: auto;
     min-width: 0;
   }
@@ -318,7 +318,14 @@
     width: 100%;
     min-width: 0;
     overflow-wrap: break-word;
-    padding: clamp(20px, 2.5vw, 28px);
+    padding: clamp(24px, 2.5vw, 32px);
+    transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gc-card {
+      transition: none;
+    }
   }
 
   img,
@@ -326,4 +333,27 @@
   svg {
     max-width: 100%;
   }
+}
+
+/* ─────────────────────────────────────────────────
+   GastroCentro Design System Tokens
+   ───────────────────────────────────────────────── */
+:root {
+  /* GC shadows */
+  --gc-shadow-sm:   0 2px 8px -2px rgba(4, 27, 58, 0.10);
+  --gc-shadow-md:   0 6px 24px -6px rgba(4, 27, 58, 0.14);
+  --gc-shadow-lg:   0 12px 40px -8px rgba(4, 27, 58, 0.20);
+  --gc-shadow-card: 0 4px 24px -4px rgba(4, 27, 58, 0.09), 0 1px 4px rgba(4, 27, 58, 0.04);
+  --gc-shadow-float: 0 8px 40px -8px rgba(4, 27, 58, 0.18);
+
+  /* GC radii */
+  --gc-radius-sm: 12px;
+  --gc-radius-md: 16px;
+  --gc-radius-lg: 22px;
+  --gc-radius-xl: 28px;
+
+  /* GC overlay (premium lateral gradient for hero) */
+  --gc-hero-overlay-left: rgba(3, 24, 48, 0.97);
+  --gc-hero-overlay-mid:  rgba(5, 38, 72, 0.82);
+  --gc-hero-overlay-end:  rgba(5, 38, 72, 0.45);
 }

@@ -5,17 +5,17 @@ import { cn } from '@/lib/utils';
 /** Padding lateral responsivo da seção — conteúdo interno usa gc-container. */
 export const GC_SECTION = 'gc-section w-full min-w-0';
 
-/** Espaçamento vertical padrão entre seções da landing. */
-export const GC_SECTION_Y = 'py-7 sm:py-9 lg:py-11';
+/** Espaçamento vertical padrão entre seções da landing — mais generoso para respiração. */
+export const GC_SECTION_Y = 'py-14 sm:py-18 lg:py-24';
 
 /** Card de mídia em destaque (especialidades e cursos) — altura e proporção unificadas. */
 export const GC_MEDIA_CARD =
-  'group relative min-h-[360px] min-w-0 overflow-hidden rounded-[18px] shadow-[0_4px_24px_-4px_rgba(4,27,58,0.18)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_-8px_rgba(4,27,58,0.22)] sm:min-h-[400px]';
+  'group relative min-h-[360px] min-w-0 overflow-hidden rounded-[22px] shadow-[var(--gc-shadow-md)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_50px_-10px_rgba(4,27,58,0.30)] sm:min-h-[400px]';
 
 /** Compensa header fixo ao navegar por âncoras (scroll-margin + scrollIntoView). */
 export const GC_SCROLL_ANCHOR = 'scroll-mt-[100px]';
 
-/** Container centralizado: min(100%, 1240px) com margem automática. */
+/** Container centralizado: min(100%, 1280px) com margem automática. */
 export const GC_CONTAINER = 'gc-container min-w-0';
 
 /** Grid fluido para cards médios (Comece por aqui, Especialistas). */
@@ -84,35 +84,35 @@ export function SectionHeader({
     viewAllHref.startsWith('/') ? (
       <Link
         to={viewAllHref}
-        className="group inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-gc-coral transition hover:text-gc-coral/80"
+        className="group inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-gc-coral transition hover:text-gc-coral/80"
       >
         {viewAllLabel}
-        <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" aria-hidden />
+        <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" aria-hidden />
       </Link>
     ) : (
       <a
         href={viewAllHref}
-        className="group inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-gc-coral transition hover:text-gc-coral/80"
+        className="group inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-gc-coral transition hover:text-gc-coral/80"
       >
         {viewAllLabel}
-        <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" aria-hidden />
+        <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" aria-hidden />
       </a>
     )
   ) : null;
 
   return (
     <div className={cn('flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between', className)}>
-      <div className="min-w-0 max-w-3xl">
+      <div className="min-w-0 max-w-2xl">
         <h2
           className={cn(
-            'text-2xl font-extrabold tracking-tight sm:text-[1.75rem]',
+            'text-[1.75rem] font-extrabold leading-tight tracking-tight sm:text-[2rem] lg:text-[2.25rem]',
             dark ? 'text-white' : 'text-gc-text',
           )}
         >
           {title}
         </h2>
         {subtitle ? (
-          <p className={cn('mt-2 text-sm leading-relaxed sm:text-base', dark ? 'text-white/65' : 'text-gc-gray-text')}>
+          <p className={cn('mt-3 text-[15px] leading-relaxed sm:text-base lg:text-[17px]', dark ? 'text-white/65' : 'text-gc-gray-text')}>
             {subtitle}
           </p>
         ) : null}
@@ -134,8 +134,8 @@ export function GastroCard({
   return (
     <div
       className={cn(
-        'gc-card rounded-[18px] border border-gc-border bg-white shadow-[0_4px_24px_-4px_rgba(4,27,58,0.08)]',
-        hover && 'transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_-8px_rgba(4,27,58,0.14)]',
+        'gc-card rounded-[22px] border border-gc-border bg-white shadow-[var(--gc-shadow-card)]',
+        hover && 'hover:-translate-y-1 hover:border-gc-teal/25 hover:shadow-[var(--gc-shadow-lg)]',
         className,
       )}
     >

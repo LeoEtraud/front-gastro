@@ -27,17 +27,20 @@ export function GastroButton({
   ariaLabel,
 }: GastroButtonProps) {
   const base =
-    'inline-flex items-center justify-center rounded-full font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gc-teal focus-visible:ring-offset-2';
+    'inline-flex items-center justify-center rounded-full font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gc-teal focus-visible:ring-offset-2 active:scale-[0.97]';
+
   const sizes = {
-    default: 'h-11 px-6 text-sm',
+    default: 'h-11 px-6 text-[14px]',
     lg: 'h-[52px] px-8 text-[15px]',
   };
+
   const variants = {
-    primary: 'bg-gc-coral text-white shadow-[0_8px_24px_-6px_rgba(255,107,53,0.45)] hover:bg-[#e85f2d]',
+    primary:
+      'bg-gc-coral text-white shadow-[0_6px_20px_-4px_rgba(255,107,53,0.50)] hover:bg-[#e85f2d] hover:shadow-[0_8px_28px_-4px_rgba(255,107,53,0.60)] active:shadow-[0_2px_10px_-2px_rgba(255,107,53,0.40)]',
     secondary:
-      'border border-white/35 bg-white/5 text-white backdrop-blur-sm hover:border-white/60 hover:bg-white/10 focus-visible:ring-offset-gc-navy',
+      'border border-white/35 bg-white/6 text-white backdrop-blur-sm hover:border-white/55 hover:bg-white/12 focus-visible:ring-offset-gc-navy',
     outline:
-      'border border-gc-border bg-white text-gc-text shadow-sm hover:border-gc-teal/40 hover:text-gc-navy focus-visible:ring-offset-gc-ice',
+      'border border-gc-border bg-white text-gc-text shadow-[var(--gc-shadow-sm)] hover:border-gc-teal/40 hover:text-gc-navy hover:shadow-[var(--gc-shadow-md)] focus-visible:ring-offset-gc-ice',
   };
 
   const cls = cn(base, sizes[size], variants[variant], className);
