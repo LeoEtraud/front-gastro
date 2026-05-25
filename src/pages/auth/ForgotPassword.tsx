@@ -6,9 +6,13 @@ import { z } from 'zod';
 import { api } from '@/lib/axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { PasswordResetTimeline, type ResetTimelineStepStatus } from '@/components/auth/PasswordResetTimeline';
-import '@/styles/animations/text-focus-in.css';
+import { AuthLayout } from '@/components/auth/AuthLayout';
+import { ArrowLeft } from 'lucide-react';
+
+/* ── campo de input padrão das páginas de auth ── */
+const authField =
+  'h-12 rounded-[11px] border border-[#D8DEE8] bg-[#F7F9FC] px-4 text-[14.5px] text-gc-text placeholder:text-slate-400 shadow-none transition-[border-color,box-shadow] duration-150 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/15 focus-visible:bg-white focus-visible:ring-offset-0 aria-[invalid=true]:border-red-400 aria-[invalid=true]:focus-visible:ring-red-300/30';
 
 const schema = z.object({
   email: z.string().email('Email inválido'),
@@ -20,28 +24,30 @@ export default function ForgotPassword() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-  });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
-  const timelineStatuses = useMemo((): [
-    ResetTimelineStepStatus,
-    ResetTimelineStepStatus,
-    ResetTimelineStepStatus,
-    ResetTimelineStepStatus,
-  ] => {
-    if (successMsg) {
-      return ['done', 'active', 'todo', 'todo'];
-    }
-    return ['active', 'todo', 'todo', 'todo'];
-  }, [successMsg]);
+  const timelineStatuses = useMemo(
+    (): [
+      ResetTimelineStepStatus,
+      ResetTimelineStepStatus,
+      ResetTimelineStepStatus,
+      ResetTimelineStepStatus,
+    ] => (successMsg ? ['done', 'active', 'todo', 'todo'] : ['active', 'todo', 'todo', 'todo']),
+    [successMsg],
+  );
 
   const onSubmit = async (data: FormValues) => {
     try {
       setErrorMsg('');
       setSuccessMsg('');
       const res = await api.post<{ message: string }>('/auth/forgot-password', { email: data.email });
-      setSuccessMsg(res.data.message || 'Se existir uma conta com este e-mail, você receberá as instruções.');
+      setSuccessMsg(
+        res.data.message || 'Se existir uma conta com este e-mail, você receberá as instruções.',
+      );
     } catch (error: unknown) {
       const msg =
         (error as { response?: { data?: { error?: string } } })?.response?.data?.error ||
@@ -51,77 +57,94 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="grid min-h-dvh overflow-x-hidden bg-slate-50 md:grid-cols-2">
-      <div className="hidden md:flex flex-col justify-center items-center p-12 bg-sidebar text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-30">
-          <img src={`${import.meta.env.BASE_URL}images/doctor-abstract.png`} alt="Medical" className="w-full h-full object-cover" />
-        </div>
-        <div className="relative z-10 max-w-md text-center">
+    <AuthLayout
+      heroBg={`${import.meta.env.BASE_URL}images/doctor-abstract.png`}
+      heroTitle="Redefinir sua senha"
+      heroSubtitle="Informe o e-mail da sua conta e enviaremos um link seguro para você criar uma nova senha."
+    >
+      {/* ── Card ── */}
+      <div className="w-full rounded-[22px] border border-[#E2E8F4] bg-white px-6 py-8 shadow-[0_8px_40px_rgba(7,27,53,0.09),0_1px_4px_rgba(7,27,53,0.05)] sm:px-8 sm:py-10">
+
+        {/* Logo mobile (só aparece em mobile, hero já mostra no desktop) */}
+        <div className="mb-6 flex justify-center md:hidden">
           <img
-            src="/logo-menu-login.png"
-            alt="Gastrocentro"
-            className="mx-auto mb-8 h-20 w-20 object-contain"
-            width={100}
-            height={100}
+            src="/logo-login.png"
+            alt="GastroCentro"
+            className="h-auto w-full max-w-[160px] object-contain"
           />
-          <h2 className="text-focus-in mb-4 font-display text-4xl font-bold text-white">
-            Redefinir sua senha
-          </h2>
-          <p className="text-lg text-white">
-            Informe o e-mail da sua conta e enviaremos um link seguro para você criar uma nova senha.
+        </div>
+
+        {/* Heading */}
+        <div className="mb-7 text-center">
+          <h1 className="font-display text-[28px] font-bold tracking-tight text-gc-text">
+            Esqueci minha senha
+          </h1>
+          <p className="mt-1.5 text-[14px] leading-relaxed text-slate-500">
+            Digite o e-mail cadastrado no GastroCentro.
           </p>
         </div>
-      </div>
 
-      <div className="flex min-w-0 items-center justify-center p-4 sm:p-6">
-        <Card className="w-full max-w-md border-slate-200 shadow-xl">
-          <CardHeader className="space-y-4 pt-6 text-center sm:pt-8">
-            <div className="flex justify-center pb-3">
-              <img
-                src="/logo-menu-login.png"
-                alt="Gastrocentro"
-                className="h-20 w-20 object-contain"
-                width={100}
-                height={100}
-              />
-            </div>
-            <CardTitle className="font-display text-2xl font-bold sm:text-3xl">Esqueci minha senha</CardTitle>
-            <CardDescription className="pt-1">Digite o e-mail cadastrado no GastroCentro</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-5 border-b border-border/60 pb-5">
-              <PasswordResetTimeline statuses={timelineStatuses} />
-            </div>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              {errorMsg && (
-                <div className="p-4 text-sm text-red-600 bg-red-50 rounded-md border border-red-100">
-                  {errorMsg}
-                </div>
-              )}
-              {successMsg && (
-                <div className="p-4 text-sm text-green-800 bg-green-50 rounded-md border border-green-100">
-                  {successMsg}
-                </div>
-              )}
-              <div className="space-y-2.5">
-                <label className="text-sm font-medium">E-mail</label>
-                <Input {...register('email')} placeholder="seu@email.com" className="sm:h-12" type="email" />
-                {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
-              </div>
-              <Button type="submit" className="w-full text-base sm:h-12 sm:text-lg" isLoading={isSubmitting}>
-                Enviar link por e-mail
-              </Button>
-            </form>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-3 pt-7 pb-8 text-center">
-            <p className="text-sm text-slate-600">
-              <Link to="/login" className="text-primary hover:underline font-semibold">
-                Voltar ao login
-              </Link>
-            </p>
-          </CardFooter>
-        </Card>
+        {/* Stepper */}
+        <div className="mb-7 rounded-xl border border-slate-100 bg-slate-50/70 px-4 py-4">
+          <PasswordResetTimeline statuses={timelineStatuses} />
+        </div>
+
+        {/* Alertas */}
+        {errorMsg && (
+          <div
+            role="alert"
+            className="mb-5 rounded-xl border border-red-100 bg-red-50 px-4 py-3.5 text-sm text-red-600"
+          >
+            {errorMsg}
+          </div>
+        )}
+        {successMsg && (
+          <div
+            role="status"
+            className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm text-emerald-800"
+          >
+            {successMsg}
+          </div>
+        )}
+
+        {/* Formulário */}
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
+          <div className="space-y-1.5">
+            <label className="block text-[13px] font-semibold text-slate-700">E-mail</label>
+            <Input
+              {...register('email')}
+              placeholder="seu@email.com"
+              className={authField}
+              type="email"
+              autoComplete="email"
+            />
+            {errors.email && (
+              <p role="alert" className="text-[12px] text-red-500">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
+
+          <Button
+            type="submit"
+            className="h-12 w-full rounded-[11px] text-[15px] font-semibold tracking-wide shadow-[0_2px_10px_rgba(30,144,232,0.22)] transition-all duration-200 hover:brightness-[1.06] hover:shadow-[0_4px_16px_rgba(30,144,232,0.30)] active:scale-[0.99]"
+            isLoading={isSubmitting}
+          >
+            Enviar link por e-mail
+          </Button>
+        </form>
+
+        {/* Rodapé */}
+        <div className="mt-6 border-t border-slate-100 pt-5 text-center">
+          <Link
+            to="/login"
+            className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-primary transition-colors hover:text-primary/80 hover:underline underline-offset-2"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
+            Voltar ao login
+          </Link>
+        </div>
       </div>
-    </div>
+    </AuthLayout>
   );
 }

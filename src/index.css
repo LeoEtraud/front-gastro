@@ -197,6 +197,20 @@
   @apply bg-muted-foreground/50;
 }
 
+/* ─────────────────────────────────────────────────
+   Auth page design tokens
+   ───────────────────────────────────────────────── */
+:root {
+  --auth-card-radius: 22px;
+  --auth-input-radius: 11px;
+  --auth-input-bg: #F7F9FC;
+  --auth-input-border: #D8DEE8;
+  --auth-card-border: #E2E8F4;
+  --auth-card-shadow: 0 8px 40px rgba(7, 27, 53, 0.09), 0 1px 4px rgba(7, 27, 53, 0.05);
+  --auth-btn-shadow: 0 2px 10px rgba(30, 144, 232, 0.22);
+  --auth-page-bg: #EEF2F8;
+}
+
 /* Utilities for visual depth */
 @layer utilities {
   .glass-panel {

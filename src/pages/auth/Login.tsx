@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,16 +6,17 @@ import { z } from 'zod';
 import { useAuth } from '@/hooks/use-auth';
 import { RecaptchaWidget, getRecaptchaSiteKey } from '@/components/auth/RecaptchaWidget';
 import { LegalDocumentLinks } from '@/components/common/LegalDocumentLinks';
+import { AuthLayout } from '@/components/auth/AuthLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import '@/styles/animations/text-focus-in.css';
+import { useEffect } from 'react';
 
-const loginFieldClass =
-  'h-11 rounded-lg border-slate-200 sm:h-12 dark:h-11 dark:rounded-[10px] dark:border-slate-600 dark:bg-slate-700 dark:text-slate-50 dark:placeholder:text-slate-400 dark:focus-visible:border-sky-400 dark:focus-visible:ring-sky-400/40 sm:dark:h-12';
+/* ── campo de input padrão das páginas de auth ── */
+const authField =
+  'h-12 rounded-[11px] border border-[#D8DEE8] bg-[#F7F9FC] px-4 text-[14.5px] text-gc-text placeholder:text-slate-400 shadow-none transition-[border-color,box-shadow] duration-150 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/15 focus-visible:bg-white focus-visible:ring-offset-0 aria-[invalid=true]:border-red-400 aria-[invalid=true]:focus-visible:ring-red-300/30';
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -34,9 +35,11 @@ export default function Login() {
   const [recaptchaMountKey, setRecaptchaMountKey] = useState(0);
   const hasRecaptchaSiteKey = Boolean(getRecaptchaSiteKey());
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema),
-  });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
 
   useEffect(() => {
     const state = location.state as { registrationSuccess?: boolean } | null;
@@ -60,7 +63,6 @@ export default function Login() {
       setErrorMsg('Marque a caixa do reCAPTCHA antes de entrar.');
       return;
     }
-
     try {
       setErrorMsg('');
       setIsPending(false);
@@ -82,169 +84,150 @@ export default function Login() {
   const submitBlocked = !recaptchaToken || !hasRecaptchaSiteKey;
 
   return (
-    <div className="grid min-h-dvh overflow-x-hidden bg-slate-50 dark:bg-slate-950 md:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
-      <div className="relative hidden overflow-hidden bg-sidebar text-white md:flex md:flex-col md:items-center md:justify-center md:p-12">
-        <div className="absolute inset-0 opacity-30">
+    <AuthLayout
+      heroBg={`${import.meta.env.BASE_URL}img-de-fundo.jpg`}
+      heroTitle="Bem-vindo de volta ao GastroCentro"
+      heroSubtitle="Acesse seus cursos, continue seu aprendizado e expanda seus conhecimentos em saúde digestiva."
+    >
+      {/* ── Card ── */}
+      <div className="w-full rounded-[22px] border border-[#E2E8F4] bg-white px-6 py-8 shadow-[0_8px_40px_rgba(7,27,53,0.09),0_1px_4px_rgba(7,27,53,0.05)] sm:px-8 sm:py-10">
+
+        {/* Logo */}
+        <div className="mb-7 flex justify-center">
           <img
-            src={`${import.meta.env.BASE_URL}img-de-fundo.jpg`}
-            alt=""
-            className="h-full w-full object-cover"
-            aria-hidden
+            src="/logo-login.png"
+            alt="GastroCentro — Instituto de Ensino e Pesquisa"
+            className="h-auto w-full max-w-[180px] object-contain"
+            width={280}
+            height={125}
           />
         </div>
-        <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-sidebar/80 via-sidebar/50 to-gc-deep/70"
-          aria-hidden
-        />
-        <div className="relative z-10 max-w-md px-4 text-center">
-          <img
-            src="/logo-menu-login.png"
-            alt="GastroCentro"
-            className="mx-auto mb-8 h-20 w-20 object-contain drop-shadow-md"
-            width={100}
-            height={100}
-          />
-          <h2 className="text-focus-in mb-4 font-display text-4xl font-bold text-white">
-            Bem-vindo de volta ao GastroCentro
-          </h2>
-          <p className="text-lg leading-relaxed text-slate-300">
-            Acesse seus cursos, continue seu aprendizado e expanda seus conhecimentos em saúde digestiva.
+
+        {/* Heading */}
+        <div className="mb-7 text-center">
+          <h1 className="font-display text-[28px] font-bold tracking-tight text-gc-text">
+            Entrar
+          </h1>
+          <p className="mt-1.5 text-[14.5px] leading-relaxed text-slate-500">
+            Acesse sua conta para continuar seus estudos.
+          </p>
+        </div>
+
+        {/* Banners de estado */}
+        {isPending && (
+          <div
+            role="status"
+            className="mb-5 flex gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-sm text-amber-800"
+          >
+            <Clock className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" aria-hidden />
+            <p>
+              Sua conta está <strong>aguardando habilitação</strong>. Após a confirmação do
+              pagamento, o coordenador irá liberar seu acesso.
+            </p>
+          </div>
+        )}
+        {errorMsg && (
+          <div
+            role="alert"
+            className="mb-5 rounded-xl border border-red-100 bg-red-50 px-4 py-3.5 text-sm text-red-600"
+          >
+            {errorMsg}
+          </div>
+        )}
+
+        {/* Formulário */}
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
+          {/* E-mail */}
+          <div className="space-y-1.5">
+            <label htmlFor="login-email" className="block text-[13px] font-semibold text-slate-700">
+              E-mail
+            </label>
+            <Input
+              id="login-email"
+              type="email"
+              autoComplete="email"
+              {...register('email')}
+              placeholder="seu@email.com"
+              className={authField}
+              aria-invalid={Boolean(errors.email)}
+              aria-describedby={errors.email ? 'login-email-error' : undefined}
+            />
+            {errors.email && (
+              <p id="login-email-error" role="alert" className="text-[12px] text-red-500">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
+
+          {/* Senha */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label htmlFor="login-password" className="block text-[13px] font-semibold text-slate-700">
+                Senha
+              </label>
+              <Link
+                to="/forgot-password"
+                className="text-[12.5px] font-medium text-primary transition-colors hover:text-primary/80 hover:underline underline-offset-2"
+              >
+                Esqueci minha senha
+              </Link>
+            </div>
+            <PasswordInput
+              id="login-password"
+              autoComplete="current-password"
+              {...register('password')}
+              placeholder="••••••••"
+              className={authField}
+              aria-invalid={Boolean(errors.password)}
+              aria-describedby={errors.password ? 'login-password-error' : undefined}
+            />
+            {errors.password && (
+              <p id="login-password-error" role="alert" className="text-[12px] text-red-500">
+                {errors.password.message}
+              </p>
+            )}
+          </div>
+
+          {/* reCAPTCHA */}
+          <div className="flex justify-center py-1">
+            <RecaptchaWidget
+              key={recaptchaMountKey}
+              onChange={setRecaptchaToken}
+              className="w-full max-w-[304px]"
+            />
+          </div>
+
+          {/* Botão principal */}
+          <Button
+            type="submit"
+            className="h-12 w-full rounded-[11px] text-[15px] font-semibold tracking-wide shadow-[0_2px_10px_rgba(30,144,232,0.22)] transition-all duration-200 hover:brightness-[1.06] hover:shadow-[0_4px_16px_rgba(30,144,232,0.30)] active:scale-[0.99] disabled:brightness-90 disabled:shadow-none"
+            isLoading={isSubmitting}
+            disabled={submitBlocked}
+          >
+            {isSubmitting ? 'Acessando...' : 'Acessar plataforma'}
+          </Button>
+        </form>
+
+        {/* Rodapé do card */}
+        <div className="mt-7 space-y-3 border-t border-slate-100 pt-6 text-center">
+          <p className="text-[13.5px] text-slate-600">
+            Não tem uma conta?{' '}
+            <Link
+              to="/register"
+              className="font-semibold text-primary transition-colors hover:text-primary/80 hover:underline underline-offset-2"
+            >
+              Cadastre-se
+            </Link>
+          </p>
+          <p className="text-[12px] leading-relaxed text-slate-400">
+            Ao entrar, você concorda com os{' '}
+            <LegalDocumentLinks
+              linkClassName="font-medium text-slate-500 underline-offset-2 hover:underline transition-colors hover:text-primary"
+            />
+            .
           </p>
         </div>
       </div>
-
-      <div className="flex min-w-0 items-center justify-center p-4 sm:p-6">
-        <div className="flex w-full max-w-md flex-col gap-4">
-          <Card className="w-full border-slate-200 bg-white text-slate-900 shadow-xl">
-            <CardHeader className="space-y-4 pt-6 text-center sm:space-y-5 sm:pt-8">
-              <div className="flex justify-center pb-0.5">
-                <div className="inline-flex max-w-[260px] rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200/80">
-                  <img
-                    src="/logo-login.png"
-                    alt="GastroCentro — Instituto de Ensino e Pesquisa"
-                    className="h-auto w-full max-w-[220px] object-contain sm:max-w-[240px]"
-                    width={300}
-                    height={134}
-                  />
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <CardTitle className="!text-gc-text font-display text-2xl font-bold">
-                  Entrar
-                </CardTitle>
-                <CardDescription className="text-slate-600">
-                  Acesse sua conta para continuar.
-                </CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
-                {isPending && (
-                  <div
-                    role="status"
-                    className="flex gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-500/35 dark:bg-amber-950/35 dark:text-amber-100"
-                  >
-                    <Clock className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
-                    <p>
-                      Sua conta está <strong>aguardando habilitação</strong>. Após a confirmação do pagamento, o
-                      coordenador irá liberar seu acesso e você receberá um e-mail para criar sua senha.
-                    </p>
-                  </div>
-                )}
-                {errorMsg && (
-                  <div
-                    role="alert"
-                    className="rounded-lg border border-red-100 bg-red-50 p-4 text-sm text-red-600 dark:border-red-500 dark:bg-red-950/30 dark:text-red-300"
-                  >
-                    {errorMsg}
-                  </div>
-                )}
-                <div className="space-y-2.5">
-                  <label htmlFor="login-email" className="text-sm font-medium text-slate-900">
-                    E-mail
-                  </label>
-                  <Input
-                    id="login-email"
-                    type="email"
-                    autoComplete="email"
-                    {...register('email')}
-                    placeholder="seu@email.com"
-                    className={loginFieldClass}
-                    aria-invalid={Boolean(errors.email)}
-                    aria-describedby={errors.email ? 'login-email-error' : undefined}
-                  />
-                  {errors.email && (
-                    <p id="login-email-error" role="alert" className="text-xs text-red-500 dark:text-red-300">
-                      {errors.email.message}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2.5">
-                  <label htmlFor="login-password" className="text-sm font-medium text-slate-900">
-                    Senha
-                  </label>
-                  <PasswordInput
-                    id="login-password"
-                    autoComplete="current-password"
-                    {...register('password')}
-                    placeholder="••••••••"
-                    className={loginFieldClass}
-                    aria-invalid={Boolean(errors.password)}
-                    aria-describedby={errors.password ? 'login-password-error' : undefined}
-                  />
-                  {errors.password && (
-                    <p id="login-password-error" role="alert" className="text-xs text-red-500 dark:text-red-300">
-                      {errors.password.message}
-                    </p>
-                  )}
-                  <div className="flex justify-end pt-2 pb-1">
-                    <Link
-                      to="/forgot-password"
-                      className="min-h-11 inline-flex items-center text-sm font-medium text-primary hover:underline dark:text-sky-400 dark:hover:text-sky-300 sm:min-h-0"
-                    >
-                      Esqueci minha senha
-                    </Link>
-                  </div>
-                </div>
-                <div className="flex justify-center pt-0.5 pb-1">
-                  <RecaptchaWidget
-                    key={recaptchaMountKey}
-                    onChange={setRecaptchaToken}
-                    className="w-full max-w-[304px] scale-[0.98] sm:scale-100"
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="h-11 w-full rounded-lg text-base shadow-sm focus-visible:ring-sky-400/35 dark:bg-sky-500 dark:text-white dark:hover:bg-sky-600 dark:focus-visible:ring-[3px] dark:focus-visible:ring-sky-400/35 sm:h-12 sm:text-lg"
-                  isLoading={isSubmitting}
-                  disabled={submitBlocked}
-                >
-                  {isSubmitting ? 'Acessando...' : 'Acessar plataforma'}
-                </Button>
-              </form>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-4 pt-6 pb-6 text-center sm:pb-8">
-              <p className="text-sm text-slate-600 dark:text-slate-300">
-                Não tem uma conta?{' '}
-                <Link
-                  to="/register"
-                  className="font-semibold text-primary hover:underline dark:text-sky-400 dark:hover:text-sky-300"
-                >
-                  Cadastre-se
-                </Link>
-              </p>
-              <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                Ao entrar, você concorda com os{' '}
-                <LegalDocumentLinks
-                  linkClassName="font-medium text-primary underline-offset-2 hover:underline dark:text-sky-400 dark:hover:text-sky-300"
-                />
-                .
-              </p>
-            </CardFooter>
-          </Card>
-        </div>
-      </div>
-
-    </div>
+    </AuthLayout>
   );
 }

@@ -5,13 +5,11 @@ import { cn } from '@/lib/utils';
 export type ResetTimelineStepStatus = 'done' | 'active' | 'todo' | 'error';
 
 const STEP_LABELS = [
-  'Solicitação do e-mail',
-  'Verificação do link',
-  'Definição da nova senha',
-  'Senha redefinida',
+  'Solicitar e-mail',
+  'Verificar link',
+  'Nova senha',
+  'Concluído',
 ] as const;
-
-const STEP_SHORT = ['E-mail', 'Link', 'Nova senha', 'Concluído'] as const;
 
 type Props = {
   statuses: [ResetTimelineStepStatus, ResetTimelineStepStatus, ResetTimelineStepStatus, ResetTimelineStepStatus];
@@ -21,74 +19,67 @@ function StepCircle({ status, index }: { status: ResetTimelineStepStatus; index:
   const isDone = status === 'done';
   const isActive = status === 'active';
   const isError = status === 'error';
+  const isTodo = status === 'todo';
 
   return (
     <div
       className={cn(
-        'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-xs font-semibold transition-colors',
-        isDone && 'border-primary bg-primary text-primary-foreground',
-        isActive && !isError && 'border-primary bg-primary/10 text-primary ring-2 ring-primary/25 ring-offset-2 ring-offset-card',
-        isError && 'border-destructive bg-destructive/10 text-destructive',
-        status === 'todo' && 'border-muted-foreground/25 bg-muted/50 text-muted-foreground',
+        'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold transition-all duration-300',
+        isDone &&
+          'border-2 border-primary bg-primary text-white shadow-[0_0_0_3px_rgba(30,144,232,0.15)]',
+        isActive &&
+          'border-2 border-primary bg-white text-primary shadow-[0_0_0_3px_rgba(30,144,232,0.18)]',
+        isError && 'border-2 border-red-400 bg-red-50 text-red-500',
+        isTodo && 'border border-slate-200 bg-white text-slate-400',
       )}
       aria-current={isActive ? 'step' : undefined}
     >
-      {isDone ? <Check className="h-4 w-4" strokeWidth={2.5} /> : <span>{index + 1}</span>}
+      {isDone ? <Check className="h-3.5 w-3.5" strokeWidth={2.5} /> : <span>{index + 1}</span>}
     </div>
   );
 }
 
-function lineBetween(prev: ResetTimelineStepStatus, next: ResetTimelineStepStatus): string {
-  if (prev === 'error' || next === 'error') return 'bg-destructive/35';
-  if (prev === 'done') return 'bg-primary/45';
-  return 'bg-border';
+function connectorColor(prev: ResetTimelineStepStatus, next: ResetTimelineStepStatus): string {
+  if (prev === 'error' || next === 'error') return 'bg-red-300/40';
+  if (prev === 'done') return 'bg-primary/35';
+  return 'bg-slate-200';
 }
 
-// LINHA DO TEMPO DO FLUXO DE REDEFINIÇÃO DE SENHA (4 etapas)
 export function PasswordResetTimeline({ statuses }: Props) {
   return (
-    <nav className="w-full" aria-label="Etapas da redefinição de senha">
-      <div className="flex w-full items-center">
-        {STEP_LABELS.map((fullLabel, i) => (
-          <Fragment key={fullLabel}>
+    <nav aria-label="Etapas da redefinição de senha" className="w-full">
+      <div className="flex w-full items-center justify-between">
+        {STEP_LABELS.map((label, i) => (
+          <Fragment key={label}>
+            {/* Linha conectora */}
             {i > 0 && (
               <div
-                className={cn(
-                  'h-0.5 w-2 shrink-0 sm:w-5',
-                  lineBetween(statuses[i - 1], statuses[i]),
-                )}
                 aria-hidden
+                className={cn(
+                  'h-px flex-1 transition-colors duration-300',
+                  connectorColor(statuses[i - 1], statuses[i]),
+                )}
               />
             )}
-            <div className="flex min-w-0 flex-1 flex-col items-center gap-1.5 px-0.5">
+
+            {/* Etapa */}
+            <div className="flex flex-col items-center gap-1.5">
               <StepCircle status={statuses[i]} index={i} />
-              <div className="w-full text-center">
-                <p className="text-[10px] font-medium leading-tight text-foreground sm:text-xs">{STEP_SHORT[i]}</p>
-                <p className="mt-0.5 hidden text-[10px] leading-snug text-muted-foreground sm:line-clamp-2 sm:block">
-                  {fullLabel}
-                </p>
-              </div>
+              <span
+                className={cn(
+                  'max-w-[56px] text-center text-[10.5px] leading-snug transition-colors duration-300',
+                  statuses[i] === 'done' && 'font-medium text-primary',
+                  statuses[i] === 'active' && 'font-semibold text-gc-text',
+                  statuses[i] === 'error' && 'font-medium text-red-500',
+                  statuses[i] === 'todo' && 'text-slate-400',
+                )}
+              >
+                {label}
+              </span>
             </div>
           </Fragment>
         ))}
       </div>
-      <ul className="mt-3 space-y-1.5 border-t border-border/60 pt-3 sm:hidden">
-        {STEP_LABELS.map((label, i) => (
-          <li key={label} className="flex items-start gap-2 text-xs">
-            <span className="mt-0.5 shrink-0 font-medium text-muted-foreground">{i + 1}.</span>
-            <span
-              className={cn(
-                statuses[i] === 'done' && 'text-primary',
-                statuses[i] === 'active' && 'font-semibold text-foreground',
-                statuses[i] === 'error' && 'font-medium text-destructive',
-                statuses[i] === 'todo' && 'text-muted-foreground',
-              )}
-            >
-              {label}
-            </span>
-          </li>
-        ))}
-      </ul>
     </nav>
   );
 }

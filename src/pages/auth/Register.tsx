@@ -6,8 +6,6 @@ import { z } from 'zod';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen } from 'lucide-react';
 import {
   CPF_MASK_MAX_LENGTH,
   PHONE_BR_MASK_MAX_LENGTH,
@@ -18,7 +16,14 @@ import {
   isValidPhoneBR,
 } from '@/lib/profile-formatters';
 import { RecaptchaWidget, getRecaptchaSiteKey } from '@/components/auth/RecaptchaWidget';
-import '@/styles/animations/text-focus-in.css';
+import { AuthLayout } from '@/components/auth/AuthLayout';
+
+/* ── campo de input padrão das páginas de auth ── */
+const authField =
+  'h-12 rounded-[11px] border border-[#D8DEE8] bg-[#F7F9FC] px-4 text-[14.5px] text-gc-text placeholder:text-slate-400 shadow-none transition-[border-color,box-shadow] duration-150 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/15 focus-visible:bg-white focus-visible:ring-offset-0 aria-[invalid=true]:border-red-400 aria-[invalid=true]:focus-visible:ring-red-300/30';
+
+const selectField =
+  'flex h-12 w-full rounded-[11px] border border-[#D8DEE8] bg-[#F7F9FC] px-4 text-[14.5px] text-gc-text shadow-none transition-[border-color,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/15 focus:border-primary focus:bg-white touch-manipulation appearance-none cursor-pointer';
 
 const registerSchema = z.object({
   name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
@@ -33,28 +38,24 @@ const registerSchema = z.object({
     .string()
     .min(1, 'Telefone é obrigatório')
     .max(PHONE_BR_MASK_MAX_LENGTH, `Telefone pode ter no máximo ${PHONE_BR_MASK_MAX_LENGTH} caracteres`)
-    .refine((v) => isValidPhoneBR(v, { allowEmpty: false }), 'Informe um telefone válido com DDD (mesmo formato do perfil).')
+    .refine(
+      (v) => isValidPhoneBR(v, { allowEmpty: false }),
+      'Informe um telefone válido com DDD (mesmo formato do perfil).',
+    )
     .transform(digitsOnly),
   role: z.enum(['STUDENT', 'TEACHER']),
 });
 
 type RegisterForm = z.infer<typeof registerSchema>;
 
-  // PÁGINA DE REGISTRO DE USUÁRIO
 export default function Register() {
-  // HOOK PARA REGISTRAR UM NOVO USUÁRIO
   const { register: registerUser } = useAuth();
-  // NAVEGAÇÃO ENTRE AS PÁGINAS
   const navigate = useNavigate();
   const [errorMsg, setErrorMsg] = useState('');
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
-  // CHAVE DE MONTAGEM DO RECAPTCHA
   const [recaptchaMountKey, setRecaptchaMountKey] = useState(0);
-
-  // VERIFICA SE A CHAVE DO RECAPTCHA ESTÁ CONFIGURADA
   const hasRecaptchaSiteKey = Boolean(getRecaptchaSiteKey());
 
-  // HOOK PARA GERENCIAR O FORMULÁRIO DE REGISTRO
   const {
     register,
     handleSubmit,
@@ -65,26 +66,20 @@ export default function Register() {
     defaultValues: { role: 'STUDENT', name: '', email: '', cpf: '', phone: '' },
   });
 
-  // MÁSCARAS PARA CPF E TELEFONE
   const cpfRegister = register('cpf', { maxLength: CPF_MASK_MAX_LENGTH });
   const phoneRegister = register('phone', { maxLength: PHONE_BR_MASK_MAX_LENGTH });
 
-  // FUNÇÃO PARA SUBMETER O FORMULÁRIO DE REGISTRO
   const onSubmit = async (data: RegisterForm) => {
     if (!hasRecaptchaSiteKey) {
       setErrorMsg('reCAPTCHA não está configurado neste ambiente.');
       return;
     }
-    // VERIFICA SE O TOKEN DO RECAPTCHA ESTÁ PREENCHIDO
     if (!recaptchaToken) {
       setErrorMsg('Marque a caixa do reCAPTCHA antes de enviar.');
       return;
     }
-
     try {
-      // LIMPA A MENSAGEM DE ERRO
       setErrorMsg('');
-      // REGISTRA O USUÁRIO
       await registerUser.mutateAsync({
         name: data.name,
         email: data.email,
@@ -93,14 +88,11 @@ export default function Register() {
         phone: data.phone,
         recaptchaToken,
       });
-      // REDIRECIONA PARA A PÁGINA DE LOGIN
-      navigate('/login', {
-        replace: true,
-        state: { registrationSuccess: true },
-      });
+      navigate('/login', { replace: true, state: { registrationSuccess: true } });
     } catch (error: unknown) {
       const msg =
-        (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Erro ao criar conta.';
+        (error as { response?: { data?: { error?: string } } })?.response?.data?.error ||
+        'Erro ao criar conta.';
       setErrorMsg(msg);
       setRecaptchaToken(null);
       setRecaptchaMountKey((k) => k + 1);
@@ -110,122 +102,165 @@ export default function Register() {
   const submitBlocked = !isValid || !recaptchaToken || !hasRecaptchaSiteKey;
 
   return (
-    <div className="grid min-h-dvh overflow-x-hidden bg-slate-50 md:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
-      <div className="hidden md:flex flex-col justify-center items-center p-12 bg-sidebar text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-30">
-          <img src={`${import.meta.env.BASE_URL}img-de-fundo-2.jpg`} alt="Medical" className="w-full h-full object-cover" />
-        </div>
-        <div className="relative z-10 max-w-md text-center">
+    <AuthLayout
+      heroBg={`${import.meta.env.BASE_URL}img-de-fundo-2.jpg`}
+      heroTitle="Comece sua jornada no GastroCentro"
+      heroSubtitle="Crie sua conta e acesse cursos, materiais e uma comunidade focada em educação médica de qualidade."
+      formMaxWidth="max-w-[480px]"
+    >
+      {/* ── Card ── */}
+      <div className="w-full rounded-[22px] border border-[#E2E8F4] bg-white px-6 py-8 shadow-[0_8px_40px_rgba(7,27,53,0.09),0_1px_4px_rgba(7,27,53,0.05)] sm:px-8 sm:py-10">
+
+        {/* Logo mobile (só aparece em mobile, hero já mostra no desktop) */}
+        <div className="mb-6 flex justify-center md:hidden">
           <img
-            src="/logo-menu-login.png"
-            alt="Gastrocentro"
-            className="mx-auto mb-8 h-20 w-20 object-contain"
-            width={100}
-            height={100}
+            src="/logo-login.png"
+            alt="GastroCentro"
+            className="h-auto w-full max-w-[160px] object-contain"
           />
-          <h2 className="text-focus-in text-4xl font-display font-bold mb-4 text-white">Comece sua jornada no GastroCentro</h2>
-          <p className="text-lg text-slate-300">
-            Crie sua conta e acesse cursos, materiais e uma comunidade focada em educação médica de qualidade.
+        </div>
+
+        {/* Heading */}
+        <div className="mb-7 text-center">
+          <h1 className="font-display text-[28px] font-bold tracking-tight text-gc-text">
+            Criar conta
+          </h1>
+          <p className="mx-auto mt-1.5 max-w-[340px] text-[14px] leading-relaxed text-slate-500">
+            Junte-se à plataforma. Após o cadastro, enviaremos um e-mail para você definir sua senha
+            de acesso.
+          </p>
+        </div>
+
+        {/* Erro */}
+        {errorMsg && (
+          <div
+            role="alert"
+            className="mb-5 rounded-xl border border-red-100 bg-red-50 px-4 py-3.5 text-sm text-red-600"
+          >
+            {errorMsg}
+          </div>
+        )}
+
+        {/* Formulário */}
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+
+          {/* Nome */}
+          <div className="space-y-1.5">
+            <label className="block text-[13px] font-semibold text-slate-700">Nome completo</label>
+            <Input
+              {...register('name')}
+              placeholder="Ana Silva Souza"
+              className={authField}
+              autoComplete="name"
+            />
+            {errors.name && <p className="text-[12px] text-red-500">{errors.name.message}</p>}
+          </div>
+
+          {/* E-mail */}
+          <div className="space-y-1.5">
+            <label className="block text-[13px] font-semibold text-slate-700">E-mail</label>
+            <Input
+              type="email"
+              {...register('email')}
+              placeholder="dr.nome@exemplo.com"
+              className={authField}
+              autoComplete="email"
+            />
+            {errors.email && <p className="text-[12px] text-red-500">{errors.email.message}</p>}
+          </div>
+
+          {/* CPF e Telefone em grid */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <label className="block text-[13px] font-semibold text-slate-700">CPF</label>
+              <Input
+                {...cpfRegister}
+                placeholder="000.000.000-00"
+                className={authField}
+                inputMode="numeric"
+                autoComplete="off"
+                title="Mesma máscara do perfil: até 11 dígitos (000.000.000-00)"
+                onChange={(e) => {
+                  e.target.value = formatCpf(e.target.value);
+                  cpfRegister.onChange(e);
+                }}
+              />
+              {errors.cpf && <p className="text-[12px] text-red-500">{errors.cpf.message}</p>}
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-[13px] font-semibold text-slate-700">Telefone</label>
+              <Input
+                {...phoneRegister}
+                placeholder="(98) 99999-9999"
+                className={authField}
+                inputMode="tel"
+                autoComplete="tel"
+                title="Mesma máscara do perfil: (DD) número com hífen"
+                onChange={(e) => {
+                  e.target.value = formatPhoneBR(e.target.value);
+                  phoneRegister.onChange(e);
+                }}
+              />
+              {errors.phone && <p className="text-[12px] text-red-500">{errors.phone.message}</p>}
+            </div>
+          </div>
+
+          {/* Perfil */}
+          <div className="space-y-1.5">
+            <label className="block text-[13px] font-semibold text-slate-700">Perfil</label>
+            <div className="relative">
+              <select {...register('role')} className={selectField}>
+                <option value="STUDENT">Estudante</option>
+                <option value="TEACHER">Professor</option>
+              </select>
+              {/* Ícone chevron */}
+              <svg
+                aria-hidden
+                className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+
+          {/* reCAPTCHA */}
+          <div className="flex justify-center py-1">
+            <RecaptchaWidget
+              key={recaptchaMountKey}
+              onChange={setRecaptchaToken}
+              className="w-full max-w-[304px]"
+            />
+          </div>
+
+          {/* Botão principal */}
+          <Button
+            type="submit"
+            className="h-12 w-full rounded-[11px] text-[15px] font-semibold tracking-wide shadow-[0_2px_10px_rgba(30,144,232,0.22)] transition-all duration-200 hover:brightness-[1.06] hover:shadow-[0_4px_16px_rgba(30,144,232,0.30)] active:scale-[0.99] disabled:brightness-90 disabled:shadow-none"
+            isLoading={isSubmitting}
+            disabled={submitBlocked}
+          >
+            Cadastrar na plataforma
+          </Button>
+        </form>
+
+        {/* Rodapé */}
+        <div className="mt-6 border-t border-slate-100 pt-5 text-center">
+          <p className="text-[13.5px] text-slate-600">
+            Já tem uma conta?{' '}
+            <Link
+              to="/login"
+              className="font-semibold text-primary transition-colors hover:text-primary/80 hover:underline underline-offset-2"
+            >
+              Entrar
+            </Link>
           </p>
         </div>
       </div>
-
-      <div className="flex min-w-0 items-center justify-center p-4 sm:p-6">
-        <Card className="w-full max-w-md border-slate-200 shadow-xl">
-          <CardHeader className="space-y-2 pt-6 text-center sm:pt-8">
-            <div className="flex justify-center mb-4 md:hidden">
-              <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
-                <BookOpen className="h-6 w-6 text-white" />
-              </div>
-            </div>
-            <CardTitle className="font-display text-2xl font-bold sm:text-3xl">Criar conta</CardTitle>
-            <CardDescription>
-              Junte-se à plataforma de educação médica. Após o cadastro, enviaremos um e-mail para você definir sua
-              senha de acesso.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              {errorMsg && (
-                <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md border border-red-100">
-                  {errorMsg}
-                </div>
-              )}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Nome completo</label>
-                <Input {...register('name')} placeholder="Ana Silva Souza" className="sm:h-12" autoComplete="name" />
-                {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Email</label>
-                <Input type="email" {...register('email')} placeholder="dr.nome@exemplo.com" className="sm:h-12" autoComplete="email" />
-                {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">CPF</label>
-                <Input
-                  {...cpfRegister}
-                  placeholder="000.000.000-00"
-                  className="sm:h-12"
-                  inputMode="numeric"
-                  autoComplete="off"
-                  title="Mesma máscara do perfil: até 11 dígitos (000.000.000-00)"
-                  onChange={(e) => {
-                    e.target.value = formatCpf(e.target.value);
-                    cpfRegister.onChange(e);
-                  }}
-                />
-                {errors.cpf && <p className="text-xs text-red-500">{errors.cpf.message}</p>}
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Telefone</label>
-                <Input
-                  {...phoneRegister}
-                  placeholder="(98) 99999-9999"
-                  className="sm:h-12"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  title="Mesma máscara do perfil: (DD) número com hífen"
-                  onChange={(e) => {
-                    e.target.value = formatPhoneBR(e.target.value);
-                    phoneRegister.onChange(e);
-                  }}
-                />
-                {errors.phone && <p className="text-xs text-red-500">{errors.phone.message}</p>}
-              </div>
-              <div className="space-y-2 pb-2">
-                <label className="text-sm font-medium">Eu sou um...</label>
-                <select
-                  {...register('role')}
-                  className="flex h-11 min-h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-12 sm:text-sm touch-manipulation"
-                >
-                  <option value="STUDENT">Estudante</option>
-                  <option value="TEACHER">Professor</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <RecaptchaWidget key={recaptchaMountKey} onChange={setRecaptchaToken} />
-              </div>
-              <Button
-                type="submit"
-                className="w-full text-base sm:h-12 sm:text-lg"
-                isLoading={isSubmitting}
-                disabled={submitBlocked}
-              >
-                Cadastrar na plataforma
-              </Button>
-            </form>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-2 pb-8 text-center">
-            <p className="text-sm text-slate-600">
-              Já tem uma conta?{' '}
-              <Link to="/login" className="text-primary hover:underline font-semibold">
-                Entrar
-              </Link>
-            </p>
-          </CardFooter>
-        </Card>
-      </div>
-    </div>
+    </AuthLayout>
   );
 }
