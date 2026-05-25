@@ -4,7 +4,6 @@ import {
   useTeacherCourse,
   useUpdateCourse,
   useSetCourseStatus,
-  usePresignLessonVideo,
   useUpdateLesson,
   useDeleteLesson,
   useDeleteModule,
@@ -74,24 +73,10 @@ import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MEDICAL_SPECIALTIES } from '@/lib/medical-specialties';
 import { uploadCourseCoverFile } from '@/lib/course-cover-upload';
+import { uploadLessonVideo, resolveLessonVideoMimeType } from '@/lib/lesson-video-upload';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-
-// FUNÇÃO PARA PARSEAR O ERRO DO S3
-function parseS3ErrorText(raw: string): string | null {
-  const code = raw.match(/<Code>([^<]+)<\/Code>/)?.[1];
-  const message = raw.match(/<Message>([^<]+)<\/Message>/)?.[1];
-  if (!code && !message) return null;
-  return [code, message].filter(Boolean).join(': ');
-}
-
-type UploadWithProgressParams = {
-  uploadUrl: string;
-  file: File;
-  contentType: string;
-  onProgress: (percent: number) => void;
-};
 
 // FUNÇÃO PARA EXTRAIR METADADOS LOCAIS DO ARQUIVO DE VÍDEO (DURAÇÃO + DIMENSÕES)
 type LocalVideoMetadata = {
@@ -184,34 +169,6 @@ function formatDateTime(iso?: string | null): string {
   });
 }
 
-function uploadFileWithProgress({ uploadUrl, file, contentType, onProgress }: UploadWithProgressParams): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('PUT', uploadUrl);
-    xhr.setRequestHeader('Content-Type', contentType);
-
-    xhr.upload.onprogress = (event) => {
-      if (!event.lengthComputable) return;
-      const percent = Math.max(0, Math.min(100, Math.round((event.loaded / event.total) * 100)));
-      onProgress(percent);
-    };
-
-    xhr.onerror = () => reject(new Error('Falha de rede durante o upload do vídeo.'));
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        onProgress(100);
-        resolve();
-        return;
-      }
-      const rawBody = typeof xhr.responseText === 'string' ? xhr.responseText : '';
-      const s3Reason = parseS3ErrorText(rawBody);
-      reject(new Error(s3Reason ? `Upload falhou (${xhr.status}) - ${s3Reason}` : `Upload falhou (${xhr.status})`));
-    };
-
-    xhr.send(file);
-  });
-}
-
 /**
  * Estilos do badge de status do vídeo da aula. Mantém legibilidade e
  * coerência com os tokens do projeto, sem cores chamativas no estado padrão.
@@ -236,7 +193,6 @@ function LessonEditorRow({
   courseId: string;
   readOnly?: boolean;
 }) {
-  const presign = usePresignLessonVideo();
   const updateLesson = useUpdateLesson();
   const deleteLesson = useDeleteLesson();
   const { toast } = useToast();
@@ -288,7 +244,7 @@ function LessonEditorRow({
   const hasExternal = !!lesson.videoUrl && !hasHosted;
   const hasAnyVideo = hasHosted || hasExternal;
   const previewUrl = localVideoPreviewUrl || lesson.videoPlaybackUrl || (!hasHosted ? lesson.videoUrl : null) || null;
-  const busy = isUploading || presign.isPending || (updateLesson.isPending && !isRemovingVideo);
+  const busy = isUploading || (updateLesson.isPending && !isRemovingVideo);
   const sourceStatus: 'hosted' | 'external' | 'none' = hasHosted ? 'hosted' : hasExternal ? 'external' : 'none';
   const sourceLabel = hasHosted ? 'Hospedado' : hasExternal ? 'Link externo' : 'Sem vídeo';
   const durationLabel = lesson.duration ? formatDuration(lesson.duration) : null;
@@ -314,8 +270,10 @@ function LessonEditorRow({
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
-    if (!file.type.startsWith('video/')) {
-      toast({ variant: 'destructive', title: 'Selecione um arquivo de vídeo' });
+    try {
+      resolveLessonVideoMimeType(file);
+    } catch {
+      toast({ variant: 'destructive', title: 'Selecione um arquivo de vídeo (MP4, WebM ou MOV)' });
       return;
     }
     try {
@@ -323,16 +281,9 @@ function LessonEditorRow({
       setUploadProgress(0);
       // Lê metadados locais (duração, resolução) antes do upload para persistir no backend
       const localMeta = await extractLocalVideoMetadata(file);
-      const { uploadUrl, objectKey, headers } = await presign.mutateAsync({
+      const { objectKey, contentType: uploadedContentType } = await uploadLessonVideo({
         lessonId: lesson.id,
-        fileName: file.name,
-        contentType: file.type,
-        fileSizeBytes: file.size,
-      });
-      await uploadFileWithProgress({
-        uploadUrl,
         file,
-        contentType: headers['Content-Type'],
         onProgress: (percent) => setUploadProgress(percent),
       });
       await updateLesson.mutateAsync({
@@ -341,7 +292,7 @@ function LessonEditorRow({
           type: 'VIDEO',
           videoObjectKey: objectKey,
           videoSizeBytes: file.size,
-          videoContentType: file.type || null,
+          videoContentType: uploadedContentType || file.type || null,
           duration: localMeta.durationSeconds,
           videoWidth: localMeta.width,
           videoHeight: localMeta.height,
@@ -355,7 +306,10 @@ function LessonEditorRow({
       toast({
         variant: 'destructive',
         title: 'Falha no upload',
-        description: ax?.response?.data?.error || ax?.message || 'Verifique CORS do bucket e variáveis S3/R2.',
+        description:
+          ax?.response?.data?.error ||
+          ax?.message ||
+          'Verifique as variáveis S3/R2 no servidor e o limite de tamanho do upload.',
       });
     } finally {
       setIsUploading(false);
