@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 
 declare global {
   interface Window {
@@ -33,13 +34,14 @@ export function getRecaptchaSiteKey(): string {
 type RecaptchaWidgetProps = {
   /** Recebe o token quando o usuário conclui o desafio; `null` ao expirar ou erro. */
   onChange: (token: string | null) => void;
+  className?: string;
 };
 
 /**
  * reCAPTCHA v2 (checkbox), render explícito.
  * Carrega `api.js` uma vez e monta o widget no container.
  */
-export function RecaptchaWidget({ onChange }: RecaptchaWidgetProps) {
+export function RecaptchaWidget({ onChange, className }: RecaptchaWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<number | null>(null);
   const onChangeRef = useRef(onChange);
@@ -105,5 +107,10 @@ export function RecaptchaWidget({ onChange }: RecaptchaWidgetProps) {
     );
   }
 
-  return <div ref={containerRef} className="flex min-h-[78px] justify-center" />;
+  return (
+    <div
+      ref={containerRef}
+      className={cn("flex min-h-[78px] justify-center", className)}
+    />
+  );
 }
