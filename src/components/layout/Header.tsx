@@ -40,27 +40,39 @@ export function Header({ user, theme, onMenuToggle, onToggleTheme, onLogout }: H
         "h-12 shrink-0 rounded-2xl border border-border bg-card text-card-foreground shadow-md sm:h-16",
       )}
     >
-      <div className="flex h-full items-center justify-between gap-3 pl-1 pr-4 sm:pl-1.5 sm:pr-6">
-        <div className="flex h-full min-w-0 flex-1 items-center gap-2 overflow-hidden sm:gap-3">
-          <div className="flex h-full shrink-0 items-center overflow-hidden rounded-xl py-1 sm:py-1.5">
-            <img
-              src="/header-fellowship.jpg"
-              alt="Fellowship Endoscopia Digestiva Alta"
-              className="h-full w-full object-contain object-left"
-            />
-          </div>
+      <div className="relative flex h-full items-center justify-end gap-1 pr-3 sm:gap-2 sm:pr-6">
+        {/* Menu mobile — fixo à esquerda dentro do cabeçalho */}
+        <button
+          type="button"
+          onClick={onMenuToggle}
+          className={cn(
+            "absolute left-2 top-1/2 z-20 -translate-y-1/2 rounded-lg border border-border/80 p-2",
+            "text-foreground shadow-sm transition-colors",
+            "hover:bg-muted hover:text-foreground",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card",
+            "md:hidden",
+          )}
+          aria-label="Abrir menu"
+        >
+          <Menu className="h-5 w-5" strokeWidth={2.25} aria-hidden />
+        </button>
 
-          <button
-            type="button"
-            onClick={onMenuToggle}
-            className="shrink-0 rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:hidden"
-            aria-label="Abrir menu"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
+        {/* Imagem institucional — centralizada no cabeçalho */}
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden py-1 sm:py-1.5",
+            /* mais respiro à direita (tema + avatar) para não sobrepor o ícone */
+            "pl-[3.25rem] pr-[8.25rem] sm:pl-14 sm:pr-[9.5rem] md:pl-6 md:pr-36 lg:pr-44",
+          )}
+        >
+          <img
+            src="/header-fellowship.jpg"
+            alt="Fellowship Endoscopia Digestiva Alta"
+            className="h-full w-auto max-w-full object-contain object-center"
+          />
         </div>
 
-        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+        <div className="relative z-20 flex shrink-0 items-center gap-1 sm:gap-2">
           <button
             type="button"
             onClick={onToggleTheme}
