@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, Stethoscope, Clock } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import '@/styles/animations/text-focus-in.css';
 
@@ -82,11 +82,17 @@ export default function Login() {
   return (
     <div className="grid min-h-dvh overflow-x-hidden bg-slate-50 md:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
       <div className="hidden md:flex flex-col justify-center items-center p-12 bg-sidebar text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20">
+        <div className="absolute inset-0 opacity-30">
           <img src={`${import.meta.env.BASE_URL}img-de-fundo.jpg`} alt="Medical" className="w-full h-full object-cover" />
         </div>
         <div className="relative z-10 max-w-md text-center">
-          <Stethoscope className="w-16 h-16 mx-auto mb-8 text-primary" />
+          <img
+            src="/logo-menu-login.png"
+            alt="Gastrocentro"
+            className="mx-auto mb-8 h-20 w-20 object-contain"
+            width={100}
+            height={100}
+          />
           <h2 className="text-focus-in mb-4 font-display text-4xl font-bold text-white">
             Bem-vindo de volta ao GastroCentro
           </h2>
@@ -97,13 +103,17 @@ export default function Login() {
       <div className="flex min-w-0 items-center justify-center p-4 sm:p-6">
         <Card className="w-full max-w-md border-slate-200 shadow-xl">
           <CardHeader className="space-y-3 pt-6 text-center sm:pt-8">
-            <div className="flex justify-center mb-5 md:hidden">
-              <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
-                <BookOpen className="h-6 w-6 text-white" />
-              </div>
+            <div className="flex justify-center pb-1">
+              <img
+                src="/logo-login.png"
+                alt="Gastrocentro — Instituto de Ensino e Pesquisa"
+                className="h-auto w-full max-w-[220px] rounded-xl object-contain sm:max-w-[260px]"
+                width={300}
+                height={134}
+              />
             </div>
             <CardTitle className="font-display text-2xl font-bold sm:text-3xl">Entrar</CardTitle>
-            <CardDescription>Insira suas credenciais para acessar a plataforma</CardDescription>
+            <CardDescription>Acesse sua conta para continuar.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -122,8 +132,8 @@ export default function Login() {
                 </div>
               )}
               <div className="space-y-2.5">
-                <label className="text-sm font-medium">Email</label>
-                <Input {...register('email')} placeholder="dr.nome@exemplo.com" className="sm:h-12" />
+                <label className="text-sm font-medium">E-mail</label>
+                <Input {...register('email')} placeholder="seu@email.com" className="sm:h-12" />
                 {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
               </div>
               <div className="space-y-2.5">
@@ -145,7 +155,7 @@ export default function Login() {
                 isLoading={isSubmitting}
                 disabled={submitBlocked}
               >
-                Entrar na Plataforma
+                Acessar plataforma
               </Button>
             </form>
           </CardContent>

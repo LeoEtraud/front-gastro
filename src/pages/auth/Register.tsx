@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, Stethoscope } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 import {
   CPF_MASK_MAX_LENGTH,
   PHONE_BR_MASK_MAX_LENGTH,
@@ -112,11 +112,17 @@ export default function Register() {
   return (
     <div className="grid min-h-dvh overflow-x-hidden bg-slate-50 md:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
       <div className="hidden md:flex flex-col justify-center items-center p-12 bg-sidebar text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 opacity-30">
           <img src={`${import.meta.env.BASE_URL}img-de-fundo-2.jpg`} alt="Medical" className="w-full h-full object-cover" />
         </div>
         <div className="relative z-10 max-w-md text-center">
-          <Stethoscope className="w-16 h-16 mx-auto mb-8 text-primary" />
+          <img
+            src="/logo-menu-login.png"
+            alt="Gastrocentro"
+            className="mx-auto mb-8 h-20 w-20 object-contain"
+            width={100}
+            height={100}
+          />
           <h2 className="text-focus-in text-4xl font-display font-bold mb-4 text-white">Comece sua jornada no GastroCentro</h2>
           <p className="text-lg text-slate-300">
             Crie sua conta e acesse cursos, materiais e uma comunidade focada em educação médica de qualidade.

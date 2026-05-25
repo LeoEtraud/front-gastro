@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { PasswordResetTimeline, type ResetTimelineStepStatus } from '@/components/auth/PasswordResetTimeline';
-import { BookOpen, Stethoscope } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
+import '@/styles/animations/text-focus-in.css';
 
 const schema = z.object({
   email: z.string().email('Email inválido'),
@@ -53,12 +54,20 @@ export default function ForgotPassword() {
   return (
     <div className="grid min-h-dvh overflow-x-hidden bg-slate-50 md:grid-cols-2">
       <div className="hidden md:flex flex-col justify-center items-center p-12 bg-sidebar text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 opacity-30">
           <img src={`${import.meta.env.BASE_URL}images/doctor-abstract.png`} alt="Medical" className="w-full h-full object-cover" />
         </div>
         <div className="relative z-10 max-w-md text-center">
-          <Stethoscope className="w-16 h-16 mx-auto mb-8 text-primary" />
-          <h2 className="text-4xl font-display font-bold mb-4 text-white">Redefinir sua senha</h2>
+          <img
+            src="/logo-menu-login.png"
+            alt="Gastrocentro"
+            className="mx-auto mb-8 h-20 w-20 object-contain"
+            width={100}
+            height={100}
+          />
+          <h2 className="text-focus-in mb-4 font-display text-4xl font-bold text-white">
+            Redefinir sua senha
+          </h2>
           <p className="text-lg text-white">
             Informe o e-mail da sua conta e enviaremos um link seguro para você criar uma nova senha.
           </p>
@@ -92,8 +101,8 @@ export default function ForgotPassword() {
                 </div>
               )}
               <div className="space-y-2.5">
-                <label className="text-sm font-medium">Email</label>
-                <Input {...register('email')} placeholder="dr.nome@exemplo.com" className="sm:h-12" type="email" />
+                <label className="text-sm font-medium">E-mail</label>
+                <Input {...register('email')} placeholder="seu@email.com" className="sm:h-12" type="email" />
                 {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
               </div>
               <Button type="submit" className="w-full text-base sm:h-12 sm:text-lg" isLoading={isSubmitting}>

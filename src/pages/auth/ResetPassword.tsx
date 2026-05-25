@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { PasswordResetTimeline, type ResetTimelineStepStatus } from '@/components/auth/PasswordResetTimeline';
 import { PasswordStrengthHints } from '@/components/auth/PasswordStrengthHints';
 import { resetPasswordMeetsAllCriteria } from '@/lib/password-reset-criteria';
-import { BookOpen, Stethoscope } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 
 const passwordField = z
   .string()
@@ -129,11 +129,17 @@ export default function ResetPassword() {
   return (
     <div className="grid min-h-dvh overflow-x-hidden bg-slate-50 md:grid-cols-2">
       <div className="hidden md:flex flex-col justify-center items-center p-12 bg-sidebar text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 opacity-30">
           <img src={`${import.meta.env.BASE_URL}images/doctor-abstract.png`} alt="Medical" className="w-full h-full object-cover" />
         </div>
         <div className="relative z-10 max-w-md text-center">
-          <Stethoscope className="w-16 h-16 mx-auto mb-8 text-primary" />
+          <img
+            src="/logo-menu-login.png"
+            alt="Gastrocentro"
+            className="mx-auto mb-8 h-20 w-20 object-contain"
+            width={100}
+            height={100}
+          />
           <h2 className="text-4xl font-display font-bold mb-4 text-white">Nova senha</h2>
           <p className="text-lg text-white">Escolha uma senha forte e guarde em local seguro.</p>
         </div>
