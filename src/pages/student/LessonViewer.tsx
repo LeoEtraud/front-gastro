@@ -59,6 +59,7 @@ function LessonVideoPanel({ lesson, loading }: { lesson: LessonWithProgress; loa
           key={playbackSrc}
           src={playbackSrc}
           controls
+          controlsList="nodownload"
           playsInline
           preload="metadata"
           className="absolute inset-0 h-full w-full object-contain"
@@ -87,6 +88,7 @@ function LessonVideoPanel({ lesson, loading }: { lesson: LessonWithProgress; loa
         <video
           src={lesson.videoUrl}
           controls
+          controlsList="nodownload"
           playsInline
           preload="metadata"
           className="absolute inset-0 h-full w-full object-contain"
