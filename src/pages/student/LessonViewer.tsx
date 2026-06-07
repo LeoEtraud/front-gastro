@@ -3,10 +3,11 @@ import { useStudentLesson, useMarkLessonProgress } from '@/hooks/use-student';
 import { usePublicCourse } from '@/hooks/use-courses';
 import type { LessonWithProgress } from '@/types/api';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { ArrowLeft, CheckCircle2, PlayCircle, FileText, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, FileText, Loader2, PlayCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { resolveApiUrl } from '@/lib/axios';
+import { COURSE_MATERIALS_DRIVE_URL } from '@/lib/course-materials-config';
 import { CompactContentSkeleton, LessonViewerSkeleton } from '@/components/ui/content-skeletons';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { normalizePtBrText } from '@/lib/normalize-ptbr';
@@ -223,7 +224,21 @@ export default function LessonViewer() {
             >
               <ArrowLeft className="h-3.5 w-3.5" />
             </Button>
-            <h3 className="line-clamp-2 font-display text-sm font-bold text-foreground sm:text-base">{normalizePtBrText(course.title)}</h3>
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="line-clamp-2 min-w-0 flex-1 font-display text-sm font-bold text-foreground sm:text-base">
+                {normalizePtBrText(course.title)}
+              </h3>
+              <a
+                href={COURSE_MATERIALS_DRIVE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
+                aria-label="Materiais complementares"
+                title="Materiais complementares"
+              >
+                <FileText className="h-4 w-4" aria-hidden />
+              </a>
+            </div>
           </div>
           <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain p-2 sm:space-y-4">
             {course.modules?.map((mod, i) => (

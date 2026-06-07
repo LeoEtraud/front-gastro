@@ -1,5 +1,7 @@
 /** Conteúdo editorial da landing GastroCentro — imagens via [Unsplash](https://unsplash.com/pt-br). */
 
+import { COURSE_MATERIALS_DRIVE_URL } from '@/lib/course-materials-config';
+
 const img = (id: string, w = 1400) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
@@ -31,7 +33,7 @@ const unsplash = {
 export const GASTRO_INTRO_VIDEO_URL = 'https://www.instagram.com/reel/DXM-i_OiXjt/embed';
 
 /** URL da pasta de materiais complementares no Google Drive. */
-export const GASTRO_MATERIALS_DRIVE_URL = '';
+export const GASTRO_MATERIALS_DRIVE_URL = COURSE_MATERIALS_DRIVE_URL;
 
 export type HeroSlide = {
   id: string;
