@@ -7,7 +7,6 @@ import { GastroFooter } from '@/components/gastrocentro/GastroFooter';
 import { GastroHeader } from '@/components/gastrocentro/GastroHeader';
 import { HeroCarousel } from '@/components/gastrocentro/HeroCarousel';
 import { SpecialistsSection } from '@/components/gastrocentro/SpecialistsSection';
-import { SpecialtiesSection } from '@/components/gastrocentro/SpecialtiesSection';
 import { StartHereSection } from '@/components/gastrocentro/StartHereSection';
 import { StatsBar } from '@/components/gastrocentro/StatsBar';
 import { TestimonialsSection } from '@/components/gastrocentro/TestimonialsSection';
@@ -30,7 +29,6 @@ export default function GastrocentroHome() {
         <HeroCarousel />
         <StatsBar />
         <StartHereSection />
-        <SpecialtiesSection />
         <FeaturedCoursesSection />
         <SpecialistsSection />
         <TestimonialsSection />

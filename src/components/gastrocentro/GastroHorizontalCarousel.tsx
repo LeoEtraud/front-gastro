@@ -10,6 +10,7 @@ type GastroHorizontalCarouselProps = {
   children: ReactNode;
   slideCount: number;
   className?: string;
+  showIndicators?: boolean;
   'aria-label'?: string;
 };
 
@@ -21,6 +22,7 @@ export function GastroHorizontalCarousel({
   children,
   slideCount,
   className,
+  showIndicators = true,
   'aria-label': ariaLabel = 'Carrossel de conteúdos',
 }: GastroHorizontalCarouselProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -126,7 +128,7 @@ export function GastroHorizontalCarousel({
         {children}
       </div>
 
-      {showControls ? (
+      {showControls && showIndicators ? (
         <div className="mt-4 flex justify-center gap-2" aria-hidden={slideCount <= 1}>
           {Array.from({ length: slideCount }, (_, i) => (
             <button

@@ -1,4 +1,4 @@
-import { CalendarDays, FileText, Route, Star } from 'lucide-react';
+import { FileText, Route, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   GC_SECTION_Y,
@@ -14,21 +14,42 @@ const iconMap = {
   routes: Route,
   star: Star,
   files: FileText,
-  calendar: CalendarDays,
 };
 
 const iconColors = [
   'bg-[#e4f9f9] text-gc-teal',
   'bg-[#fff3ee] text-gc-coral',
   'bg-[#fffbeb] text-[#d4940e]',
-  'bg-[#eaf0fb] text-gc-mid',
 ];
 
-function CardLink({ href, children }: { href: string; children: React.ReactNode }) {
-  if (href.startsWith('#')) {
-    return <a href={href} className="block min-w-0 h-full">{children}</a>;
+function CardLink({
+  href,
+  external,
+  children,
+}: {
+  href: string;
+  external?: boolean;
+  children: React.ReactNode;
+}) {
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className="block min-w-0 h-full">
+        {children}
+      </a>
+    );
   }
-  return <Link to={href} className="block min-w-0 h-full">{children}</Link>;
+  if (href.startsWith('#')) {
+    return (
+      <a href={href} className="block min-w-0 h-full">
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link to={href} className="block min-w-0 h-full">
+      {children}
+    </Link>
+  );
 }
 
 export function StartHereSection() {
@@ -37,14 +58,13 @@ export function StartHereSection() {
       <GastroContainer className="w-full">
         <SectionHeader
           title="Comece por aqui"
-          subtitle="Navegue pelos principais caminhos da plataforma."
-          viewAllHref="/login"
+          subtitle="Orientações para iniciar sua jornada na Plataforma GastroCentro."
         />
-        <div className="mt-8 grid grid-cols-1 gap-5 sm:mt-10 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4 lg:gap-7">
+        <div className="mt-8 grid grid-cols-1 gap-5 sm:mt-10 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-7">
           {startHereCards.map((card, i) => {
             const Icon = iconMap[card.icon];
             return (
-              <CardLink key={card.id} href={card.href}>
+              <CardLink key={card.id} href={card.href} external={card.external}>
                 <GastroCard className="group/card flex h-full flex-col !p-0">
                   <div className="flex h-full flex-col p-7 sm:p-8">
                     <span

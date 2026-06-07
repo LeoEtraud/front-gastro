@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { GastroButton } from '@/components/gastrocentro/GastroButton';
 import {
-  GASTRO_APPOINTMENT_URL,
+  GASTRO_ABOUT_URL,
   gastroNavItems,
   handleGastroAnchorClick,
   type GastroNavItem,
@@ -114,22 +114,22 @@ export function GastroHeader() {
                 Acessar plataforma
               </GastroButton>
               <GastroButton
-                href={GASTRO_APPOINTMENT_URL}
+                href={GASTRO_ABOUT_URL}
                 variant="primary"
                 className="h-[42px] whitespace-nowrap px-5 text-[13px] font-semibold xl:px-6"
               >
-                Agendar atendimento
+                Sobre nós
               </GastroButton>
             </div>
 
             {/* Mobile / tablet */}
             <div className="flex items-center gap-1 sm:gap-1.5 lg:hidden">
               <GastroButton
-                href={GASTRO_APPOINTMENT_URL}
+                href={GASTRO_ABOUT_URL}
                 variant="primary"
                 className="hidden h-9 px-3 text-xs sm:inline-flex sm:h-10 sm:px-4 sm:text-[13px]"
               >
-                Agendar
+                Sobre nós
               </GastroButton>
               <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger asChild>
@@ -159,13 +159,13 @@ export function GastroHeader() {
                     ))}
                     <div className="mt-5 flex flex-col gap-2.5 border-t border-white/10 pt-5">
                       <a
-                        href={GASTRO_APPOINTMENT_URL}
+                        href={GASTRO_ABOUT_URL}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={closeMobileMenu}
                         className="inline-flex h-11 w-full items-center justify-center rounded-full bg-gc-coral px-6 text-sm font-semibold text-white shadow-[0_6px_20px_-4px_rgba(255,107,53,0.50)] transition-all duration-200 hover:bg-[#e85f2d] active:scale-[0.97]"
                       >
-                        Agendar atendimento
+                        Sobre nós
                       </a>
                       <Link
                         to="/login"

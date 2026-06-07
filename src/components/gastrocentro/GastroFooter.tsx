@@ -5,15 +5,26 @@ import { handleGastroAnchorClick } from '@/components/gastrocentro/gastro-nav';
 import { useLegalDocuments } from '@/hooks/use-legal-documents';
 import { cn } from '@/lib/utils';
 
+const GASTRO_INSTAGRAM_URL = 'https://www.instagram.com/gastrocentroslz/';
+/** Configure quando o link oficial estiver disponível. */
+const GASTRO_YOUTUBE_URL = '#';
+/** Configure quando o link oficial estiver disponível. */
+const GASTRO_LINKEDIN_URL = '#';
+
+const socialLinks = [
+  { Icon: Instagram, label: 'Instagram', href: GASTRO_INSTAGRAM_URL },
+  { Icon: Youtube, label: 'YouTube', href: GASTRO_YOUTUBE_URL },
+  { Icon: Linkedin, label: 'LinkedIn', href: GASTRO_LINKEDIN_URL },
+] as const;
+
 const institutional = [
-  { label: 'Sobre nós', href: '#topo' },
-  { label: 'Especialidades', href: '#especialidades' },
-  { label: 'Corpo clínico', href: '#especialistas' },
+  { label: 'Sobre nós', href: 'https://gastrocentroslz.com.br/', external: true },
+  { label: 'Corpo docente', href: '#especialistas' },
   { label: 'Contato', href: '#contato' },
 ];
 
 const platform = [
-  { label: 'Cursos e conteúdos', href: '#cursos-destaque' },
+  { label: 'Fellowship', href: '#cursos-destaque' },
   { label: 'Comece por aqui', href: '#comece-aqui' },
   { label: 'Depoimentos', href: '#depoimentos' },
   { label: 'Materiais gratuitos', href: '/login' },
@@ -30,8 +41,23 @@ const legalLinks = [
   { label: 'Termos de uso', document: 'terms' as const },
 ];
 
-function FooterLink({ href, label }: { href: string; label: string }) {
+function FooterLink({
+  href,
+  label,
+  external,
+}: {
+  href: string;
+  label: string;
+  external?: boolean;
+}) {
   const cls = 'transition-colors duration-150 hover:text-gc-teal';
+  if (external || href.startsWith('http')) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>
+        {label}
+      </a>
+    );
+  }
   if (href.startsWith('/')) {
     return (
       <Link to={href} className={cls}>
@@ -61,13 +87,11 @@ export function GastroFooter() {
         GC_SCROLL_ANCHOR,
       )}
     >
-      {/* Top accent line */}
       <div className="h-px w-full bg-gradient-to-r from-transparent via-gc-teal/40 to-transparent" aria-hidden />
 
       <GastroSection className="pt-14 pb-10 sm:pt-16">
         <GastroContainer>
           <div className="grid min-w-0 gap-10 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:gap-12">
-            {/* Brand */}
             <div className="min-w-0">
               <div className="flex min-w-0 items-start">
                 <img
@@ -80,14 +104,13 @@ export function GastroFooter() {
                 Referência em ensino, pesquisa e cuidado em saúde digestiva. Conteúdo de qualidade para profissionais e pacientes.
               </p>
               <div className="mt-6 flex flex-wrap gap-2">
-                {[
-                  { Icon: Instagram, label: 'Instagram' },
-                  { Icon: Youtube, label: 'YouTube' },
-                  { Icon: Linkedin, label: 'LinkedIn' },
-                ].map(({ Icon, label }) => (
+                {socialLinks.map(({ Icon, label, href }) => (
                   <a
                     key={label}
-                    href="#"
+                    href={href}
+                    {...(href.startsWith('http')
+                      ? { target: '_blank', rel: 'noopener noreferrer' }
+                      : {})}
                     aria-label={label}
                     className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 text-white/55 transition-all duration-150 hover:border-gc-teal/50 hover:bg-gc-teal/10 hover:text-gc-teal"
                   >
@@ -97,7 +120,6 @@ export function GastroFooter() {
               </div>
             </div>
 
-            {/* Institucional */}
             <div className="min-w-0">
               <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/40">Institucional</p>
               <ul className="mt-5 space-y-3 text-[13px] sm:text-sm">
@@ -109,7 +131,6 @@ export function GastroFooter() {
               </ul>
             </div>
 
-            {/* Plataforma */}
             <div className="min-w-0">
               <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/40">Plataforma</p>
               <ul className="mt-5 space-y-3 text-[13px] sm:text-sm">
@@ -121,7 +142,6 @@ export function GastroFooter() {
               </ul>
             </div>
 
-            {/* Suporte */}
             <div className="min-w-0">
               <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/40">Suporte</p>
               <ul className="mt-5 space-y-3 text-[13px] sm:text-sm">
@@ -147,7 +167,6 @@ export function GastroFooter() {
 
           {modals}
 
-          {/* Copyright */}
           <div className="mt-14 border-t border-white/8 pt-7 text-center text-[12px] text-white/30">
             © 2026 GastroCentro. Todos os direitos reservados.
           </div>

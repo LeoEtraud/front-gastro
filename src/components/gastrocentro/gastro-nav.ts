@@ -1,7 +1,10 @@
 import type { MouseEvent } from 'react';
 
-/** Site institucional — agendamento de atendimento. */
-export const GASTRO_APPOINTMENT_URL = 'https://gastrocentroslz.com.br/';
+/** Site institucional GastroCentro — página "Sobre nós". */
+export const GASTRO_ABOUT_URL = 'https://gastrocentroslz.com.br/';
+
+/** @deprecated Use GASTRO_ABOUT_URL */
+export const GASTRO_APPOINTMENT_URL = GASTRO_ABOUT_URL;
 
 /** Altura do header fixo (px) — manter em sync com `h-[84px]` no GastroHeader. */
 export const GASTRO_HEADER_HEIGHT_PX = 84;
@@ -15,8 +18,8 @@ export const GASTRO_SCROLL_OFFSET_PX = GASTRO_HEADER_HEIGHT_PX + 16;
  */
 export const gastroNavItems = [
   { label: 'Início', href: '#topo' },
-  { label: 'Especialidades', href: '#especialidades' },
-  { label: 'Cursos em destaque', shortLabel: 'Cursos', href: '#cursos-destaque' },
+  { label: 'Comece por aqui', shortLabel: 'Comece', href: '#comece-aqui' },
+  { label: 'Fellowship', shortLabel: 'Curso', href: '#cursos-destaque' },
   { label: 'Médicos', href: '#especialistas' },
   { label: 'Depoimentos', href: '#depoimentos' },
   { label: 'Contato', href: '#contato' },

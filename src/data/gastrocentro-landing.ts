@@ -27,47 +27,41 @@ const unsplash = {
   medicalSupplies: 'photo-1643660527074-0ddcec3bda96',
 } as const;
 
+/** URL do vídeo de apresentação do curso (embed Instagram, YouTube, Vimeo, etc.). */
+export const GASTRO_INTRO_VIDEO_URL = 'https://www.instagram.com/reel/DXM-i_OiXjt/embed';
+
+/** URL da pasta de materiais complementares no Google Drive. */
+export const GASTRO_MATERIALS_DRIVE_URL = '';
+
 export type HeroSlide = {
   id: string;
   badge: string;
   title: string;
   subtitle: string;
   primaryCta: string;
-  secondaryCta: string;
   primaryHref: string;
-  secondaryHref: string;
+  primaryAction?: 'link' | 'video';
+  secondaryCta?: string;
+  secondaryHref?: string;
   imageSrc: string;
   imageAlt: string;
-};
-
-export type ShowcaseThumb = {
-  id: string;
-  title: string;
-  category: string;
-  imageSrc: string;
-  href: string;
 };
 
 export type StartHereCard = {
   id: string;
   title: string;
   description: string;
-  icon: 'routes' | 'star' | 'files' | 'calendar';
+  icon: 'routes' | 'star' | 'files';
   href: string;
+  external?: boolean;
 };
 
-export type Specialty = {
-  id: string;
-  name: string;
-  count: number;
-  imageSrc: string;
-};
-
-export type FeaturedCourse = {
+export type PlatformCourse = {
   id: string;
   title: string;
-  category: string;
-  badge?: string;
+  description: string;
+  targetAudience: string;
+  topics: string[];
   imageSrc: string;
 };
 
@@ -79,6 +73,8 @@ export type Specialist = {
   initials: string;
   color: string;
   photoSrc?: string;
+  /** URL do LinkedIn — deixe vazio enquanto não estiver disponível. */
+  linkedinUrl?: string;
 };
 
 export type Testimonial = {
@@ -87,6 +83,8 @@ export type Testimonial = {
   name: string;
   role: string;
   initials: string;
+  /** Quando true, exibe placeholder editorial em vez de depoimento fictício. */
+  placeholder?: boolean;
 };
 
 export type Benefit = {
@@ -104,21 +102,19 @@ export const heroSlides: HeroSlide[] = [
     subtitle:
       'Aulas práticas, materiais complementares e conteúdos atualizados para sua evolução clínica.',
     primaryCta: 'Assistir agora',
-    secondaryCta: 'Ver especialidades',
     primaryHref: '/login',
-    secondaryHref: '#especialidades',
+    primaryAction: 'video',
     imageSrc: img('photo-1576091160399-112ba8d25d1d'),
     imageAlt: 'Profissionais de saúde em ambiente clínico moderno',
   },
   {
     id: 'slide-2',
-    badge: 'Trilhas completas',
+    badge: 'Plataforma GastroCentro',
     title: 'Aprenda por especialidades',
-    subtitle: 'Conteúdos organizados em Endoscopia, Hepatologia, Nutrição, Pediatria e muito mais.',
-    primaryCta: 'Explorar trilhas',
-    secondaryCta: 'Conhecer plataforma',
+    subtitle:
+      'Conteúdos organizados para sua formação em saúde digestiva, com expansão contínua de novos cursos.',
+    primaryCta: 'Acessar plataforma',
     primaryHref: '/login',
-    secondaryHref: '#topo',
     imageSrc: img('photo-1582719478250-c89cae4dc85b'),
     imageAlt: 'Equipamento médico de endoscopia digestiva',
   },
@@ -128,9 +124,7 @@ export const heroSlides: HeroSlide[] = [
     title: 'Aulas com profissionais referência',
     subtitle: 'Conteúdos conduzidos por especialistas experientes e reconhecidos na prática clínica.',
     primaryCta: 'Conhecer especialistas',
-    secondaryCta: 'Ver cursos',
     primaryHref: '#especialistas',
-    secondaryHref: '#cursos-destaque',
     imageSrc: img('photo-1612349317150-e413f6a5b16d'),
     imageAlt: 'Médico especialista em consulta',
   },
@@ -139,134 +133,82 @@ export const heroSlides: HeroSlide[] = [
     badge: 'Certificação',
     title: 'Evolua sua carreira com conteúdos certificados',
     subtitle: 'Conclua cursos, acompanhe seu progresso e fortaleça sua formação profissional.',
-    primaryCta: 'Ver certificações',
-    secondaryCta: 'Começar agora',
+    primaryCta: 'Começar agora',
     primaryHref: '/register',
-    secondaryHref: '/register',
     imageSrc: img('photo-1454165804606-c3d57bc86b40'),
     imageAlt: 'Profissional estudando materiais clínicos',
   },
 ];
 
-export const showcaseThumbs: ShowcaseThumb[] = [
-  {
-    id: 'thumb-1',
-    title: 'Técnicas em APH',
-    category: 'Urgência',
-    imageSrc: img(unsplash.emergencyRoom, 600),
-    href: '/login',
-  },
-  {
-    id: 'thumb-2',
-    title: 'Endoscopia Avançada',
-    category: 'Procedimentos',
-    imageSrc: img(unsplash.endoscopyEquipment, 600),
-    href: '/login',
-  },
-  {
-    id: 'thumb-3',
-    title: 'Hepatologia Clínica',
-    category: 'Especialidade',
-    imageSrc: img('photo-1559757148-5c350d0d3c56', 600),
-    href: '/login',
-  },
-  {
-    id: 'thumb-4',
-    title: 'Nutrição Digestiva',
-    category: 'Nutrição',
-    imageSrc: img('photo-1490645935967-10de6ba17061', 600),
-    href: '/login',
-  },
-  {
-    id: 'thumb-5',
-    title: 'Via Aérea e Ventilação',
-    category: 'Emergências',
-    imageSrc: img('photo-1519494026892-80bbd2d6fd0d', 600),
-    href: '/login',
-  },
-  {
-    id: 'thumb-6',
-    title: 'Colonoscopia e Preparo',
-    category: 'Exames',
-    imageSrc: img(unsplash.endoscopyEquipment, 600),
-    href: '/login',
-  },
-];
-
 export const stats = [
-  { id: 'students', value: '+5 mil', label: 'Alunos ativos', icon: 'users' as const },
-  { id: 'lessons', value: '+200', label: 'Aulas disponíveis', icon: 'play' as const },
-  { id: 'specialties', value: '24', label: 'Especialidades', icon: 'layers' as const },
-  { id: 'satisfaction', value: '98%', label: 'Satisfação dos alunos', icon: 'heart' as const },
+  {
+    id: 'course',
+    title: 'Curso inicial disponível',
+    subtitle: 'Fellowship em Endoscopia Digestiva Alta',
+    icon: 'book' as const,
+  },
+  {
+    id: 'experts',
+    title: 'Aulas com especialistas',
+    subtitle: 'Conteúdo conduzido por profissionais de referência',
+    icon: 'users' as const,
+  },
+  {
+    id: 'materials',
+    title: 'Materiais complementares',
+    subtitle: 'Apoio ao aprendizado com arquivos e conteúdos extras',
+    icon: 'files' as const,
+  },
+  {
+    id: 'certification',
+    title: 'Certificação',
+    subtitle: 'Formação com conteúdo certificado',
+    icon: 'award' as const,
+  },
 ];
 
 export const startHereCards: StartHereCard[] = [
   {
     id: 'trilhas',
-    title: 'Trilhas de aprendizado',
-    description: 'Jornadas organizadas por nível e tema.',
+    title: 'Trilha de aprendizado',
+    description:
+      'Acesse a plataforma, entre no curso disponível, acompanhe as aulas na sequência indicada e utilize os materiais complementares para aprofundar seus estudos.',
     icon: 'routes',
     href: '/login',
   },
   {
     id: 'destaques',
     title: 'Aulas em destaque',
-    description: 'Seleção dos conteúdos mais acessados.',
+    description: 'Seleção dos conteúdos mais acessados do curso disponível na plataforma.',
     icon: 'star',
     href: '#cursos-destaque',
   },
   {
     id: 'materiais',
     title: 'Materiais complementares',
-    description: 'Artigos, guias e downloads exclusivos.',
+    description:
+      'Os materiais complementares são organizados por aula ou módulo do curso, com apoio ao aprendizado por meio de arquivos, documentos e conteúdos extras.',
     icon: 'files',
-    href: '/login',
-  },
-  {
-    id: 'lives',
-    title: 'Agenda de lives',
-    description: 'Eventos ao vivo com especialistas.',
-    icon: 'calendar',
-    href: '/login',
+    href: GASTRO_MATERIALS_DRIVE_URL || '/login',
+    external: Boolean(GASTRO_MATERIALS_DRIVE_URL),
   },
 ];
 
-export const specialties: Specialty[] = [
-  { id: 'endo', name: 'Endoscopia', count: 26, imageSrc: img(unsplash.endoscopyEquipment, 800) },
-  { id: 'hepato', name: 'Hepatologia', count: 24, imageSrc: img(unsplash.liverAnatomy, 800) },
-  { id: 'motil', name: 'Motilidade', count: 18, imageSrc: img(unsplash.digestiveIllustration, 800) },
-  { id: 'nutri', name: 'Nutrição', count: 22, imageSrc: img(unsplash.healthyFood, 800) },
-  { id: 'onco', name: 'Oncologia', count: 30, imageSrc: img(unsplash.hospitalIv, 800) },
-  { id: 'ped', name: 'Pediatria', count: 16, imageSrc: img(unsplash.pediatricCare, 800) },
-];
-
-export const featuredCourses: FeaturedCourse[] = [
-  {
-    id: 'aph',
-    title: 'Técnicas em APH',
-    category: 'Urgência',
-    badge: 'Mais assistido',
-    imageSrc: img(unsplash.cprTraining, 900),
-  },
-  {
-    id: 'injecoes',
-    title: 'Aplicação de Injeções',
-    category: 'Procedimentos',
-    imageSrc: img('photo-1587854692152-cbe660dbde88', 900),
-  },
-  {
-    id: 'perfusao',
-    title: 'Perfusão Extracorpórea',
-    category: 'Terapia Intensiva',
-    imageSrc: img('photo-1519494026892-80bbd2d6fd0d', 900),
-  },
-  {
-    id: 'via-aerea',
-    title: 'Via Aérea e Ventilação',
-    category: 'Emergências',
-    imageSrc: img('photo-1551601651-2a8555f1a136', 900),
-  },
-];
+export const platformCourse: PlatformCourse = {
+  id: 'fellowship-endoscopia',
+  title: 'Fellowship em Endoscopia Digestiva Alta',
+  description:
+    'Formação completa em endoscopia digestiva alta, com abordagem teórica e prática para o desenvolvimento de competências essenciais na área.',
+  targetAudience:
+    'Médicos gastroenterologistas, cirurgiões do aparelho digestivo, residentes e profissionais em formação na área digestiva.',
+  topics: [
+    'Fundamentos e indicações da EDA',
+    'Técnicas de inspeção e documentação',
+    'Procedimentos diagnósticos e terapêuticos',
+    'Interpretação e conduta clínica',
+  ],
+  imageSrc: '/capa-curso.jpg',
+};
 
 export const specialists: Specialist[] = [
   {
@@ -277,6 +219,7 @@ export const specialists: Specialist[] = [
     initials: 'MM',
     color: '#20C4C9',
     photoSrc: img('photo-1612349317150-e413f6a5b16d', 200),
+    linkedinUrl: '',
   },
   {
     id: 'juliana',
@@ -286,6 +229,7 @@ export const specialists: Specialist[] = [
     initials: 'JA',
     color: '#FF6B35',
     photoSrc: img('photo-1559839734-2b71ea197ec2', 200),
+    linkedinUrl: '',
   },
   {
     id: 'rafael',
@@ -295,6 +239,7 @@ export const specialists: Specialist[] = [
     initials: 'RN',
     color: '#FFC533',
     photoSrc: img('photo-1622253692010-333f2da6031d', 200),
+    linkedinUrl: '',
   },
   {
     id: 'carlos',
@@ -304,30 +249,70 @@ export const specialists: Specialist[] = [
     initials: 'CE',
     color: '#082A4F',
     photoSrc: img(unsplash.doctorPortrait, 200),
+    linkedinUrl: '',
+  },
+  {
+    id: 'docente-5',
+    name: 'Docente em atualização',
+    specialty: 'A definir',
+    registration: '',
+    initials: '—',
+    color: '#20C4C9',
+    linkedinUrl: '',
+  },
+  {
+    id: 'docente-6',
+    name: 'Docente em atualização',
+    specialty: 'A definir',
+    registration: '',
+    initials: '—',
+    color: '#FF6B35',
+    linkedinUrl: '',
+  },
+  {
+    id: 'docente-7',
+    name: 'Docente em atualização',
+    specialty: 'A definir',
+    registration: '',
+    initials: '—',
+    color: '#082A4F',
+    linkedinUrl: '',
+  },
+  {
+    id: 'docente-8',
+    name: 'Docente em atualização',
+    specialty: 'A definir',
+    registration: '',
+    initials: '—',
+    color: '#FFC533',
+    linkedinUrl: '',
   },
 ];
 
 export const testimonials: Testimonial[] = [
   {
-    id: 'lucas',
-    quote: 'A plataforma mudou minha forma de estudar. Os conteúdos são práticos e atualizados.',
-    name: 'Dr. Lucas Ferreira',
-    role: 'Gastroenterologista',
-    initials: 'LF',
+    id: 'placeholder-1',
+    quote: '',
+    name: '',
+    role: '',
+    initials: '?',
+    placeholder: true,
   },
   {
-    id: 'camila',
-    quote: 'Excelente qualidade das aulas e dos professores. Recomendo para toda a equipe de saúde.',
-    name: 'Dra. Camila Mendes',
-    role: 'Clínica Médica',
-    initials: 'CM',
+    id: 'placeholder-2',
+    quote: '',
+    name: '',
+    role: '',
+    initials: '?',
+    placeholder: true,
   },
   {
-    id: 'joao',
-    quote: 'Os cursos me deram mais segurança no dia a dia e fizeram diferença na prática.',
-    name: 'Enf. João Pedro',
-    role: 'Enfermagem',
-    initials: 'JP',
+    id: 'placeholder-3',
+    quote: '',
+    name: '',
+    role: '',
+    initials: '?',
+    placeholder: true,
   },
 ];
 
