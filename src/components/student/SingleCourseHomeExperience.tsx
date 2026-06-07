@@ -11,7 +11,7 @@ import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carouse
 import {
   Captions,
   ChevronRight,
-  Clock,
+  FileText,
   LayoutList,
   PlayCircle,
   Target,
@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { normalizePtBrText } from '@/lib/normalize-ptbr';
 import { resolveApiUrl } from '@/lib/axios';
+import { COURSE_MATERIALS_DRIVE_URL } from '@/lib/course-materials-config';
 import { cn } from '@/lib/utils';
 import { useVideoPreviewPreload } from '@/hooks/use-video-preview-preload';
 import { useStudentProfile } from '@/hooks/use-student';
@@ -574,6 +575,19 @@ function DashboardInfoCard({
   );
 
   if (href) {
+    if (href.startsWith('http://') || href.startsWith('https://')) {
+      return (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group block h-full min-w-0"
+        >
+          {card}
+        </a>
+      );
+    }
+
     return (
       <Link to={href} className="group block h-full min-w-0">
         {card}
@@ -704,14 +718,19 @@ export function SingleCourseHomeExperience({ home }: Props) {
         </DashboardInfoCard>
 
         <DashboardInfoCard
-          icon={<Clock className="h-5 w-5 text-slate-500 dark:text-slate-400" aria-hidden />}
-          iconWrapClass="bg-slate-100 dark:bg-slate-500/12 dark:text-slate-300"
-          footer={<p className="text-[10px] leading-snug text-muted-foreground">De conteúdo completo</p>}
+          icon={<FileText className="h-5 w-5 text-primary" aria-hidden />}
+          iconWrapClass="bg-primary/10 dark:bg-primary/12 dark:text-primary"
+          href={COURSE_MATERIALS_DRIVE_URL}
+          footer={
+            <p className="text-[10px] font-medium text-primary group-hover:underline">
+              Acessar materiais →
+            </p>
+          }
         >
-          <p className="gc-metric-value">
-            {home.workloadHours != null && home.workloadHours > 0 ? `${home.workloadHours}h` : '—'}
+          <p className="line-clamp-2 text-base font-bold leading-snug text-foreground sm:text-lg dark:gc-metric-value dark:text-[1.125rem] dark:sm:text-xl">
+            Materiais complementares
           </p>
-          <p className="gc-metric-label">Carga Horária Total</p>
+          <p className="gc-metric-label">Arquivos e documentos</p>
         </DashboardInfoCard>
       </div>
 
