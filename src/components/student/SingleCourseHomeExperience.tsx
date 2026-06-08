@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useRef, useState, type MouseEventHandler, type ReactNode } from 'react';
+import React, { useEffect, useMemo, useRef, useState, type MouseEventHandler, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { useInViewportWarmup } from '@/hooks/use-video-preview-preload';
 import type {
   StudentDashboardLessonPreview,
   StudentDashboardSingleCourseHome,
@@ -22,14 +23,9 @@ import { normalizePtBrText } from '@/lib/normalize-ptbr';
 import { resolveApiUrl } from '@/lib/axios';
 import { COURSE_MATERIALS_DRIVE_URL } from '@/lib/course-materials-config';
 import { cn } from '@/lib/utils';
-import { useVideoPreviewPreload } from '@/hooks/use-video-preview-preload';
 import { useStudentProfile } from '@/hooks/use-student';
 
-/** Miniatura oficial do YouTube quando a aula usa `videoUrl` externo. */
-function youtubePosterUrl(videoUrl: string): string | null {
-  const id = youtubeVideoId(videoUrl);
-  return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : null;
-}
+const LESSON_COVER_URL = '/capa-curso.jpg';
 
 function youtubeVideoId(videoUrl: string): string | null {
   try {
@@ -64,7 +60,6 @@ function LessonPreviewCard({
   lesson,
   className,
   visualOnly = false,
-  preloadOrder = 0,
 }: {
   courseId: string;
   courseTitle: string;
@@ -75,9 +70,8 @@ function LessonPreviewCard({
   className?: string;
   /** Preview compacto (player + informações úteis abaixo). */
   visualOnly?: boolean;
-  /** Índice do card na lista — usado para escalonar o pré-carregamento e não saturar a rede. */
-  preloadOrder?: number;
 }) {
+  const containerRef = useRef<HTMLElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const youtubeFrameRef = useRef<HTMLIFrameElement | null>(null);
   const [isHovering, setIsHovering] = useState(false);
@@ -85,18 +79,20 @@ function LessonPreviewCard({
   const [isSubtitleEnabled, setIsSubtitleEnabled] = useState(false);
   const [hasSubtitleTrack, setHasSubtitleTrack] = useState(false);
   const [isYoutubeReady, setIsYoutubeReady] = useState(false);
-  // Quando true, o preview já está aquecido: o iframe do YouTube fica montado
-  // (escondido) e o <video> hospedado passa a usar `preload="auto"`. Assim, o
-  // hover apenas alterna a visibilidade — sem latência de download.
+  // Quando true: o card está visível na tela há tempo suficiente para valer
+  // pré-aquecer o preview. Para vídeos hospedados isso monta o <video> com
+  // preload="metadata" (só cabeçalho/duração). Para YouTube, faz preconnect.
   const [isPreviewWarmedUp, setIsPreviewWarmedUp] = useState(false);
 
   const label = `${normalizePtBrText(courseTitle)} — ${normalizePtBrText(lesson.title)} — ${normalizePtBrText(lesson.moduleTitle)}`;
-  const ytPoster = lesson.videoUrl ? youtubePosterUrl(lesson.videoUrl) : null;
   const ytVideoId = lesson.videoUrl ? youtubeVideoId(lesson.videoUrl) : null;
   const hostedSrc = lesson.videoPreviewUrl ? resolveApiUrl(lesson.videoPreviewUrl) : null;
   const canPreview = Boolean(hostedSrc || ytVideoId);
-  const shouldMountYoutubeIframe = Boolean(!hostedSrc && ytVideoId && (isHovering || isPreviewWarmedUp));
-  const hostedPreloadStrategy: 'metadata' | 'auto' = isPreviewWarmedUp ? 'auto' : 'metadata';
+  // YouTube só é montado no hover — é custoso em banda. Warmed-up apenas preconecta.
+  const shouldMountYoutubeIframe = Boolean(!hostedSrc && ytVideoId && isHovering);
+  // Vídeo hospedado: monta assim que aquecido (preload="metadata") ou no hover (preload="auto").
+  const shouldMountHostedVideo = Boolean(hostedSrc && (isHovering || isPreviewWarmedUp));
+  const hostedPreload = isHovering ? 'auto' : 'metadata';
   const canToggleSubtitle = Boolean(ytVideoId || hasSubtitleTrack);
   const youtubePreviewSrc = ytVideoId
     ? `https://www.youtube.com/embed/${ytVideoId}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&playsinline=1&loop=1&playlist=${ytVideoId}&cc_load_policy=1&cc_lang_pref=pt&enablejsapi=1`
@@ -139,63 +135,51 @@ function LessonPreviewCard({
     };
   }, [isAudioEnabled, isSubtitleEnabled, shouldMountYoutubeIframe, isYoutubeReady]);
 
-  // Quando o iframe é pré-aquecido (montado em background), ele inicia com
-  // autoplay+mute. Pausamos imediatamente após o ready para economizar banda
-  // e CPU enquanto o usuário não interage. No hover, voltamos a tocar.
   useEffect(() => {
-    if (!shouldMountYoutubeIframe || !isYoutubeReady) return;
-    sendYoutubeCommand(isHovering ? 'playVideo' : 'pauseVideo');
-  }, [isHovering, isYoutubeReady, shouldMountYoutubeIframe]);
+    if (!isHovering) {
+      setIsYoutubeReady(false);
+    }
+  }, [isHovering]);
 
-  // Agendamento do warm-up: assim que o navegador estiver ocioso (após o
-  // Dashboard estabilizar), preparamos o preview em segundo plano.
+  // Warm-up baseado em visibilidade: ativa preload="metadata" quando o card
+  // fica visível por ≥400ms, sem esperar o hover.
+  useInViewportWarmup(
+    containerRef,
+    () => setIsPreviewWarmedUp(true),
+    { enabled: canPreview && !isPreviewWarmedUp },
+  );
+
+  // Preconnect YouTube ao aquecer cards com vídeo externo (muito barato —
+  // apenas DNS+TLS, sem baixar nada).
   useEffect(() => {
-    if (!canPreview || isPreviewWarmedUp) return;
-    if (typeof window === 'undefined') return;
-
-    let cancelled = false;
-    let idleHandle: number | null = null;
-    const w = window as Window & {
-      requestIdleCallback?: (cb: () => void, opts?: { timeout?: number }) => number;
-      cancelIdleCallback?: (handle: number) => void;
-    };
-
-    const baseDelay = 350 + preloadOrder * 280;
-    const timeoutId = window.setTimeout(() => {
-      if (cancelled) return;
-      const run = () => {
-        if (cancelled) return;
-        setIsPreviewWarmedUp(true);
-      };
-      if (typeof w.requestIdleCallback === 'function') {
-        idleHandle = w.requestIdleCallback(run, { timeout: 3000 });
-      } else {
-        run();
+    if (!isPreviewWarmedUp || !ytVideoId || hostedSrc) return;
+    const hosts = ['https://www.youtube.com', 'https://i.ytimg.com'];
+    for (const href of hosts) {
+      if (!document.querySelector(`link[rel="preconnect"][href="${href}"]`)) {
+        const link = document.createElement('link');
+        link.rel = 'preconnect';
+        link.href = href;
+        document.head.appendChild(link);
       }
-    }, baseDelay);
+    }
+  }, [isPreviewWarmedUp, ytVideoId, hostedSrc]);
 
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timeoutId);
-      if (idleHandle != null && typeof w.cancelIdleCallback === 'function') {
-        w.cancelIdleCallback(idleHandle);
-      }
-    };
-  }, [canPreview, preloadOrder, isPreviewWarmedUp]);
+  // Quando o hover começa e o vídeo já estava aquecido (preload="metadata"),
+  // só precisa trocar para preload="auto" e dar play — sem latência de mount.
+  useEffect(() => {
+    if (!isHovering || !shouldMountHostedVideo || !videoRef.current) return;
+    const video = videoRef.current;
+    video.currentTime = 0;
+    video.muted = !isAudioEnabled;
+    void video.play().catch(() => {
+      /* ignore autoplay block */
+    });
+  }, [isHovering, shouldMountHostedVideo, isAudioEnabled]);
 
-  const handlePreviewStart = async () => {
+  const handlePreviewStart = () => {
     setIsHovering(true);
     setIsAudioEnabled(audioPreferenceEnabled);
     setIsSubtitleEnabled(true);
-    if (ytVideoId && !hostedSrc) return;
-    if (!videoRef.current) return;
-    try {
-      videoRef.current.currentTime = 0;
-      videoRef.current.muted = !isAudioEnabled;
-      await videoRef.current.play();
-    } catch {
-      /* ignore autoplay block */
-    }
   };
 
   const handlePreviewStop = () => {
@@ -204,12 +188,16 @@ function LessonPreviewCard({
     setIsSubtitleEnabled(false);
     if (youtubeFrameRef.current) {
       sendYoutubeCommand('mute');
-      sendYoutubeCommand(isPreviewWarmedUp ? 'pauseVideo' : 'stopVideo');
+      sendYoutubeCommand('stopVideo');
     }
     if (!videoRef.current) return;
     videoRef.current.pause();
     videoRef.current.currentTime = 0;
     videoRef.current.muted = true;
+    // Volta para metadata-only para liberar buffer enquanto não está em hover
+    if (isPreviewWarmedUp) {
+      videoRef.current.preload = 'metadata';
+    }
   };
 
   const handleToggleAudio: MouseEventHandler<HTMLButtonElement> = (event) => {
@@ -250,13 +238,13 @@ function LessonPreviewCard({
   };
 
   if (visualOnly) {
-    const coverSrc = courseCover ? resolveApiUrl(courseCover) : null;
     const subtitleText = lesson.description?.trim()
       ? normalizePtBrText(lesson.description)
       : normalizePtBrText(courseTitle);
 
     return (
       <Link
+        ref={containerRef as React.Ref<HTMLAnchorElement>}
         to={`/student/courses/${courseId}/lessons/${lesson.id}`}
         className={cn(
           'group gc-lesson-card gc-lesson-card--stacked w-full min-w-0 cursor-pointer border border-border/80 bg-card',
@@ -271,38 +259,29 @@ function LessonPreviewCard({
           onMouseEnter={canPreview ? handlePreviewStart : undefined}
           onMouseLeave={canPreview ? handlePreviewStop : undefined}
         >
-          {ytPoster ? (
-            <img
-              src={ytPoster}
-              alt=""
-              loading="lazy"
-              className={cn('gc-lesson-card-media', isHovering && 'scale-[1.03]')}
-            />
-          ) : null}
-          {hostedSrc ? (
+          <img
+            src={LESSON_COVER_URL}
+            alt=""
+            loading="lazy"
+            className={cn(
+              'gc-lesson-card-media transition-opacity duration-200',
+              isHovering && canPreview && 'opacity-0',
+              isHovering && !canPreview && 'scale-[1.03]',
+            )}
+          />
+          {shouldMountHostedVideo && hostedSrc ? (
             <video
               ref={videoRef}
               src={hostedSrc}
               muted
               playsInline
-              preload={hostedPreloadStrategy}
+              preload={hostedPreload}
               loop
               onLoadedMetadata={handleHostedMetadata}
-              className={cn('gc-lesson-card-media preview-video', isHovering && 'scale-[1.03]')}
-              aria-hidden
-            />
-          ) : null}
-          {!ytPoster && !hostedSrc && coverSrc ? (
-            <img
-              src={coverSrc}
-              alt=""
-              loading="lazy"
-              className={cn('gc-lesson-card-media', isHovering && 'scale-[1.03]')}
-            />
-          ) : null}
-          {!ytPoster && !hostedSrc && !coverSrc ? (
-            <div
-              className="absolute inset-0 z-[1] bg-gradient-to-br from-muted via-muted/80 to-background"
+              className={cn(
+                'gc-lesson-card-media preview-video absolute inset-0 z-[3] transition-opacity duration-200',
+                isHovering ? 'scale-[1.03] opacity-100' : 'opacity-0',
+              )}
               aria-hidden
             />
           ) : null}
@@ -312,10 +291,7 @@ function LessonPreviewCard({
               src={youtubePreviewSrc}
               title={`Prévia da aula ${normalizePtBrText(lesson.title)}`}
               allow="autoplay; encrypted-media; picture-in-picture"
-              className={cn(
-                'pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-200',
-                isHovering ? 'z-[3] opacity-100' : 'z-[0] opacity-0',
-              )}
+              className="pointer-events-none absolute inset-0 z-[3] h-full w-full object-cover opacity-100"
               onLoad={handleYoutubeLoaded}
               tabIndex={-1}
               aria-hidden
@@ -400,25 +376,28 @@ function LessonPreviewCard({
       onMouseEnter={canPreview ? handlePreviewStart : undefined}
       onMouseLeave={canPreview ? handlePreviewStop : undefined}
     >
-      {ytPoster ? (
-        <img
-          src={ytPoster}
-          alt=""
-          loading="lazy"
-          className="absolute inset-0 z-[1] h-full w-full object-cover"
-        />
-      ) : hostedSrc ? (
+      <img
+        src={LESSON_COVER_URL}
+        alt=""
+        loading="lazy"
+        className={cn(
+          'absolute inset-0 z-[1] h-full w-full object-cover transition-opacity duration-200',
+          isHovering && canPreview && 'opacity-0',
+          isHovering && !canPreview && 'scale-[1.03]',
+        )}
+      />
+      {shouldMountHostedVideo && hostedSrc ? (
         <video
           ref={videoRef}
           src={hostedSrc}
           muted
           playsInline
-          preload={hostedPreloadStrategy}
+          preload={hostedPreload}
           loop
           onLoadedMetadata={handleHostedMetadata}
           className={cn(
-            'preview-video pointer-events-none absolute inset-0 z-[1] h-full w-full object-cover transition-transform duration-300',
-            isHovering ? 'scale-[1.03]' : 'scale-100',
+            'preview-video pointer-events-none absolute inset-0 z-[3] h-full w-full object-cover transition-opacity duration-200',
+            isHovering ? 'scale-[1.03] opacity-100' : 'opacity-0',
           )}
           aria-hidden
         />
@@ -429,10 +408,7 @@ function LessonPreviewCard({
           src={youtubePreviewSrc}
           title={`Prévia da aula ${normalizePtBrText(lesson.title)}`}
           allow="autoplay; encrypted-media; picture-in-picture"
-          className={cn(
-            'pointer-events-none absolute inset-0 h-full w-full transition-opacity duration-200',
-            isHovering ? 'z-[3] opacity-100' : 'z-[0] opacity-0',
-          )}
+          className="pointer-events-none absolute inset-0 z-[3] h-full w-full opacity-100"
           onLoad={handleYoutubeLoaded}
           tabIndex={-1}
           aria-hidden
@@ -508,6 +484,7 @@ function LessonPreviewCard({
 
   return (
     <Link
+      ref={containerRef as React.Ref<HTMLAnchorElement>}
       to={`/student/courses/${courseId}/lessons/${lesson.id}`}
       className={cn('group block min-w-0 cursor-pointer', className)}
       aria-label={label}
@@ -607,16 +584,6 @@ export function SingleCourseHomeExperience({ home }: Props) {
     ...(home.lessonFourth ? [home.lessonFourth] : []),
   ];
   const fourthLessonPlaceholder = home.lessonRowTop.length === 3 && !home.lessonFourth;
-
-  const preloadEntries = useMemo(
-    () =>
-      featuredLessons.map((lesson) => ({
-        hostedUrl: lesson.videoPreviewUrl ?? null,
-        youtubeId: lesson.videoUrl ? youtubeVideoId(lesson.videoUrl) : null,
-      })),
-    [featuredLessons],
-  );
-  useVideoPreviewPreload(preloadEntries);
 
   const lessonsCarouselOptions = useMemo(
     () => ({ align: 'start' as const, dragFree: true, containScroll: 'trimSnaps' as const }),
@@ -759,7 +726,7 @@ export function SingleCourseHomeExperience({ home }: Props) {
         {featuredLessons.length > 0 ? (
           <Carousel opts={lessonsCarouselOptions} className="w-full">
             <CarouselContent className="-ml-3 sm:-ml-4">
-              {featuredLessons.map((lesson, idx) => (
+              {featuredLessons.map((lesson) => (
                 <CarouselItem
                   key={lesson.id}
                   className="basis-[88%] pl-3 min-[420px]:basis-[62%] sm:basis-[48%] sm:pl-4 md:basis-[38%] lg:basis-[28%] xl:basis-1/4"
@@ -771,7 +738,6 @@ export function SingleCourseHomeExperience({ home }: Props) {
                     audioPreferenceEnabled={audioPreferenceEnabled}
                     onAudioPreferenceChange={setAudioPreferenceEnabled}
                     lesson={lesson}
-                    preloadOrder={idx}
                     visualOnly
                   />
                 </CarouselItem>

@@ -6,7 +6,7 @@ import {
   hasAuthTokenCookie,
   setAuthTokenCookie,
 } from "@/lib/auth-cookie";
-import { UserProfile } from "@/types/api";
+import { StudentDashboard, UserProfile } from "@/types/api";
 import { isStaffRole } from "@/lib/permissions";
 
 // FUNÇÃO PARA GERENCIAR AUTENTICAÇÃO E SESSÃO NO FRONTEND
@@ -43,6 +43,21 @@ export function useAuth() {
       if (!data?.token || !data?.user) return;
       setAuthTokenCookie(data.token);
       queryClient.setQueryData(["auth", "me"], data.user);
+
+      if (!isStaffRole(data.user.role)) {
+        // Inicia o prefetch do dashboard do aluno imediatamente após o login,
+        // enquanto o React Router ainda está processando a navegação.
+        // Quando o componente Dashboard montar, o dado já estará em cache.
+        void queryClient.prefetchQuery({
+          queryKey: ["student-dashboard"],
+          queryFn: async () => {
+            const res = await api.get<StudentDashboard>("/student/dashboard");
+            return res.data;
+          },
+          staleTime: 5 * 60_000,
+        });
+      }
+
       navigate(isStaffRole(data.user.role) ? "/teacher/dashboard" : "/student/dashboard", {
         replace: true,
       });

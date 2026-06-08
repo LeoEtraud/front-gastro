@@ -83,6 +83,32 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // React core — raramente muda, fica em cache por muito tempo
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          // Tanstack Query — separado para cachear independente
+          "vendor-query": ["@tanstack/react-query"],
+          // Radix UI / shadcn — grande, raramente muda
+          "vendor-ui": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-tooltip",
+            "@radix-ui/react-tabs",
+            "@radix-ui/react-select",
+            "@radix-ui/react-label",
+            "@radix-ui/react-slot",
+            "@radix-ui/react-progress",
+            "@radix-ui/react-avatar",
+            "@radix-ui/react-accordion",
+            "@radix-ui/react-popover",
+          ],
+          // Lucide icons — grande, raramente muda
+          "vendor-icons": ["lucide-react"],
+        },
+      },
+    },
   },
   server: {
     port,

@@ -10,6 +10,11 @@ export function useStudentDashboard() {
       const res = await api.get<StudentDashboard>('/student/dashboard');
       return res.data;
     },
+    // Dashboard muda raramente; 5 min de stale evita refetch desnecessário
+    // entre navegações e mantém o dado prefetchado pelo login em cache.
+    staleTime: 5 * 60_000,
+    // Mantém dado anterior visível enquanto busca em background (sem flash de skeleton)
+    placeholderData: (prev) => prev,
   });
 }
 

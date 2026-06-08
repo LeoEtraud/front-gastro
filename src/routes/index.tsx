@@ -1,26 +1,36 @@
+import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 import { PublicAuthThemeLayout } from "@/components/auth/PublicAuthThemeLayout";
-import ForgotPassword from "@/pages/auth/ForgotPassword";
+import { PrivateRoute } from "./privateRoute";
+
+// Páginas públicas / auth — carregadas imediatamente (são pequenas e necessárias no primeiro acesso)
+import GastrocentroHome from "@/pages/public/GastrocentroHome";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
+import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPassword from "@/pages/auth/ResetPassword";
 import NotFound from "@/pages/not-found";
-import CourseCatalog from "@/pages/public/CourseCatalog";
-import CourseDetail from "@/pages/public/CourseDetail";
-import GastrocentroHome from "@/pages/public/GastrocentroHome";
-import StudentCourses from "@/pages/student/Courses";
-import StudentDashboard from "@/pages/student/Dashboard";
-import LessonViewer from "@/pages/student/LessonViewer";
-import StudentProfile from "@/pages/student/Profile";
-import CourseEditor from "@/pages/teacher/CourseEditor";
-import CoursesList from "@/pages/teacher/CoursesList";
-import TeacherDashboard from "@/pages/teacher/Dashboard";
-import TeacherProfile from "@/pages/teacher/Profile";
-import UserManagement from "@/pages/teacher/UserManagement";
-import { PrivateRoute } from "./privateRoute";
+
+// Páginas de catálogo — lazy (não são a página inicial após login)
+const CourseCatalog = lazy(() => import("@/pages/public/CourseCatalog"));
+const CourseDetail = lazy(() => import("@/pages/public/CourseDetail"));
+
+// Páginas do aluno — lazy (carregadas apenas após autenticação)
+const StudentDashboard = lazy(() => import("@/pages/student/Dashboard"));
+const StudentCourses = lazy(() => import("@/pages/student/Courses"));
+const LessonViewer = lazy(() => import("@/pages/student/LessonViewer"));
+const StudentProfile = lazy(() => import("@/pages/student/Profile"));
+
+// Páginas do professor — lazy (nunca usadas por alunos)
+const TeacherDashboard = lazy(() => import("@/pages/teacher/Dashboard"));
+const CoursesList = lazy(() => import("@/pages/teacher/CoursesList"));
+const CourseEditor = lazy(() => import("@/pages/teacher/CourseEditor"));
+const TeacherProfile = lazy(() => import("@/pages/teacher/Profile"));
+const UserManagement = lazy(() => import("@/pages/teacher/UserManagement"));
 
 export function AppRoutes() {
   return (
+    <Suspense fallback={null}>
     <Routes>
       {/* Public */}
       <Route path="/" element={<GastrocentroHome />} />
@@ -57,6 +67,7 @@ export function AppRoutes() {
 
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </Suspense>
   );
 }
 

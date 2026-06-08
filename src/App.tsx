@@ -10,8 +10,11 @@ const queryClient = new QueryClient({
       retry: 1,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
-      staleTime: 60_000,
-      gcTime: 5 * 60_000,
+      // 5 min de "freshness" global: evita refetch desnecessário ao voltar para
+      // uma página já visitada na mesma sessão.
+      staleTime: 5 * 60_000,
+      // 30 min no garbage collector: dados ficam em cache entre navegações.
+      gcTime: 30 * 60_000,
     },
   },
 });
