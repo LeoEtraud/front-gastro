@@ -32,8 +32,9 @@ type UploadLessonVideoResult = {
 };
 
 /**
- * Envia o vídeo pela API (multipart). Evita falhas de CORS/assinatura do PUT direto no S3/R2 em produção.
- * Em dev, upload direto no bucket só com VITE_VIDEO_DIRECT_UPLOAD=true.
+ * Upload de vídeo via URL pré-assinada (PUT direto no bucket S3/R2).
+ * Evita passar o arquivo pelo backend — necessário no Render free (limite de /tmp).
+ * Fallback multipart via API só com VITE_VIDEO_API_UPLOAD=true.
  */
 export async function uploadLessonVideo({
   lessonId,
@@ -42,10 +43,72 @@ export async function uploadLessonVideo({
 }: UploadLessonVideoParams): Promise<UploadLessonVideoResult> {
   const contentType = resolveLessonVideoMimeType(file);
 
-  if (import.meta.env.DEV && import.meta.env.VITE_VIDEO_DIRECT_UPLOAD === 'true') {
-    return uploadLessonVideoViaPresignedUrl({ lessonId, file, contentType, onProgress });
+  if (import.meta.env.VITE_VIDEO_API_UPLOAD === 'true') {
+    return uploadLessonVideoViaApi({ lessonId, file, contentType, onProgress });
   }
 
+  return uploadLessonVideoViaPresignedUrl({ lessonId, file, contentType, onProgress });
+}
+
+async function uploadLessonVideoViaPresignedUrl({
+  lessonId,
+  file,
+  contentType,
+  onProgress,
+}: UploadLessonVideoParams & { contentType: string }): Promise<UploadLessonVideoResult> {
+  const presignRes = await api.post<{
+    uploadUrl: string;
+    objectKey: string;
+    headers: { 'Content-Type': string };
+  }>('/teacher/videos/presign-upload', {
+    lessonId,
+    fileName: file.name,
+    contentType,
+    fileSizeBytes: file.size,
+  });
+
+  const { uploadUrl, objectKey, headers } = presignRes.data;
+  const signedContentType = headers['Content-Type'] || contentType;
+
+  await new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', uploadUrl);
+    xhr.setRequestHeader('Content-Type', signedContentType);
+    xhr.upload.onprogress = (event) => {
+      if (!event.lengthComputable || !onProgress) return;
+      onProgress(Math.max(0, Math.min(100, Math.round((event.loaded / event.total) * 100))));
+    };
+    xhr.onerror = () =>
+      reject(
+        new Error(
+          'Falha de rede durante o upload. Verifique o CORS do bucket R2/S3 (PUT + Content-Type) para a origem do frontend.',
+        ),
+      );
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        onProgress?.(100);
+        resolve();
+        return;
+      }
+      if (xhr.status === 403) {
+        reject(new Error('Upload recusado pelo storage (403). Verifique credenciais e política CORS do bucket.'));
+        return;
+      }
+      reject(new Error(`Upload falhou (${xhr.status})`));
+    };
+    xhr.send(file);
+  });
+
+  return { objectKey, contentType: signedContentType };
+}
+
+/** Fallback: envia o vídeo pela API (multipart). Usa /tmp no servidor — evitar em produção no Render free. */
+async function uploadLessonVideoViaApi({
+  lessonId,
+  file,
+  contentType,
+  onProgress,
+}: UploadLessonVideoParams & { contentType: string }): Promise<UploadLessonVideoResult> {
   const form = new FormData();
   form.append('lessonId', lessonId);
   form.append('file', file, file.name);
@@ -76,49 +139,6 @@ export async function uploadLessonVideo({
   };
 }
 
-async function uploadLessonVideoViaPresignedUrl({
-  lessonId,
-  file,
-  contentType,
-  onProgress,
-}: UploadLessonVideoParams & { contentType: string }): Promise<UploadLessonVideoResult> {
-  const presignRes = await api.post<{
-    uploadUrl: string;
-    objectKey: string;
-    headers: { 'Content-Type': string };
-  }>('/teacher/videos/presign-upload', {
-    lessonId,
-    fileName: file.name,
-    contentType,
-    fileSizeBytes: file.size,
-  });
-
-  const { uploadUrl, objectKey, headers } = presignRes.data;
-
-  await new Promise<void>((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('PUT', uploadUrl);
-    xhr.setRequestHeader('Content-Type', headers['Content-Type'] || contentType);
-    xhr.upload.onprogress = (event) => {
-      if (!event.lengthComputable || !onProgress) return;
-      onProgress(Math.max(0, Math.min(100, Math.round((event.loaded / event.total) * 100))));
-    };
-    xhr.onerror = () => reject(new Error('Falha de rede durante o upload do vídeo.'));
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        onProgress?.(100);
-        resolve();
-        return;
-      }
-      reject(new Error(`Upload falhou (${xhr.status})`));
-    };
-    xhr.send(file);
-  });
-
-  return { objectKey, contentType: headers['Content-Type'] || contentType };
-}
-
-/** URL do endpoint de upload — em produção prefere ir direto ao backend (evita limite de body do proxy da Vercel). */
 function resolveVideoUploadUrl(): string {
   const fromEnv = import.meta.env.VITE_API_ORIGIN?.trim().replace(/\/$/, '');
   if (fromEnv) {
