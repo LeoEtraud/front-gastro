@@ -60,6 +60,7 @@ function LessonPreviewCard({
   lesson,
   className,
   visualOnly = false,
+  preloadOrder = 0,
 }: {
   courseId: string;
   courseTitle: string;
@@ -70,6 +71,9 @@ function LessonPreviewCard({
   className?: string;
   /** Preview compacto (player + informações úteis abaixo). */
   visualOnly?: boolean;
+  /** Posição do card no carrossel — escalone o delay do warm-up para evitar
+   *  N requests simultâneos ao entrar na página. */
+  preloadOrder?: number;
 }) {
   const containerRef = useRef<HTMLElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -142,11 +146,15 @@ function LessonPreviewCard({
   }, [isHovering]);
 
   // Warm-up baseado em visibilidade: ativa preload="metadata" quando o card
-  // fica visível por ≥400ms, sem esperar o hover.
+  // fica visível por ≥400ms. O delay é escalonado por posição para evitar N
+  // requests simultâneos ao carregar a página (card 0 = 400ms, card 3 = 2.5s).
   useInViewportWarmup(
     containerRef,
     () => setIsPreviewWarmedUp(true),
-    { enabled: canPreview && !isPreviewWarmedUp },
+    {
+      enabled: canPreview && !isPreviewWarmedUp,
+      delayMs: 400 + preloadOrder * 700,
+    },
   );
 
   // Preconnect YouTube ao aquecer cards com vídeo externo (muito barato —
@@ -726,7 +734,7 @@ export function SingleCourseHomeExperience({ home }: Props) {
         {featuredLessons.length > 0 ? (
           <Carousel opts={lessonsCarouselOptions} className="w-full">
             <CarouselContent className="-ml-3 sm:-ml-4">
-              {featuredLessons.map((lesson) => (
+              {featuredLessons.map((lesson, idx) => (
                 <CarouselItem
                   key={lesson.id}
                   className="basis-[88%] pl-3 min-[420px]:basis-[62%] sm:basis-[48%] sm:pl-4 md:basis-[38%] lg:basis-[28%] xl:basis-1/4"
@@ -738,6 +746,7 @@ export function SingleCourseHomeExperience({ home }: Props) {
                     audioPreferenceEnabled={audioPreferenceEnabled}
                     onAudioPreferenceChange={setAudioPreferenceEnabled}
                     lesson={lesson}
+                    preloadOrder={idx}
                     visualOnly
                   />
                 </CarouselItem>

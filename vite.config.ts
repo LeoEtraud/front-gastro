@@ -57,8 +57,19 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff2}"],
         navigateFallbackDenylist: [/^\/api\b/],
         runtimeCaching: [
+          // ⚠️ REGRA PRIORITÁRIA — deve vir ANTES da regra genérica /api/.
+          // Streaming S3 via API: response do tipo ReadableStream não pode ser
+          // clonada pelo Cache API do workbox (NetworkFirst tenta clonar).
+          // NetworkOnly passa o request direto para a rede, sem interceptar.
           {
-            urlPattern: ({ url }) => url.pathname.startsWith("/api/"),
+            urlPattern: ({ url }) => url.pathname.includes("/video"),
+            handler: "NetworkOnly",
+          },
+          // Endpoints de API padrão (JSON) — NetworkFirst com cache curto.
+          {
+            urlPattern: ({ url }) =>
+              url.pathname.startsWith("/api/") &&
+              !url.pathname.includes("/video"),
             handler: "NetworkFirst",
             options: {
               cacheName: "gastrocentro-api",
