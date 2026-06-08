@@ -78,6 +78,8 @@ export interface Lesson {
   videoObjectKey?: string | null;
   /** URL temporária (presign GET) para vídeo no bucket privado. */
   videoPlaybackUrl?: string | null;
+  /** URL HLS (.m3u8) via API ou CDN — preferencial para reprodução. */
+  videoHlsPlaybackUrl?: string | null;
   /** Duração do vídeo em segundos. */
   duration?: number | null;
   /** Tamanho do arquivo de vídeo em bytes (apenas editor do professor). */
@@ -218,6 +220,7 @@ export interface StudentDashboardLessonPreview {
   status: LessonPreviewStatus;
   videoUrl?: string | null;
   videoPreviewUrl?: string | null;
+  videoHlsPreviewUrl?: string | null;
 }
 
 export interface StudentDashboardMuralNextItem {

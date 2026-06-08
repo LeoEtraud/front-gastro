@@ -74,6 +74,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { MEDICAL_SPECIALTIES } from '@/lib/medical-specialties';
 import { uploadCourseCoverFile } from '@/lib/course-cover-upload';
 import { uploadLessonVideo, resolveLessonVideoMimeType } from '@/lib/lesson-video-upload';
+import { HlsVideoPlayer } from '@/components/video/HlsVideoPlayer';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -398,7 +399,14 @@ function LessonEditorRow({
               {readOnly ? (
                 previewUrl ? (
                   <div className="w-full max-w-md overflow-hidden rounded-md bg-black/90">
-                    <video src={previewUrl} controls preload="metadata" className="aspect-video w-full" />
+                    <HlsVideoPlayer
+                      src={previewUrl}
+                      controls
+                      preload="metadata"
+                      active
+                      className="aspect-video w-full"
+                      videoClassName="aspect-video w-full"
+                    />
                   </div>
                 ) : (
                   <p className="rounded-md border border-dashed border-border bg-muted/30 px-3 py-4 text-center text-xs text-muted-foreground sm:text-sm">
@@ -511,7 +519,14 @@ function LessonEditorRow({
                     <div className="space-y-2 rounded-md border border-border/70 bg-muted/30 p-2.5">
                       <p className="text-xs font-medium text-muted-foreground">Pré-visualização do vídeo</p>
                       <div className="w-full max-w-md overflow-hidden rounded-md bg-black/90">
-                        <video src={previewUrl} controls preload="metadata" className="aspect-video w-full" />
+                        <HlsVideoPlayer
+                          src={previewUrl}
+                          controls
+                          preload="metadata"
+                          active
+                          className="aspect-video w-full"
+                          videoClassName="aspect-video w-full"
+                        />
                       </div>
                     </div>
                   ) : (

@@ -6,7 +6,8 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { ArrowLeft, CheckCircle2, FileText, Loader2, PlayCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { resolveApiUrl } from '@/lib/axios';
+import { HlsVideoPlayer } from '@/components/video/HlsVideoPlayer';
+import { isAllowedPlaybackUrl, resolveHostedPlaybackSources } from '@/lib/video-playback';
 import { COURSE_MATERIALS_DRIVE_URL } from '@/lib/course-materials-config';
 import { CompactContentSkeleton, LessonViewerSkeleton } from '@/components/ui/content-skeletons';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
@@ -50,26 +51,25 @@ function LessonVideoPanel({ lesson, loading }: { lesson: LessonWithProgress; loa
     </div>
   );
 
-  // Vídeo hospedado (S3/R2) ou URL externa: exibir mesmo se `type` ainda estiver TEXT no banco (ex.: seed + upload).
-  if (lesson.videoPlaybackUrl) {
-    const playbackSrc = resolveApiUrl(lesson.videoPlaybackUrl);
+  // Vídeo hospedado (HLS via CDN/API): exibir mesmo se `type` ainda estiver TEXT no banco (ex.: seed + upload).
+  const { src: hostedSrc, fallbackSrc } = resolveHostedPlaybackSources(lesson);
+  if (hostedSrc && isAllowedPlaybackUrl(hostedSrc)) {
     return (
       <div className="relative aspect-video w-full shrink-0 bg-black">
-        <video
-          key={playbackSrc}
-          src={playbackSrc}
+        <HlsVideoPlayer
+          key={`${hostedSrc}|${fallbackSrc ?? ''}`}
+          src={hostedSrc}
+          fallbackSrc={fallbackSrc}
+          poster="/capa-curso.jpg"
           controls
           controlsList="nodownload"
           playsInline
           preload="metadata"
-          className="absolute inset-0 h-full w-full object-contain"
-          onError={(e) => {
-            const err = (e.currentTarget as HTMLVideoElement).error;
-            console.error("Vídeo (playback): erro de mídia", err?.code, err?.message);
-          }}
-        >
-          Seu navegador não suporta reprodução deste vídeo.
-        </video>
+          active
+          pauseWhenHidden={false}
+          className="absolute inset-0"
+          videoClassName="object-contain"
+        />
       </div>
     );
   }
@@ -83,20 +83,22 @@ function LessonVideoPanel({ lesson, loading }: { lesson: LessonWithProgress; loa
         </div>
       );
     }
-    return (
-      <div className="relative aspect-video w-full shrink-0 bg-black">
-        <video
-          src={lesson.videoUrl}
-          controls
-          controlsList="nodownload"
-          playsInline
-          preload="metadata"
-          className="absolute inset-0 h-full w-full object-contain"
-        >
-          Seu navegador não suporta reprodução deste vídeo.
-        </video>
-      </div>
-    );
+    if (isAllowedPlaybackUrl(lesson.videoUrl)) {
+      return (
+        <div className="relative aspect-video w-full shrink-0 bg-black">
+          <HlsVideoPlayer
+            src={lesson.videoUrl}
+            controls
+            controlsList="nodownload"
+            playsInline
+            preload="metadata"
+            active
+            className="absolute inset-0"
+            videoClassName="object-contain"
+          />
+        </div>
+      );
+    }
   }
 
   if (lesson.type !== 'VIDEO') {
