@@ -123,8 +123,8 @@ export const heroSlides: HeroSlide[] = [
   {
     id: 'slide-3',
     badge: 'Especialistas',
-    title: 'Aulas com profissionais referência',
-    subtitle: 'Conteúdos conduzidos por especialistas experientes e reconhecidos na prática clínica.',
+    title: 'Aulas com médicos de referência',
+    subtitle: 'Conteúdos conduzidos por médicos experientes e reconhecidos na prática clínica.',
     primaryCta: 'Conhecer especialistas',
     primaryHref: '#especialistas',
     imageSrc: img('photo-1612349317150-e413f6a5b16d'),

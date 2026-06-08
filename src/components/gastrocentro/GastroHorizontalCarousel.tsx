@@ -16,7 +16,7 @@ type GastroHorizontalCarouselProps = {
 
 /** Mesmo estilo dos botões do carrossel do hero (vídeos). */
 const navButtonBase =
-  'absolute top-1/2 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-gc-navy/70 text-white backdrop-blur-sm transition hover:bg-white/10 disabled:pointer-events-none disabled:opacity-35 sm:h-11 sm:w-11';
+  'absolute top-1/2 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-gc-navy/70 text-white backdrop-blur-sm transition-all duration-200 hover:bg-gc-navy disabled:pointer-events-none disabled:opacity-35 sm:h-11 sm:w-11';
 
 export function GastroHorizontalCarousel({
   children,
