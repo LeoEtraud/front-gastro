@@ -1,6 +1,8 @@
 import { resolveApiUrl } from '@/lib/axios';
 
 const HLS_PATH_PATTERN = /\.m3u8(\?|$)|\/video\/hls\//i;
+const MEDIA_EXTENSIONS = /\.(mp4|webm|m3u8|ts)(\?|$)/i;
+const LEGACY_API_VIDEO_PATTERN = /\/api\/student\/lessons\/[^/]+\/video(\/|$|\?)/i;
 
 const EXTERNAL_VIDEO_HOSTS = new Set([
   'www.youtube.com',
@@ -20,6 +22,14 @@ function parseAllowedCdnHosts(): Set<string> {
   );
 }
 
+function isS3CompatibleHost(host: string): boolean {
+  return (
+    host.includes('.amazonaws.com')
+    || host.endsWith('.r2.cloudflarestorage.com')
+    || host.endsWith('.digitaloceanspaces.com')
+  );
+}
+
 /** Indica se a URL aponta para uma playlist HLS (.m3u8). */
 export function isHlsPlaybackUrl(url: string): boolean {
   return HLS_PATH_PATTERN.test(url);
@@ -31,13 +41,13 @@ export function resolvePlaybackUrl(pathOrUrl: string): string {
 }
 
 /**
- * Valida se a URL de reprodução é permitida (API autenticada, CDN configurada ou YouTube).
- * Bloqueia links diretos permanentes de S3/R2 não autorizados.
+ * Valida se a URL de reprodução é permitida (CDN/S3 assinado ou YouTube).
+ * Bloqueia proxy legado do backend e links permanentes não autorizados.
  */
 export function isAllowedPlaybackUrl(url: string): boolean {
   if (!url?.trim()) return false;
 
-  if (url.startsWith('/api/')) return true;
+  if (LEGACY_API_VIDEO_PATTERN.test(url)) return false;
 
   try {
     const parsed = new URL(url, window.location.origin);
@@ -45,84 +55,17 @@ export function isAllowedPlaybackUrl(url: string): boolean {
 
     if (EXTERNAL_VIDEO_HOSTS.has(host)) return true;
 
-    const apiOrigin = import.meta.env.VITE_API_ORIGIN?.trim().replace(/\/$/, '');
-    if (apiOrigin) {
-      const apiHost = new URL(apiOrigin).hostname.toLowerCase();
-      if (host === apiHost) return true;
-    }
-
-    if (import.meta.env.DEV && (host === window.location.hostname || host === 'localhost')) {
-      return parsed.pathname.startsWith('/api/');
-    }
+    if (host.endsWith('.cloudfront.net') && MEDIA_EXTENSIONS.test(parsed.pathname)) return true;
 
     const cdnHosts = parseAllowedCdnHosts();
-    if (cdnHosts.has(host)) return true;
+    if (cdnHosts.has(host) && MEDIA_EXTENSIONS.test(parsed.pathname)) return true;
 
-    // CloudFront: URLs de distribuição não expõem o bucket S3 diretamente.
-    if (host.endsWith('.cloudfront.net') && /\.m3u8(\?|$)/i.test(parsed.pathname)) {
-      return true;
-    }
+    if (isS3CompatibleHost(host) && MEDIA_EXTENSIONS.test(parsed.pathname)) return true;
 
     return false;
   } catch {
     return false;
   }
-}
-
-type HostedVideoUrls = {
-  videoHlsPlaybackUrl?: string | null;
-  videoPlaybackUrl?: string | null;
-  videoHlsPreviewUrl?: string | null;
-  videoPreviewUrl?: string | null;
-};
-
-function pickHostedUrl(
-  hlsUrl?: string | null,
-  fallbackUrl?: string | null,
-): string | null {
-  const hls = hlsUrl?.trim();
-  if (hls) return resolvePlaybackUrl(hls);
-
-  const legacy = fallbackUrl?.trim();
-  if (legacy && isHlsPlaybackUrl(legacy)) return resolvePlaybackUrl(legacy);
-
-  return legacy ? resolvePlaybackUrl(legacy) : null;
-}
-
-/** Escolhe a melhor URL de playback hospedado (HLS preferencial sobre progressivo). */
-export function resolveHostedPlaybackUrl(lesson: HostedVideoUrls): string | null {
-  return pickHostedUrl(lesson.videoHlsPlaybackUrl, lesson.videoPlaybackUrl);
-}
-
-/** Escolhe a melhor URL de prévia hospedada (cards/carrossel). */
-export function resolveHostedPreviewUrl(lesson: HostedVideoUrls): string | null {
-  return pickHostedUrl(lesson.videoHlsPreviewUrl ?? lesson.videoHlsPlaybackUrl, lesson.videoPreviewUrl);
-}
-
-/** Retorna URL primária (HLS se existir) e fallback MP4 para reprodução resiliente. */
-export function resolveHostedPlaybackSources(lesson: HostedVideoUrls): {
-  src: string | null;
-  fallbackSrc: string | null;
-} {
-  const hls = (lesson.videoHlsPlaybackUrl ?? lesson.videoHlsPreviewUrl)?.trim();
-  const progressive = (lesson.videoPlaybackUrl ?? lesson.videoPreviewUrl)?.trim();
-
-  if (hls) {
-    return {
-      src: resolvePlaybackUrl(hls),
-      fallbackSrc: progressive && !isHlsPlaybackUrl(progressive)
-        ? resolvePlaybackUrl(progressive)
-        : null,
-    };
-  }
-
-  const legacy = progressive;
-  if (!legacy) return { src: null, fallbackSrc: null };
-
-  return {
-    src: resolvePlaybackUrl(legacy),
-    fallbackSrc: null,
-  };
 }
 
 /** Safari e iOS reproduzem HLS nativamente via `<video src>`. */

@@ -57,22 +57,27 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff2}"],
         navigateFallbackDenylist: [/^\/api\b/],
         runtimeCaching: [
-          // ⚠️ REGRA PRIORITÁRIA — deve vir ANTES da regra genérica /api/.
-          // Streaming S3 via API: response do tipo ReadableStream não pode ser
-          // clonada pelo Cache API do workbox (NetworkFirst tenta clonar).
-          // NetworkOnly passa o request direto para a rede, sem interceptar.
+          // Mídia e endpoints de vídeo: nunca cachear (Range requests, streams, URLs assinadas).
           {
-            urlPattern: ({ url }) => url.pathname.includes("/video"),
-            handler: "NetworkOnly",
+            urlPattern: ({ url }) => {
+              const path = url.pathname;
+              if (/\/api\/.*\/video(-url)?(\?|$)/.test(path)) return true;
+              if (/\.(mp4|webm|m3u8|ts)(\?|$)/i.test(path)) return true;
+              if (url.hostname.endsWith('.cloudfront.net')) return true;
+              if (url.hostname.includes('.amazonaws.com')) return true;
+              if (url.hostname.endsWith('.r2.cloudflarestorage.com')) return true;
+              return false;
+            },
+            handler: 'NetworkOnly',
           },
           // Endpoints de API padrão (JSON) — NetworkFirst com cache curto.
           {
             urlPattern: ({ url }) =>
-              url.pathname.startsWith("/api/") &&
-              !url.pathname.includes("/video"),
-            handler: "NetworkFirst",
+              url.pathname.startsWith('/api/') &&
+              !/\/video(-url)?(\?|$)/.test(url.pathname),
+            handler: 'NetworkFirst',
             options: {
-              cacheName: "gastrocentro-api",
+              cacheName: 'gastrocentro-api',
               networkTimeoutSeconds: 10,
               expiration: { maxEntries: 64, maxAgeSeconds: 60 * 5 },
             },

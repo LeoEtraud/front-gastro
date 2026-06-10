@@ -76,9 +76,9 @@ export interface Lesson {
   videoUrl?: string | null;
   /** Presente no editor do professor; não exposto ao aluno na API pública. */
   videoObjectKey?: string | null;
-  /** URL temporária (presign GET) para vídeo no bucket privado. */
+  /** URL temporária (presign GET) para vídeo no bucket privado — apenas editor do professor. */
   videoPlaybackUrl?: string | null;
-  /** URL HLS (.m3u8) via API ou CDN — preferencial para reprodução. */
+  /** @deprecated Aluno usa GET /lessons/:id/video-url */
   videoHlsPlaybackUrl?: string | null;
   /** Duração do vídeo em segundos. */
   duration?: number | null;
@@ -167,6 +167,8 @@ export interface Quiz {
 
 // INTERFACE PARA A AULA COM PROGRESSO
 export interface LessonWithProgress extends Lesson {
+  /** Vídeo no bucket S3 — obter URL assinada via GET /student/lessons/:id/video-url */
+  hasHostedVideo?: boolean;
   isCompleted: boolean;
   watchedSeconds: number;
   quiz?: Quiz;
@@ -219,8 +221,8 @@ export interface StudentDashboardLessonPreview {
   watchedSeconds: number;
   status: LessonPreviewStatus;
   videoUrl?: string | null;
-  videoPreviewUrl?: string | null;
-  videoHlsPreviewUrl?: string | null;
+  /** Vídeo no bucket — obter URL assinada via GET /student/lessons/:id/video-url */
+  hasHostedVideo?: boolean;
 }
 
 export interface StudentDashboardMuralNextItem {

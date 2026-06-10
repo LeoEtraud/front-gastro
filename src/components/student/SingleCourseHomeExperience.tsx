@@ -20,8 +20,8 @@ import {
   VolumeX,
 } from 'lucide-react';
 import { normalizePtBrText } from '@/lib/normalize-ptbr';
-import { HlsVideoPlayer } from '@/components/video/HlsVideoPlayer';
-import { isAllowedPlaybackUrl, resolveHostedPlaybackSources } from '@/lib/video-playback';
+import { HostedLessonVideoPlayer } from '@/components/video/HostedLessonVideoPlayer';
+import { isAllowedPlaybackUrl } from '@/lib/video-playback';
 import { COURSE_MATERIALS_DRIVE_URL } from '@/lib/course-materials-config';
 import { cn } from '@/lib/utils';
 import { useStudentProfile } from '@/hooks/use-student';
@@ -91,16 +91,10 @@ function LessonPreviewCard({
 
   const label = `${normalizePtBrText(courseTitle)} — ${normalizePtBrText(lesson.title)} — ${normalizePtBrText(lesson.moduleTitle)}`;
   const ytVideoId = lesson.videoUrl ? youtubeVideoId(lesson.videoUrl) : null;
-  const { src: hostedSrc, fallbackSrc: hostedFallbackSrc } = resolveHostedPlaybackSources({
-    videoHlsPreviewUrl: lesson.videoHlsPreviewUrl,
-    videoPreviewUrl: lesson.videoPreviewUrl,
-  });
-  const canUseHostedSrc = Boolean(hostedSrc && isAllowedPlaybackUrl(hostedSrc));
+  const canUseHostedSrc = Boolean(lesson.hasHostedVideo);
   const canPreview = Boolean(canUseHostedSrc || ytVideoId);
-  // YouTube só é montado no hover — é custoso em banda. Warmed-up apenas preconecta.
   const shouldMountYoutubeIframe = Boolean(!canUseHostedSrc && ytVideoId && isHovering);
-  // Vídeo hospedado HLS: monta assim que aquecido (lazy) ou no hover para reproduzir.
-  const shouldMountHostedVideo = Boolean(canUseHostedSrc && hostedSrc && (isHovering || isPreviewWarmedUp));
+  const shouldMountHostedVideo = Boolean(canUseHostedSrc && isHovering);
   const hostedPreload = isHovering ? 'auto' : 'metadata';
   const canToggleSubtitle = Boolean(ytVideoId || hasSubtitleTrack);
   const youtubePreviewSrc = ytVideoId
@@ -157,7 +151,7 @@ function LessonPreviewCard({
     containerRef,
     () => setIsPreviewWarmedUp(true),
     {
-      enabled: canPreview && !isPreviewWarmedUp,
+      enabled: canPreview && !isPreviewWarmedUp && !canUseHostedSrc && !!ytVideoId,
       delayMs: 400 + preloadOrder * 700,
     },
   );
@@ -282,11 +276,9 @@ function LessonPreviewCard({
               isHovering && !canPreview && 'scale-[1.03]',
             )}
           />
-          {shouldMountHostedVideo && hostedSrc ? (
-            <HlsVideoPlayer
-              key={`${hostedSrc}|${hostedFallbackSrc ?? ''}`}
-              src={hostedSrc}
-              fallbackSrc={hostedFallbackSrc}
+          {shouldMountHostedVideo ? (
+            <HostedLessonVideoPlayer
+              lessonId={lesson.id}
               videoRef={videoRef}
               muted
               playsInline
@@ -296,6 +288,7 @@ function LessonPreviewCard({
               active={shouldMountHostedVideo}
               pauseWhenHidden
               showLoadingOverlay={false}
+              showUrlLoading={false}
               onLoadedMetadata={handleHostedMetadata}
               className={cn(
                 'gc-lesson-card-media preview-video absolute inset-0 z-[3] transition-opacity duration-200',
@@ -405,11 +398,9 @@ function LessonPreviewCard({
           isHovering && !canPreview && 'scale-[1.03]',
         )}
       />
-      {shouldMountHostedVideo && hostedSrc ? (
-        <HlsVideoPlayer
-          key={`${hostedSrc}|${hostedFallbackSrc ?? ''}`}
-          src={hostedSrc}
-          fallbackSrc={hostedFallbackSrc}
+      {shouldMountHostedVideo ? (
+        <HostedLessonVideoPlayer
+          lessonId={lesson.id}
           videoRef={videoRef}
           muted
           playsInline
@@ -419,6 +410,7 @@ function LessonPreviewCard({
           active={shouldMountHostedVideo}
           pauseWhenHidden
           showLoadingOverlay={false}
+          showUrlLoading={false}
           onLoadedMetadata={handleHostedMetadata}
           className={cn(
             'preview-video pointer-events-none absolute inset-0 z-[3] h-full w-full object-cover transition-opacity duration-200',

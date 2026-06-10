@@ -7,7 +7,8 @@ import { ArrowLeft, CheckCircle2, FileText, Loader2, PlayCircle } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { HlsVideoPlayer } from '@/components/video/HlsVideoPlayer';
-import { isAllowedPlaybackUrl, resolveHostedPlaybackSources } from '@/lib/video-playback';
+import { HostedLessonVideoPlayer } from '@/components/video/HostedLessonVideoPlayer';
+import { isAllowedPlaybackUrl } from '@/lib/video-playback';
 import { COURSE_MATERIALS_DRIVE_URL } from '@/lib/course-materials-config';
 import { CompactContentSkeleton, LessonViewerSkeleton } from '@/components/ui/content-skeletons';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
@@ -51,26 +52,21 @@ function LessonVideoPanel({ lesson, loading }: { lesson: LessonWithProgress; loa
     </div>
   );
 
-  // Vídeo hospedado (HLS via CDN/API): exibir mesmo se `type` ainda estiver TEXT no banco (ex.: seed + upload).
-  const { src: hostedSrc, fallbackSrc } = resolveHostedPlaybackSources(lesson);
-  if (hostedSrc && isAllowedPlaybackUrl(hostedSrc)) {
+  // Vídeo hospedado no bucket: URL assinada via API (sem proxy no Render).
+  if (lesson.hasHostedVideo) {
     return (
-      <div className="relative aspect-video w-full shrink-0 bg-black">
-        <HlsVideoPlayer
-          key={`${hostedSrc}|${fallbackSrc ?? ''}`}
-          src={hostedSrc}
-          fallbackSrc={fallbackSrc}
-          poster="/capa-curso.jpg"
-          controls
-          controlsList="nodownload"
-          playsInline
-          preload="metadata"
-          active
-          pauseWhenHidden={false}
-          className="absolute inset-0"
-          videoClassName="object-contain"
-        />
-      </div>
+      <HostedLessonVideoPlayer
+        lessonId={lesson.id}
+        poster="/capa-curso.jpg"
+        controls
+        controlsList="nodownload"
+        playsInline
+        preload="metadata"
+        active
+        pauseWhenHidden={false}
+        className="relative aspect-video w-full shrink-0 bg-black"
+        videoClassName="object-contain"
+      />
     );
   }
 
