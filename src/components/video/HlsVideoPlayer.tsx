@@ -1,6 +1,6 @@
 import { memo, useRef, useState, type Ref } from 'react';
 import { AlertCircle, Loader2 } from 'lucide-react';
-import { useHlsPlayer } from '@/hooks/use-hls-player';
+import { useHlsPlayer, type HlsPlayerMode } from '@/hooks/use-hls-player';
 import { useInViewportPause } from '@/hooks/use-in-viewport-pause';
 import { cn } from '@/lib/utils';
 
@@ -21,6 +21,9 @@ export type HlsVideoPlayerProps = {
   active?: boolean;
   /** Pausa automaticamente ao sair do viewport. */
   pauseWhenHidden?: boolean;
+  playerMode?: HlsPlayerMode;
+  /** Envia cookies CloudFront em requests de segmentos HLS. */
+  withCredentials?: boolean;
   onLoadedMetadata?: () => void;
   onError?: (message: string) => void;
   /** Ref opcional para controlar play/pause externamente (prévias em cards). */
@@ -43,6 +46,8 @@ function HlsVideoPlayerInner({
   controlsList = 'nodownload',
   active = true,
   pauseWhenHidden = false,
+  playerMode = 'playback',
+  withCredentials = false,
   onLoadedMetadata,
   onError,
   videoRef: externalVideoRef,
@@ -67,6 +72,8 @@ function HlsVideoPlayerInner({
     src,
     fallbackSrc,
     active,
+    mode: playerMode,
+    withCredentials,
     onFatalError: onError,
   });
 
@@ -88,6 +95,7 @@ function HlsVideoPlayerInner({
         playsInline={playsInline}
         preload={effectivePreload}
         controlsList={controlsList}
+        crossOrigin={withCredentials ? 'use-credentials' : undefined}
         className={cn('h-full w-full object-contain', videoClassName)}
         onLoadedMetadata={onLoadedMetadata}
         onPlay={() => setHasStarted(true)}

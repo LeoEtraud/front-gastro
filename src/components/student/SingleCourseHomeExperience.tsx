@@ -95,7 +95,7 @@ function LessonPreviewCard({
   const canPreview = Boolean(canUseHostedSrc || ytVideoId);
   const shouldMountYoutubeIframe = Boolean(!canUseHostedSrc && ytVideoId && isHovering);
   const shouldMountHostedVideo = Boolean(canUseHostedSrc && isHovering);
-  const hostedPreload = isHovering ? 'auto' : 'metadata';
+  const hostedPreload = 'none' as const;
   const canToggleSubtitle = Boolean(ytVideoId || hasSubtitleTrack);
   const youtubePreviewSrc = ytVideoId
     ? `https://www.youtube.com/embed/${ytVideoId}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&playsinline=1&loop=1&playlist=${ytVideoId}&cc_load_policy=1&cc_lang_pref=pt&enablejsapi=1`
@@ -289,6 +289,8 @@ function LessonPreviewCard({
               pauseWhenHidden
               showLoadingOverlay={false}
               showUrlLoading={false}
+              playerMode="preview"
+              urlOptions={{ preferFormat: 'mp4' }}
               onLoadedMetadata={handleHostedMetadata}
               className={cn(
                 'gc-lesson-card-media preview-video absolute inset-0 z-[3] transition-opacity duration-200',
@@ -411,6 +413,8 @@ function LessonPreviewCard({
           pauseWhenHidden
           showLoadingOverlay={false}
           showUrlLoading={false}
+          playerMode="preview"
+          urlOptions={{ preferFormat: 'mp4' }}
           onLoadedMetadata={handleHostedMetadata}
           className={cn(
             'preview-video pointer-events-none absolute inset-0 z-[3] h-full w-full object-cover transition-opacity duration-200',

@@ -3,59 +3,91 @@ import Hls from 'hls.js';
 import { canPlayNativeHls, isAllowedPlaybackUrl, isHlsPlaybackUrl } from '@/lib/video-playback';
 
 export type HlsPlayerStatus = 'idle' | 'loading' | 'ready' | 'error' | 'unsupported';
+export type HlsPlayerMode = 'playback' | 'preview';
 
 type UseHlsPlayerOptions = {
   src: string | null | undefined;
-  /** URL MP4 progressiva quando HLS não estiver disponível ou falhar. */
   fallbackSrc?: string | null;
-  /** Quando false, não inicializa o player (lazy loading). */
   active?: boolean;
+  mode?: HlsPlayerMode;
+  withCredentials?: boolean;
   onFatalError?: (message: string) => void;
 };
 
 type UseHlsPlayerResult = {
   status: HlsPlayerStatus;
   errorMessage: string | null;
-  /** true quando a URL não é HLS (progressivo externo). */
   isProgressive: boolean;
 };
 
 const DEFAULT_ERROR = 'Não foi possível carregar este vídeo. Tente novamente em instantes.';
 const MAX_NETWORK_RETRIES = 2;
 
+function buildHlsConfig(mode: HlsPlayerMode, withCredentials: boolean) {
+  const isPreview = mode === 'preview';
+  return {
+    enableWorker: true,
+    lowLatencyMode: false,
+    startLevel: 0,
+    capLevelToPlayerSize: true,
+    abrEwmaDefaultEstimate: isPreview ? 400_000 : 500_000,
+    maxBufferLength: isPreview ? 10 : 20,
+    maxMaxBufferLength: isPreview ? 20 : 40,
+    backBufferLength: isPreview ? 10 : 20,
+    xhrSetup: withCredentials
+      ? (xhr: XMLHttpRequest) => {
+          xhr.withCredentials = true;
+        }
+      : undefined,
+  };
+}
+
+/** Mesmo recurso CDN — só a assinatura/query mudou (renovação de URL). */
+function samePlaybackResource(a: string, b: string): boolean {
+  try {
+    const ua = new URL(a);
+    const ub = new URL(b);
+    return ua.origin === ub.origin && ua.pathname === ub.pathname;
+  } catch {
+    return a === b;
+  }
+}
+
 export function useHlsPlayer(
   videoRef: React.RefObject<HTMLVideoElement | null>,
-  { src, fallbackSrc, active = true, onFatalError }: UseHlsPlayerOptions,
+  { src, fallbackSrc, active = true, mode = 'playback', withCredentials = false, onFatalError }: UseHlsPlayerOptions,
 ): UseHlsPlayerResult {
   const hlsRef = useRef<Hls | null>(null);
+  const isProgressiveRef = useRef(false);
+  const loadedSrcRef = useRef<string | null>(null);
+  const pendingSrcRef = useRef<string | null>(null);
+  const networkRetriesRef = useRef(0);
   const onFatalErrorRef = useRef(onFatalError);
   onFatalErrorRef.current = onFatalError;
 
   const [status, setStatus] = useState<HlsPlayerStatus>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isProgressive, setIsProgressive] = useState(false);
-  const [currentSrc, setCurrentSrc] = useState<string | null>(src?.trim() ? src : null);
-  const lastPrimarySrcRef = useRef(src);
+  const [playbackSrc, setPlaybackSrc] = useState<string | null>(src?.trim() ? src : null);
 
   useEffect(() => {
-    if (src !== lastPrimarySrcRef.current) {
-      lastPrimarySrcRef.current = src;
-      setCurrentSrc(src?.trim() ? src : null);
-    }
+    setPlaybackSrc(src?.trim() ? src : null);
   }, [src]);
 
   useEffect(() => {
-    const video = videoRef.current;
-    const playbackSrc = currentSrc;
+    pendingSrcRef.current = playbackSrc;
 
-    if (!video || !active || !playbackSrc?.trim()) {
+    const video = videoRef.current;
+    const url = playbackSrc;
+
+    if (!video || !active || !url?.trim()) {
       setStatus('idle');
       setErrorMessage(null);
       setIsProgressive(false);
       return;
     }
 
-    if (!isAllowedPlaybackUrl(playbackSrc)) {
+    if (!isAllowedPlaybackUrl(url)) {
       setStatus('error');
       setErrorMessage('URL de vídeo não autorizada.');
       onFatalErrorRef.current?.('URL de vídeo não autorizada.');
@@ -71,6 +103,7 @@ export function useHlsPlayer(
 
     const fail = (message: string) => {
       destroyHls();
+      loadedSrcRef.current = null;
       video.removeAttribute('src');
       video.load();
       setStatus('error');
@@ -79,23 +112,57 @@ export function useHlsPlayer(
     };
 
     const tryFallback = (): boolean => {
-      if (!fallbackSrc?.trim() || fallbackSrc === playbackSrc) return false;
+      if (!fallbackSrc?.trim() || fallbackSrc === url) return false;
       if (!isAllowedPlaybackUrl(fallbackSrc)) return false;
       destroyHls();
-      setCurrentSrc(fallbackSrc);
+      loadedSrcRef.current = null;
+      setPlaybackSrc(fallbackSrc);
       return true;
     };
 
+    // Renovação in-place: mesma mídia, nova assinatura.
+    if (loadedSrcRef.current && samePlaybackResource(loadedSrcRef.current, url)) {
+      const savedTime = video.currentTime;
+      const wasPaused = video.paused;
+      setStatus('loading');
+      setErrorMessage(null);
+
+      if (hlsRef.current) {
+        hlsRef.current.loadSource(url);
+        loadedSrcRef.current = url;
+        networkRetriesRef.current = 0;
+        hlsRef.current.once(Hls.Events.MANIFEST_PARSED, () => {
+          if (savedTime > 0) video.currentTime = savedTime;
+          if (!wasPaused) void video.play().catch(() => undefined);
+          setStatus('ready');
+        });
+        return () => undefined;
+      }
+
+      if (isProgressiveRef.current) {
+        video.src = url;
+        loadedSrcRef.current = url;
+        video.load();
+        video.addEventListener(
+          'canplay',
+          () => {
+            if (savedTime > 0) video.currentTime = savedTime;
+            if (!wasPaused) void video.play().catch(() => undefined);
+            setStatus('ready');
+          },
+          { once: true },
+        );
+        return () => undefined;
+      }
+    }
+
     destroyHls();
+    loadedSrcRef.current = url;
+    networkRetriesRef.current = 0;
     setErrorMessage(null);
     setStatus('loading');
 
-    let networkRetries = 0;
-
-    const handleCanPlay = () => {
-      setStatus('ready');
-    };
-
+    const handleCanPlay = () => setStatus('ready');
     const handleVideoError = () => {
       if (tryFallback()) return;
       fail(DEFAULT_ERROR);
@@ -104,30 +171,42 @@ export function useHlsPlayer(
     video.addEventListener('canplay', handleCanPlay);
     video.addEventListener('error', handleVideoError);
 
-    if (!isHlsPlaybackUrl(playbackSrc)) {
+    if (!isHlsPlaybackUrl(url)) {
+      isProgressiveRef.current = true;
       setIsProgressive(true);
-      video.src = playbackSrc;
+      video.src = url;
       video.load();
       return () => {
+        const next = pendingSrcRef.current;
+        if (loadedSrcRef.current && next && samePlaybackResource(loadedSrcRef.current, next)) return;
         video.removeEventListener('canplay', handleCanPlay);
         video.removeEventListener('error', handleVideoError);
         video.pause();
+        destroyHls();
         video.removeAttribute('src');
         video.load();
+        loadedSrcRef.current = null;
+        isProgressiveRef.current = false;
+        setStatus('idle');
       };
     }
 
+    isProgressiveRef.current = false;
     setIsProgressive(false);
 
     if (canPlayNativeHls(video)) {
-      video.src = playbackSrc;
+      video.src = url;
       video.load();
       return () => {
+        const next = pendingSrcRef.current;
+        if (loadedSrcRef.current && next && samePlaybackResource(loadedSrcRef.current, next)) return;
         video.removeEventListener('canplay', handleCanPlay);
         video.removeEventListener('error', handleVideoError);
         video.pause();
         video.removeAttribute('src');
         video.load();
+        loadedSrcRef.current = null;
+        setStatus('idle');
       };
     }
 
@@ -142,30 +221,19 @@ export function useHlsPlayer(
       };
     }
 
-    const hls = new Hls({
-      enableWorker: true,
-      lowLatencyMode: false,
-      maxBufferLength: 30,
-      maxMaxBufferLength: 60,
-      startLevel: -1,
-      capLevelToPlayerSize: true,
-      backBufferLength: 30,
-    });
-
+    const hls = new Hls(buildHlsConfig(mode, withCredentials));
     hlsRef.current = hls;
     hls.attachMedia(video);
-    hls.loadSource(playbackSrc);
+    hls.loadSource(url);
 
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      setStatus('ready');
-    });
+    hls.on(Hls.Events.MANIFEST_PARSED, () => setStatus('ready'));
 
     hls.on(Hls.Events.ERROR, (_event, data) => {
       if (!data.fatal) return;
 
       if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-        networkRetries += 1;
-        if (networkRetries <= MAX_NETWORK_RETRIES) {
+        networkRetriesRef.current += 1;
+        if (networkRetriesRef.current <= MAX_NETWORK_RETRIES) {
           hls.startLoad();
           return;
         }
@@ -184,15 +252,19 @@ export function useHlsPlayer(
     });
 
     return () => {
+      const next = pendingSrcRef.current;
+      if (loadedSrcRef.current && next && samePlaybackResource(loadedSrcRef.current, next)) return;
       video.removeEventListener('canplay', handleCanPlay);
       video.removeEventListener('error', handleVideoError);
       video.pause();
       destroyHls();
       video.removeAttribute('src');
       video.load();
+      loadedSrcRef.current = null;
+      isProgressiveRef.current = false;
       setStatus('idle');
     };
-  }, [currentSrc, fallbackSrc, active, videoRef]);
+  }, [playbackSrc, fallbackSrc, active, mode, withCredentials, videoRef]);
 
   return { status, errorMessage, isProgressive };
 }

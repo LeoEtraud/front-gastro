@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo, type Ref } from 'react';
+import { useCallback, useEffect, type Ref } from 'react';
 import { AlertCircle, Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { HlsVideoPlayer } from '@/components/video/HlsVideoPlayer';
-import { useLessonVideoUrl } from '@/hooks/use-lesson-video-url';
+import { useLessonVideoUrl, type LessonVideoUrlOptions } from '@/hooks/use-lesson-video-url';
 import { cn } from '@/lib/utils';
 
 type HostedLessonVideoPlayerProps = {
@@ -22,6 +22,10 @@ type HostedLessonVideoPlayerProps = {
   showLoadingOverlay?: boolean;
   /** Exibe spinner enquanto busca a URL assinada. Desligue em prévias compactas. */
   showUrlLoading?: boolean;
+  /** playback = aula principal; preview = cards da home (MP4, buffer menor). */
+  playerMode?: 'playback' | 'preview';
+  /** Opções da API video-url (ex.: preferFormat mp4 para prévias). */
+  urlOptions?: LessonVideoUrlOptions;
   videoRef?: Ref<HTMLVideoElement | null>;
   onLoadedMetadata?: () => void;
 };
@@ -49,10 +53,12 @@ export function HostedLessonVideoPlayer({
   pauseWhenHidden = false,
   showLoadingOverlay = true,
   showUrlLoading = true,
+  playerMode = 'playback',
+  urlOptions,
   videoRef,
   onLoadedMetadata,
 }: HostedLessonVideoPlayerProps) {
-  const { data, isLoading, isFetching, error, refetch } = useLessonVideoUrl(lessonId, enabled);
+  const { data, isLoading, isFetching, error, refetch } = useLessonVideoUrl(lessonId, enabled, urlOptions);
 
   const httpStatus = (error as { response?: { status?: number } } | undefined)?.response?.status;
 
@@ -60,7 +66,7 @@ export function HostedLessonVideoPlayer({
     void refetch();
   }, [refetch]);
 
-  // Renova a URL assinada antes de expirar (30s de margem).
+  // Renova a URL assinada antes de expirar (30s de margem) — o player atualiza in-place.
   useEffect(() => {
     if (!data?.expiresAt || !enabled) return;
     const msUntilRefresh = new Date(data.expiresAt).getTime() - Date.now() - 30_000;
@@ -75,11 +81,6 @@ export function HostedLessonVideoPlayer({
   const handlePlaybackError = useCallback(() => {
     refreshSignedUrl();
   }, [refreshSignedUrl]);
-
-  const playerKey = useMemo(
-    () => `${lessonId}|${data?.url ?? ''}|${data?.fallbackUrl ?? ''}`,
-    [lessonId, data?.url, data?.fallbackUrl],
-  );
 
   if (showUrlLoading && (isLoading || (isFetching && !data))) {
     return (
@@ -116,7 +117,6 @@ export function HostedLessonVideoPlayer({
   return (
     <div className={cn('relative aspect-video w-full shrink-0 bg-black', className)}>
       <HlsVideoPlayer
-        key={playerKey}
         src={data.url}
         fallbackSrc={data.fallbackUrl}
         poster={poster}
@@ -129,6 +129,8 @@ export function HostedLessonVideoPlayer({
         active={active}
         pauseWhenHidden={pauseWhenHidden}
         showLoadingOverlay={showLoadingOverlay}
+        playerMode={playerMode}
+        withCredentials={data.usesSignedCookies ?? false}
         className="absolute inset-0"
         videoClassName={videoClassName ?? 'object-contain'}
         videoRef={videoRef}

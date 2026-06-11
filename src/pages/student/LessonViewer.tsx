@@ -61,9 +61,10 @@ function LessonVideoPanel({ lesson, loading }: { lesson: LessonWithProgress; loa
         controls
         controlsList="nodownload"
         playsInline
-        preload="metadata"
+        preload="none"
         active
         pauseWhenHidden={false}
+        playerMode="playback"
         className="relative aspect-video w-full shrink-0 bg-black"
         videoClassName="object-contain"
       />
