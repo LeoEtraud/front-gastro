@@ -57,15 +57,13 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff2}"],
         navigateFallbackDenylist: [/^\/api\b/],
         runtimeCaching: [
-          // Mídia e endpoints de vídeo: nunca cachear (Range requests, streams, URLs assinadas).
+          // Mídia same-origin apenas — NÃO interceptar CloudFront/S3 (quebra HLS e MP4 assinado).
           {
-            urlPattern: ({ url }) => {
+            urlPattern: ({ url, sameOrigin }) => {
+              if (!sameOrigin) return false;
               const path = url.pathname;
               if (/\/api\/.*\/video(-url)?(\?|$)/.test(path)) return true;
               if (/\.(mp4|webm|m3u8|ts)(\?|$)/i.test(path)) return true;
-              if (url.hostname.endsWith('.cloudfront.net')) return true;
-              if (url.hostname.includes('.amazonaws.com')) return true;
-              if (url.hostname.endsWith('.r2.cloudflarestorage.com')) return true;
               return false;
             },
             handler: 'NetworkOnly',
