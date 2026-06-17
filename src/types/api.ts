@@ -74,11 +74,18 @@ export interface Lesson {
   order: number;
   type: LessonType;
   videoUrl?: string | null;
-  /** Presente no editor do professor; não exposto ao aluno na API pública. */
+  /** Provedor de vídeo: vimeo quando configurado no admin. */
+  videoProvider?: string | null;
+  /** ID Vimeo — visível apenas no editor do professor. */
+  vimeoVideoId?: string | null;
+  vimeoEmbedUrl?: string | null;
+  /**
+   * @deprecated Legado S3 — mantido para migração; não exposto ao aluno.
+   */
   videoObjectKey?: string | null;
-  /** URL temporária (presign GET) para vídeo no bucket privado — apenas editor do professor. */
+  /** @deprecated Removido — playback via Vimeo. */
   videoPlaybackUrl?: string | null;
-  /** @deprecated Aluno usa GET /lessons/:id/video-url */
+  /** @deprecated Removido — playback via Vimeo. */
   videoHlsPlaybackUrl?: string | null;
   /** Duração do vídeo em segundos. */
   duration?: number | null;
@@ -167,8 +174,10 @@ export interface Quiz {
 
 // INTERFACE PARA A AULA COM PROGRESSO
 export interface LessonWithProgress extends Lesson {
-  /** Vídeo no bucket S3 — obter URL assinada via GET /student/lessons/:id/video-url */
-  hasHostedVideo?: boolean;
+  /** Vídeo no Vimeo — dados do player via GET /courses/:courseId/lessons/:lessonId/video */
+  hasVimeoVideo?: boolean;
+  /** Aula ainda com vídeo legado no S3, pendente de migração para Vimeo. */
+  videoMigrationPending?: boolean;
   isCompleted: boolean;
   watchedSeconds: number;
   quiz?: Quiz;
@@ -221,8 +230,8 @@ export interface StudentDashboardLessonPreview {
   watchedSeconds: number;
   status: LessonPreviewStatus;
   videoUrl?: string | null;
-  /** Vídeo no bucket — obter URL assinada via GET /student/lessons/:id/video-url */
-  hasHostedVideo?: boolean;
+  /** Vídeo no Vimeo — sem preview no carrossel (apenas thumbnail). */
+  hasVimeoVideo?: boolean;
 }
 
 export interface StudentDashboardMuralNextItem {

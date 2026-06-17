@@ -229,25 +229,6 @@ export function useUpdateTeacherPassword() {
   });
 }
 
-// FUNÇÃO PARA SOLICITAR URL PRÉ-ASSINADA DE UPLOAD DE VÍDEO
-export function usePresignLessonVideo() {
-  return useMutation({
-    mutationFn: async (params: {
-      lessonId: string;
-      fileName: string;
-      contentType: string;
-      fileSizeBytes: number;
-    }) => {
-      const res = await api.post<{
-        uploadUrl: string;
-        objectKey: string;
-        headers: { 'Content-Type': string };
-      }>('/teacher/videos/presign-upload', params);
-      return res.data;
-    },
-  });
-}
-
 // FUNÇÃO PARA ATUALIZAR UMA AULA EXISTENTE
 export function useUpdateLesson() {
   const queryClient = useQueryClient();

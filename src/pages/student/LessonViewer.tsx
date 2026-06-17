@@ -6,15 +6,12 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { ArrowLeft, CheckCircle2, FileText, Loader2, PlayCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { HlsVideoPlayer } from '@/components/video/HlsVideoPlayer';
-import { HostedLessonVideoPlayer } from '@/components/video/HostedLessonVideoPlayer';
-import { isAllowedPlaybackUrl } from '@/lib/video-playback';
+import { LessonVimeoPlayer } from '@/components/video/LessonVimeoPlayer';
 import { COURSE_MATERIALS_DRIVE_URL } from '@/lib/course-materials-config';
 import { CompactContentSkeleton, LessonViewerSkeleton } from '@/components/ui/content-skeletons';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { normalizePtBrText } from '@/lib/normalize-ptbr';
 
-// FUNÇÃO PARA CONVERTAR O URL DO VÍDEO DO YOUTUBE PARA O EMBED
 function toYoutubeEmbed(url: string): string | null {
   try {
     const u = new URL(url);
@@ -34,8 +31,15 @@ function toYoutubeEmbed(url: string): string | null {
   return null;
 }
 
-// FUNÇÃO PARA MOSTRAR O VÍDEO DA AULA
-function LessonVideoPanel({ lesson, loading }: { lesson: LessonWithProgress; loading?: boolean }) {
+function LessonVideoPanel({
+  lesson,
+  courseId,
+  loading,
+}: {
+  lesson: LessonWithProgress;
+  courseId: string;
+  loading?: boolean;
+}) {
   if (loading) {
     return (
       <div className="relative aspect-video w-full shrink-0 bg-black/85">
@@ -47,28 +51,34 @@ function LessonVideoPanel({ lesson, loading }: { lesson: LessonWithProgress; loa
   }
 
   const placeholder = (
-    <div className="relative flex aspect-video w-full shrink-0 items-center justify-center bg-muted">
-      <FileText className="h-16 w-16 text-muted-foreground/50" />
+    <div className="relative flex aspect-video w-full shrink-0 items-center justify-center bg-muted px-6 text-center">
+      <FileText className="mb-2 h-12 w-12 text-muted-foreground/50" />
     </div>
   );
 
-  // Vídeo hospedado no bucket: URL assinada via API (sem proxy no Render).
-  if (lesson.hasHostedVideo) {
+  const migrationMessage = (
+    <div className="relative flex aspect-video w-full shrink-0 flex-col items-center justify-center gap-2 bg-muted px-6 text-center">
+      <PlayCircle className="h-12 w-12 text-muted-foreground/50" />
+      <p className="max-w-md text-sm text-muted-foreground">
+        O vídeo desta aula ainda está sendo migrado para a nova plataforma. Tente novamente em breve ou
+        entre em contato com o suporte.
+      </p>
+    </div>
+  );
+
+  if (lesson.hasVimeoVideo) {
     return (
-      <HostedLessonVideoPlayer
+      <LessonVimeoPlayer
+        courseId={courseId}
         lessonId={lesson.id}
-        poster="/capa-curso.jpg"
-        controls
-        controlsList="nodownload"
-        playsInline
-        preload="none"
         active
-        pauseWhenHidden={false}
-        playerMode="playback"
-        className="relative aspect-video w-full shrink-0 bg-black"
-        videoClassName="object-contain"
+        className="relative aspect-video w-full shrink-0"
       />
     );
+  }
+
+  if (lesson.videoMigrationPending) {
+    return migrationMessage;
   }
 
   if (lesson.videoUrl) {
@@ -76,22 +86,12 @@ function LessonVideoPanel({ lesson, loading }: { lesson: LessonWithProgress; loa
     if (embed) {
       return (
         <div className="relative aspect-video w-full shrink-0 bg-black">
-          <iframe src={embed} className="absolute inset-0 h-full w-full" allowFullScreen title="Vídeo da aula" />
-        </div>
-      );
-    }
-    if (isAllowedPlaybackUrl(lesson.videoUrl)) {
-      return (
-        <div className="relative aspect-video w-full shrink-0 bg-black">
-          <HlsVideoPlayer
-            src={lesson.videoUrl}
-            controls
-            controlsList="nodownload"
-            playsInline
-            preload="metadata"
-            active
-            className="absolute inset-0"
-            videoClassName="object-contain"
+          <iframe
+            src={embed}
+            className="absolute inset-0 h-full w-full border-0"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowFullScreen
+            title="Vídeo da aula"
           />
         </div>
       );
@@ -102,17 +102,20 @@ function LessonVideoPanel({ lesson, loading }: { lesson: LessonWithProgress; loa
     return placeholder;
   }
 
-  return placeholder;
+  return (
+    <div className="relative flex aspect-video w-full shrink-0 flex-col items-center justify-center gap-2 bg-muted px-6 text-center">
+      <PlayCircle className="h-12 w-12 text-muted-foreground/50" />
+      <p className="max-w-md text-sm text-muted-foreground">Nenhum vídeo configurado para esta aula.</p>
+    </div>
+  );
 }
 
-// PÁGINA DE VISUALIZAÇÃO DA AULA - PÁGINA PARA VISUALIZAR UMA AULA
 export default function LessonViewer() {
-  const { courseId, lessonId } = useParams<{courseId: string, lessonId: string}>();
+  const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
   const navigate = useNavigate();
-  
+
   const { data: course } = usePublicCourse(courseId ?? '');
-  
-  // Find actual lessonId if 'start' is passed
+
   let actualLessonId = lessonId ?? '';
   if (lessonId === 'start' && course?.modules?.[0]?.lessons?.[0]) {
     actualLessonId = course.modules[0].lessons[0].id;
@@ -133,11 +136,11 @@ export default function LessonViewer() {
       await markProgress.mutateAsync({ lessonId: actualLessonId, isCompleted: !lesson?.isCompleted });
       toast(
         lesson?.isCompleted
-          ? { variant: "warning", title: "Marcado como não concluído" }
-          : { variant: "success", title: "Aula concluída!" },
+          ? { variant: 'warning', title: 'Marcado como não concluído' }
+          : { variant: 'success', title: 'Aula concluída!' },
       );
-    } catch(e) {
-      toast({ variant: "destructive", title: "Erro ao salvar progresso" });
+    } catch {
+      toast({ variant: 'destructive', title: 'Erro ao salvar progresso' });
     }
   };
 
@@ -149,7 +152,11 @@ export default function LessonViewer() {
         </AppLayout>
       );
     }
-    return <AppLayout><LessonViewerSkeleton /></AppLayout>;
+    return (
+      <AppLayout>
+        <LessonViewerSkeleton />
+      </AppLayout>
+    );
   }
   if (isLoading && !lesson) {
     if (!showLessonLoading) {
@@ -159,7 +166,11 @@ export default function LessonViewer() {
         </AppLayout>
       );
     }
-    return <AppLayout><LessonViewerSkeleton /></AppLayout>;
+    return (
+      <AppLayout>
+        <LessonViewerSkeleton />
+      </AppLayout>
+    );
   }
   if (!lesson) return <AppLayout><div className="p-20 text-center">Aula não encontrada.</div></AppLayout>;
   const isLessonSwitching = isFetching && (isPlaceholderData || lesson.id !== actualLessonId);
@@ -167,10 +178,9 @@ export default function LessonViewer() {
   return (
     <AppLayout>
       <div className="flex w-full min-w-0 flex-col gap-4 lg:min-h-[min(100%,calc(100dvh-5rem))] lg:flex-row lg:gap-6">
-        {/* Principal: no mobile fica abaixo da lista de módulos; no desktop à direita */}
         <div className="order-2 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground lg:order-2 lg:min-h-[min(100%,calc(100dvh-5rem))]">
           <div className="shrink-0 overflow-hidden rounded-t-xl">
-            <LessonVideoPanel lesson={lesson} loading={isLessonSwitching} />
+            <LessonVideoPanel lesson={lesson} courseId={courseId ?? ''} loading={isLessonSwitching} />
           </div>
 
           <div className="min-h-0 flex-1 rounded-b-xl border-t border-border p-4 sm:p-6 md:p-8 lg:overflow-y-auto">
@@ -211,7 +221,6 @@ export default function LessonViewer() {
           </div>
         </div>
 
-        {/* Lista de módulos/aulas: no topo no mobile, à esquerda no desktop */}
         <aside className="order-1 flex max-h-[min(42vh,20rem)] w-full shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-card lg:order-1 lg:max-h-none lg:h-auto lg:max-h-[min(100%,calc(100dvh-5rem))] lg:w-80">
           <div className="shrink-0 border-b border-border bg-muted/50 p-3 sm:p-4">
             <Button

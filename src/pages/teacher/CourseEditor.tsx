@@ -15,7 +15,6 @@ import { canManageCourseStructure, canPublishCourse } from '@/lib/permissions';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +30,6 @@ import { useForm } from 'react-hook-form';
 import {
   Plus,
   GripVertical,
-  Upload,
   Trash2,
   ImagePlus,
   BookCheck,
@@ -42,6 +40,7 @@ import {
   Pencil,
   MoreHorizontal,
   Link2,
+  Video,
 } from 'lucide-react';
 import { Accordion } from '@heroui/react';
 import type { Key } from '@heroui/react';
@@ -73,57 +72,11 @@ import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MEDICAL_SPECIALTIES } from '@/lib/medical-specialties';
 import { uploadCourseCoverFile } from '@/lib/course-cover-upload';
-import { uploadLessonVideo, resolveLessonVideoMimeType } from '@/lib/lesson-video-upload';
-import { HlsVideoPlayer } from '@/components/video/HlsVideoPlayer';
+import { VimeoPlayerById } from '@/components/video/VimeoPlayer';
+import { extractVimeoVideoId, isValidVimeoInput } from '@/lib/vimeo';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-
-// FUNÇÃO PARA EXTRAIR METADADOS LOCAIS DO ARQUIVO DE VÍDEO (DURAÇÃO + DIMENSÕES)
-type LocalVideoMetadata = {
-  durationSeconds: number | null;
-  width: number | null;
-  height: number | null;
-};
-
-function extractLocalVideoMetadata(file: File): Promise<LocalVideoMetadata> {
-  return new Promise((resolve) => {
-    const url = URL.createObjectURL(file);
-    const video = document.createElement('video');
-    video.preload = 'metadata';
-    video.muted = true;
-    video.src = url;
-
-    const finish = (meta: LocalVideoMetadata) => {
-      URL.revokeObjectURL(url);
-      resolve(meta);
-    };
-
-    video.onloadedmetadata = () => {
-      const duration = Number.isFinite(video.duration) ? Math.round(video.duration) : null;
-      const width = video.videoWidth || null;
-      const height = video.videoHeight || null;
-      finish({ durationSeconds: duration, width, height });
-    };
-    video.onerror = () => {
-      finish({ durationSeconds: null, width: null, height: null });
-    };
-  });
-}
-
-// FUNÇÃO PARA FORMATAR TAMANHO DE ARQUIVO EM FORMATO LEGÍVEL
-function formatFileSize(bytes?: number | null): string {
-  if (!bytes || bytes <= 0) return '—';
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  let value = bytes;
-  let unitIndex = 0;
-  while (value >= 1024 && unitIndex < units.length - 1) {
-    value /= 1024;
-    unitIndex += 1;
-  }
-  const precision = value >= 100 || unitIndex === 0 ? 0 : value >= 10 ? 1 : 2;
-  return `${value.toFixed(precision)} ${units[unitIndex]}`;
-}
 
 // FUNÇÃO PARA FORMATAR DURAÇÃO EM HH:MM:SS OU MM:SS
 function formatDuration(seconds?: number | null): string {
@@ -136,47 +89,16 @@ function formatDuration(seconds?: number | null): string {
   return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
 }
 
-// FUNÇÃO PARA DERIVAR UM RÓTULO DE QUALIDADE A PARTIR DA ALTURA/CONTENT-TYPE
-function formatVideoQuality(height?: number | null, width?: number | null, contentType?: string | null): string {
-  if (height && height > 0) {
-    // Escadas padrão de qualidade por altura vertical
-    const stairs = [240, 360, 480, 720, 1080, 1440, 2160];
-    let chosen = stairs[0]!;
-    for (const s of stairs) {
-      if (height >= s) chosen = s;
-    }
-    const codec = contentType?.split('/')[1]?.toUpperCase();
-    const resolution = width ? `${width}×${height}` : `${height}p`;
-    return codec ? `${chosen}p (${resolution} · ${codec})` : `${chosen}p (${resolution})`;
-  }
-  if (contentType) {
-    const codec = contentType.split('/')[1]?.toUpperCase();
-    return codec ? `Formato ${codec}` : contentType;
-  }
-  return '—';
-}
-
-// FUNÇÃO PARA FORMATAR DATA/HORA EM PT-BR
-function formatDateTime(iso?: string | null): string {
-  if (!iso) return '—';
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return '—';
-  return date.toLocaleString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
 /**
  * Estilos do badge de status do vídeo da aula. Mantém legibilidade e
  * coerência com os tokens do projeto, sem cores chamativas no estado padrão.
  */
-function lessonSourceBadgeClass(status: 'hosted' | 'external' | 'none'): string {
-  if (status === 'hosted') {
+function lessonSourceBadgeClass(status: 'vimeo' | 'external' | 'legacy' | 'none'): string {
+  if (status === 'vimeo') {
     return 'border-emerald-300/70 bg-emerald-100 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300';
+  }
+  if (status === 'legacy') {
+    return 'border-amber-300/70 bg-amber-100 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-300';
   }
   if (status === 'external') {
     return 'border-blue-300/70 bg-blue-100 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/15 dark:text-blue-300';
@@ -197,124 +119,87 @@ function LessonEditorRow({
   const updateLesson = useUpdateLesson();
   const deleteLesson = useDeleteLesson();
   const { toast } = useToast();
-  const fileRef = useRef<HTMLInputElement>(null);
-  const localPreviewRef = useRef<string | null>(null);
+  const [vimeoInput, setVimeoInput] = useState(lesson.vimeoVideoId ?? '');
   const [externalUrl, setExternalUrl] = useState(lesson.videoUrl ?? '');
-  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
   const [isRemovingVideo, setIsRemovingVideo] = useState(false);
   const [isDeleteVideoDialogOpen, setIsDeleteVideoDialogOpen] = useState(false);
   const [isDeleteLessonDialogOpen, setIsDeleteLessonDialogOpen] = useState(false);
   const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
-  const [localVideoPreviewUrl, setLocalVideoPreviewUrl] = useState<string | null>(null);
   const LESSON_ACCORDION_KEY = 'lesson';
   const [expandedKeys, setExpandedKeys] = useState<Set<Key>>(new Set());
   const isExpanded = expandedKeys.has(LESSON_ACCORDION_KEY);
   const setIsExpanded = (open: boolean) => {
     setExpandedKeys(open ? new Set<Key>([LESSON_ACCORDION_KEY]) : new Set<Key>());
   };
-  const [videoSourceTab, setVideoSourceTab] = useState<'hosted' | 'external'>('hosted');
+  const [videoSourceTab, setVideoSourceTab] = useState<'vimeo' | 'external'>('vimeo');
 
   useEffect(() => {
-    if (lesson.videoObjectKey) {
+    setVimeoInput(lesson.vimeoVideoId ?? '');
+    if (lesson.videoProvider === 'vimeo' && lesson.vimeoVideoId) {
       setExternalUrl('');
     } else {
       setExternalUrl(lesson.videoUrl ?? '');
     }
-  }, [lesson.id, lesson.videoUrl, lesson.videoObjectKey]);
+  }, [lesson.id, lesson.vimeoVideoId, lesson.videoUrl, lesson.videoProvider]);
 
-  // Quando a aula tem link externo, abrimos a aba correspondente por padrão.
   useEffect(() => {
-    if (!lesson.videoObjectKey && lesson.videoUrl) {
+    if (lesson.videoProvider === 'vimeo' && lesson.vimeoVideoId) {
+      setVideoSourceTab('vimeo');
+    } else if (lesson.videoUrl) {
       setVideoSourceTab('external');
     } else {
-      setVideoSourceTab('hosted');
+      setVideoSourceTab('vimeo');
     }
-  }, [lesson.id, lesson.videoObjectKey, lesson.videoUrl]);
+  }, [lesson.id, lesson.videoProvider, lesson.vimeoVideoId, lesson.videoUrl]);
 
-  useEffect(() => {
-    return () => {
-      if (localPreviewRef.current) {
-        URL.revokeObjectURL(localPreviewRef.current);
-        localPreviewRef.current = null;
-      }
-    };
-  }, []);
-
-  const hasHosted = !!lesson.videoObjectKey;
-  const hasExternal = !!lesson.videoUrl && !hasHosted;
-  const hasAnyVideo = hasHosted || hasExternal;
-  const previewUrl = localVideoPreviewUrl || lesson.videoPlaybackUrl || (!hasHosted ? lesson.videoUrl : null) || null;
-  const busy = isUploading || (updateLesson.isPending && !isRemovingVideo);
-  const sourceStatus: 'hosted' | 'external' | 'none' = hasHosted ? 'hosted' : hasExternal ? 'external' : 'none';
-  const sourceLabel = hasHosted ? 'Hospedado' : hasExternal ? 'Link externo' : 'Sem vídeo';
+  const hasVimeo = lesson.videoProvider === 'vimeo' && !!lesson.vimeoVideoId;
+  const hasLegacy = !!lesson.videoObjectKey && !hasVimeo;
+  const hasExternal = !!lesson.videoUrl && !hasVimeo;
+  const hasAnyVideo = hasVimeo || hasExternal || hasLegacy;
+  const previewVimeoId = extractVimeoVideoId(vimeoInput) ?? lesson.vimeoVideoId ?? null;
+  const sourceStatus: 'vimeo' | 'external' | 'legacy' | 'none' = hasVimeo
+    ? 'vimeo'
+    : hasLegacy
+      ? 'legacy'
+      : hasExternal
+        ? 'external'
+        : 'none';
+  const sourceLabel = hasVimeo
+    ? 'Vimeo'
+    : hasLegacy
+      ? 'Migração S3'
+      : hasExternal
+        ? 'Link externo'
+        : 'Sem vídeo';
   const durationLabel = lesson.duration ? formatDuration(lesson.duration) : null;
 
-  const setLocalPreviewFromFile = (file: File) => {
-    if (localPreviewRef.current) {
-      URL.revokeObjectURL(localPreviewRef.current);
+  const onSaveVimeo = async () => {
+    const raw = vimeoInput.trim();
+    if (!raw) {
+      toast({ variant: 'destructive', title: 'Informe o ID ou link do Vimeo' });
+      return;
     }
-    const objectUrl = URL.createObjectURL(file);
-    localPreviewRef.current = objectUrl;
-    setLocalVideoPreviewUrl(objectUrl);
-  };
-
-  const clearLocalPreview = () => {
-    if (localPreviewRef.current) {
-      URL.revokeObjectURL(localPreviewRef.current);
-      localPreviewRef.current = null;
-    }
-    setLocalVideoPreviewUrl(null);
-  };
-
-  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file) return;
-    try {
-      resolveLessonVideoMimeType(file);
-    } catch {
-      toast({ variant: 'destructive', title: 'Selecione um arquivo de vídeo (MP4, WebM ou MOV)' });
+    if (!isValidVimeoInput(raw)) {
+      toast({
+        variant: 'destructive',
+        title: 'ID ou URL do Vimeo inválido',
+        description: 'Ex.: 123456789, https://vimeo.com/123456789 ou https://player.vimeo.com/video/123456789',
+      });
       return;
     }
     try {
-      setIsUploading(true);
-      setUploadProgress(0);
-      // Lê metadados locais (duração, resolução) antes do upload para persistir no backend
-      const localMeta = await extractLocalVideoMetadata(file);
-      const { objectKey, contentType: uploadedContentType } = await uploadLessonVideo({
-        lessonId: lesson.id,
-        file,
-        onProgress: (percent) => setUploadProgress(percent),
-      });
       await updateLesson.mutateAsync({
         id: lesson.id,
-        data: {
-          type: 'VIDEO',
-          videoObjectKey: objectKey,
-          videoSizeBytes: file.size,
-          videoContentType: uploadedContentType || file.type || null,
-          duration: localMeta.durationSeconds,
-          videoWidth: localMeta.width,
-          videoHeight: localMeta.height,
-        },
+        data: { type: 'VIDEO', vimeoInput: raw },
       });
-      setLocalPreviewFromFile(file);
-      setExternalUrl('');
-      toast({ variant: 'success', title: 'Vídeo enviado com sucesso' });
+      toast({ variant: 'success', title: 'Vídeo Vimeo salvo' });
     } catch (err: unknown) {
-      const ax = err as { response?: { data?: { error?: string } }; message?: string };
+      const ax = err as { response?: { data?: { error?: string } } };
       toast({
         variant: 'destructive',
-        title: 'Falha no upload',
-        description:
-          ax?.response?.data?.error ||
-          ax?.message ||
-          'Verifique as variáveis S3/R2 no servidor e o limite de tamanho do upload.',
+        title: 'Erro ao salvar vídeo',
+        description: ax?.response?.data?.error,
       });
-    } finally {
-      setIsUploading(false);
-      setUploadProgress(null);
     }
   };
 
@@ -325,8 +210,7 @@ function LessonEditorRow({
       return;
     }
     try {
-      await updateLesson.mutateAsync({ id: lesson.id, data: { videoUrl: url, videoObjectKey: null } });
-      clearLocalPreview();
+      await updateLesson.mutateAsync({ id: lesson.id, data: { videoUrl: url } });
       toast({ variant: 'success', title: 'Link externo salvo' });
     } catch {
       toast({ variant: 'destructive', title: 'Erro ao salvar link' });
@@ -336,10 +220,12 @@ function LessonEditorRow({
   const onDeleteVideo = async () => {
     setIsRemovingVideo(true);
     try {
-      await updateLesson.mutateAsync({ id: lesson.id, data: { videoObjectKey: null, videoUrl: null } });
-      clearLocalPreview();
+      await updateLesson.mutateAsync({
+        id: lesson.id,
+        data: { vimeoInput: null, videoUrl: null },
+      });
+      setVimeoInput('');
       setExternalUrl('');
-      setUploadProgress(null);
       toast({ variant: 'success', title: 'Vídeo removido com sucesso' });
     } catch {
       toast({ variant: 'destructive', title: 'Falha ao remover vídeo' });
@@ -397,16 +283,9 @@ function LessonEditorRow({
           <Accordion.Panel>
             <Accordion.Body className="border-t border-border/70 px-3 pb-3 pt-3 sm:px-4 sm:pb-4">
               {readOnly ? (
-                previewUrl ? (
+                previewVimeoId ? (
                   <div className="w-full max-w-md overflow-hidden rounded-md bg-black/90">
-                    <HlsVideoPlayer
-                      src={previewUrl}
-                      controls
-                      preload="metadata"
-                      active
-                      className="aspect-video w-full"
-                      videoClassName="aspect-video w-full"
-                    />
+                    <VimeoPlayerById videoId={previewVimeoId} className="aspect-video w-full" />
                   </div>
                 ) : (
                   <p className="rounded-md border border-dashed border-border bg-muted/30 px-3 py-4 text-center text-xs text-muted-foreground sm:text-sm">
@@ -416,28 +295,16 @@ function LessonEditorRow({
               ) : null}
               {!readOnly ? (
               <>
-              <input
-                type="file"
-                ref={fileRef}
-                accept="video/mp4,video/webm,video/quicktime,video/*"
-                className="hidden"
-                onChange={onFileChange}
-              />
-
               <Tabs
                 value={videoSourceTab}
-                onValueChange={(value) => setVideoSourceTab(value as 'hosted' | 'external')}
+                onValueChange={(value) => setVideoSourceTab(value as 'vimeo' | 'external')}
                 className="space-y-3"
               >
-                {/*
-                 * Linha de cabeçalho do painel: abas (Vídeo hospedado / Link externo) à esquerda
-                 * e o menu único de ações da aula alinhado à direita.
-                 */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <TabsList className="grid w-full grid-cols-2 sm:max-w-sm">
-                    <TabsTrigger value="hosted" className="gap-1.5">
-                      <Upload className="h-3.5 w-3.5" />
-                      Vídeo hospedado
+                    <TabsTrigger value="vimeo" className="gap-1.5">
+                      <Video className="h-3.5 w-3.5" />
+                      Vimeo
                     </TabsTrigger>
                     <TabsTrigger value="external" className="gap-1.5">
                       <Link2 className="h-3.5 w-3.5" />
@@ -462,19 +329,9 @@ function LessonEditorRow({
                         Ações da aula
                       </DropdownMenuLabel>
                       <DropdownMenuItem
-                        disabled={busy}
+                        disabled={!hasVimeo}
                         onSelect={() => {
-                          setVideoSourceTab('hosted');
-                          fileRef.current?.click();
-                        }}
-                      >
-                        <Upload className="mr-2 h-4 w-4" />
-                        {hasHosted ? 'Trocar vídeo' : 'Enviar vídeo'}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        disabled={!hasHosted}
-                        onSelect={() => {
-                          if (!hasHosted) return;
+                          if (!hasVimeo) return;
                           setIsInfoDialogOpen(true);
                         }}
                       >
@@ -504,41 +361,55 @@ function LessonEditorRow({
                   </DropdownMenu>
                 </div>
 
-                <TabsContent value="hosted" className="space-y-3">
-                  {uploadProgress !== null && (
-                    <div className="space-y-1.5 rounded-md border border-border/70 bg-muted/40 p-2.5">
-                      <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
-                        <span>Enviando vídeo...</span>
-                        <span>{uploadProgress}%</span>
-                      </div>
-                      <Progress value={uploadProgress} className="h-2.5" />
+                <TabsContent value="vimeo" className="space-y-3">
+                  <p className="text-xs text-muted-foreground">
+                    Envie o vídeo manualmente no Vimeo, depois cole o ID ou link abaixo. Configure privacidade,
+                    domínios permitidos e download desativado no painel do Vimeo.
+                  </p>
+                  {hasLegacy ? (
+                    <p className="rounded-md border border-amber-300/60 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+                      Esta aula ainda possui vídeo legado no S3. Salve um ID do Vimeo para concluir a migração.
+                    </p>
+                  ) : null}
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <label className="text-xs font-medium text-muted-foreground">
+                        ID ou link do Vimeo
+                      </label>
+                      <Input
+                        value={vimeoInput}
+                        onChange={(e) => setVimeoInput(e.target.value)}
+                        placeholder="123456789 ou https://vimeo.com/123456789"
+                        className="h-9"
+                      />
                     </div>
-                  )}
-
-                  {previewUrl ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={onSaveVimeo}
+                      isLoading={updateLesson.isPending}
+                      className="sm:shrink-0"
+                    >
+                      Salvar Vimeo
+                    </Button>
+                  </div>
+                  {previewVimeoId ? (
                     <div className="space-y-2 rounded-md border border-border/70 bg-muted/30 p-2.5">
-                      <p className="text-xs font-medium text-muted-foreground">Pré-visualização do vídeo</p>
+                      <p className="text-xs font-medium text-muted-foreground">Pré-visualização</p>
                       <div className="w-full max-w-md overflow-hidden rounded-md bg-black/90">
-                        <HlsVideoPlayer
-                          src={previewUrl}
-                          controls
-                          preload="metadata"
-                          active
-                          className="aspect-video w-full"
-                          videoClassName="aspect-video w-full"
-                        />
+                        <VimeoPlayerById videoId={previewVimeoId} className="aspect-video w-full" />
                       </div>
                     </div>
                   ) : (
                     <p className="rounded-md border border-dashed border-border bg-muted/30 px-3 py-4 text-center text-xs text-muted-foreground sm:text-sm">
-                      Nenhum vídeo hospedado para esta aula. Use o menu de ações para enviar um vídeo.
+                      Nenhum vídeo Vimeo configurado. Cole o ID ou link e clique em Salvar.
                     </p>
                   )}
                 </TabsContent>
 
                 <TabsContent value="external" className="space-y-3">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-                    <div className="flex-1 space-y-1 min-w-0">
+                    <div className="min-w-0 flex-1 space-y-1">
                       <label className="text-xs font-medium text-muted-foreground">
                         Link externo (ex.: YouTube)
                       </label>
@@ -559,10 +430,9 @@ function LessonEditorRow({
                       Salvar link
                     </Button>
                   </div>
-                  {hasHosted ? (
+                  {hasVimeo ? (
                     <p className="text-xs text-muted-foreground">
-                      Salvar um link externo substitui o vídeo hospedado nesta aula (o arquivo antigo pode permanecer no
-                      armazenamento até você apagá-lo manualmente).
+                      Salvar um link externo substitui o vídeo Vimeo desta aula.
                     </p>
                   ) : null}
                 </TabsContent>
@@ -583,7 +453,7 @@ function LessonEditorRow({
             <AlertDialogTitle>Remover vídeo da aula</AlertDialogTitle>
             <AlertDialogDescription>
               Tem certeza que deseja remover o vídeo desta aula? A reprodução ficará indisponível para os alunos até que
-              um novo vídeo seja enviado ou um link externo seja informado.
+              um novo vídeo Vimeo ou link externo seja informado.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -642,7 +512,7 @@ function LessonEditorRow({
                 Informações do vídeo
               </DialogTitle>
               <DialogDescription className="text-sm leading-relaxed text-muted-foreground">
-                Metadados do arquivo enviado para esta aula.
+                Dados do vídeo Vimeo configurado para esta aula.
               </DialogDescription>
             </div>
             <Separator className="mt-3" />
@@ -652,25 +522,9 @@ function LessonEditorRow({
             <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="rounded-lg border border-border/60 bg-background p-3.5 dark:bg-background/40">
                 <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Data de publicação
+                  ID Vimeo
                 </dt>
-                <dd className="mt-1.5 text-sm font-semibold text-foreground">
-                  {formatDateTime(lesson.videoUploadedAt)}
-                </dd>
-              </div>
-              <div className="rounded-lg border border-border/60 bg-background p-3.5 dark:bg-background/40">
-                <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Tamanho do arquivo
-                </dt>
-                <dd className="mt-1.5 text-sm font-semibold text-foreground">{formatFileSize(lesson.videoSizeBytes)}</dd>
-              </div>
-              <div className="rounded-lg border border-border/60 bg-background p-3.5 dark:bg-background/40">
-                <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Qualidade do vídeo
-                </dt>
-                <dd className="mt-1.5 text-sm font-semibold text-foreground">
-                  {formatVideoQuality(lesson.videoHeight, lesson.videoWidth, lesson.videoContentType)}
-                </dd>
+                <dd className="mt-1.5 text-sm font-semibold text-foreground">{lesson.vimeoVideoId ?? '—'}</dd>
               </div>
               <div className="rounded-lg border border-border/60 bg-background p-3.5 dark:bg-background/40">
                 <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Duração</dt>
