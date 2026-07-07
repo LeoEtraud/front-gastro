@@ -118,9 +118,9 @@ export default function CoursesList() {
         ) : isLoading ? (
           <TeacherCoursesGridSkeleton count={2} />
         ) : courses?.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-xl border border-dashed">
-            <h3 className="text-xl font-bold mb-2">Você ainda não possui cursos</h3>
-            <p className="text-slate-500 mb-6">Comece criando seu primeiro curso para seus alunos.</p>
+          <div className="rounded-xl border border-dashed border-border bg-card py-20 text-center">
+            <h3 className="mb-2 text-xl font-bold text-foreground">Você ainda não possui cursos</h3>
+            <p className="mb-6 text-muted-foreground">Comece criando seu primeiro curso para seus alunos.</p>
             {showCreate ? (
               <Button onClick={() => setIsCreateCourseOpen(true)}>Criar Meu Primeiro Curso</Button>
             ) : null}

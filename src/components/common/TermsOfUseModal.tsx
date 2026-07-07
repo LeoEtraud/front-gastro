@@ -14,7 +14,7 @@ export function TermsOfUseModal({ open, onOpenChange }: TermsOfUseModalProps) {
       open={open}
       onOpenChange={onOpenChange}
       title="Termos de Uso"
-      subtitle={`${LEGAL_ENTITY.platform} · ${LEGAL_ENTITY.name} · atualizado em ${LEGAL_LAST_UPDATED}`}
+      subtitle={LEGAL_ENTITY.platform}
       icon={FileText}
       footerNote={`Documento vigente em ${LEGAL_LAST_UPDATED}. Em caso de divergência com contratos específicos, prevalecem os instrumentos formalmente firmados com o usuário ou a instituição.`}
     >

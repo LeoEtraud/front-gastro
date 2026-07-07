@@ -1,11 +1,10 @@
 import { LegalBody, LegalSection } from '@/components/common/legal/LegalDocumentModal';
 import { PrivacyLegalReferences } from '@/components/common/legal/LegalReferences';
 import {
+  LEGAL_CONTACT_EMAIL,
   LEGAL_DPO_NAME,
   LEGAL_ENTITY,
   LEGAL_LAST_UPDATED,
-  LEGAL_PRIVACY_EMAIL,
-  LEGAL_SUPPORT_EMAIL,
 } from '@/lib/legal-config';
 
 export function PrivacyPolicyContent() {
@@ -48,15 +47,9 @@ export function PrivacyPolicyContent() {
             <strong className="text-foreground">Endereço:</strong> {address}
           </li>
           <li>
-            <strong className="text-foreground">E-mail de privacidade/DPO:</strong>{' '}
-            <a href={`mailto:${LEGAL_PRIVACY_EMAIL}`} className="text-primary hover:underline">
-              {LEGAL_PRIVACY_EMAIL}
-            </a>
-          </li>
-          <li>
-            <strong className="text-foreground">E-mail de suporte:</strong>{' '}
-            <a href={`mailto:${LEGAL_SUPPORT_EMAIL}`} className="text-primary hover:underline">
-              {LEGAL_SUPPORT_EMAIL}
+            <strong className="text-foreground">E-mail de contato:</strong>{' '}
+            <a href={`mailto:${LEGAL_CONTACT_EMAIL}`} className="text-primary hover:underline">
+              {LEGAL_CONTACT_EMAIL}
             </a>
           </li>
         </ul>
@@ -151,8 +144,9 @@ export function PrivacyPolicyContent() {
         </p>
         <p>A plataforma utiliza serviços de terceiros, incluindo:</p>
         <p>
-          <strong className="text-foreground">AWS S3:</strong> utilizado para armazenamento das videoaulas e
-          disponibilização dos conteúdos digitais.
+          <strong className="text-foreground">Vimeo:</strong> utilizado para hospedagem e reprodução das videoaulas por
+          meio de player incorporado (embed), com configurações de privacidade que restringem a visualização aos
+          domínios autorizados da plataforma e impedem o compartilhamento público dos conteúdos.
         </p>
         <p>
           Também poderão ser utilizados serviços de infraestrutura, hospedagem, segurança, suporte técnico ou manutenção
@@ -164,9 +158,13 @@ export function PrivacyPolicyContent() {
       <LegalSection title="8. Armazenamento dos dados">
         <p>
           Os dados da plataforma serão armazenados em ambiente tecnológico utilizado pela {name} e/ou por fornecedores
-          de infraestrutura contratados, incluindo serviços da AWS.
+          de infraestrutura contratados.
         </p>
-        <p>As videoaulas são armazenadas no serviço AWS S3.</p>
+        <p>
+          As videoaulas são hospedadas no serviço Vimeo. O acesso ao player é liberado somente após autenticação do
+          usuário e validação de matrícula na plataforma, conforme as regras de privacidade e domínios permitidos
+          configurados no Vimeo.
+        </p>
         <p>
           A {name} adotará medidas técnicas e administrativas razoáveis para proteger os dados pessoais contra acessos
           não autorizados, perda, alteração, divulgação indevida ou qualquer forma de tratamento inadequado.
@@ -237,9 +235,9 @@ export function PrivacyPolicyContent() {
           entrar em contato:
         </p>
         <p>
-          E-mail de privacidade/DPO:{' '}
-          <a href={`mailto:${LEGAL_PRIVACY_EMAIL}`} className="font-medium text-primary hover:underline">
-            {LEGAL_PRIVACY_EMAIL}
+          E-mail de contato:{' '}
+          <a href={`mailto:${LEGAL_CONTACT_EMAIL}`} className="font-medium text-primary hover:underline">
+            {LEGAL_CONTACT_EMAIL}
           </a>
         </p>
         <p>
@@ -256,8 +254,8 @@ export function PrivacyPolicyContent() {
         <p>{dpoLine}</p>
         <p>
           Contato:{' '}
-          <a href={`mailto:${LEGAL_PRIVACY_EMAIL}`} className="font-medium text-primary hover:underline">
-            {LEGAL_PRIVACY_EMAIL}
+          <a href={`mailto:${LEGAL_CONTACT_EMAIL}`} className="font-medium text-primary hover:underline">
+            {LEGAL_CONTACT_EMAIL}
           </a>
         </p>
         <p>
@@ -288,9 +286,9 @@ export function PrivacyPolicyContent() {
 
       <LegalSection title="16. Transferência internacional de dados">
         <p>
-          Considerando a utilização de serviços de infraestrutura tecnológica, incluindo serviços da AWS, os dados
-          poderão ser armazenados ou processados em ambientes localizados no Brasil ou no exterior, conforme a
-          estrutura técnica dos fornecedores utilizados.
+          Considerando a utilização de serviços de infraestrutura tecnológica e de hospedagem de vídeo, incluindo o
+          Vimeo, os dados poderão ser armazenados ou processados em ambientes localizados no Brasil ou no exterior,
+          conforme a estrutura técnica dos fornecedores utilizados.
         </p>
         <p>
           Nesses casos, a {name} adotará medidas razoáveis para que o tratamento ocorra conforme a legislação aplicável
@@ -318,17 +316,11 @@ export function PrivacyPolicyContent() {
       </LegalSection>
 
       <LegalSection title="19. Contato">
-        <p>Para dúvidas, solicitações ou informações sobre esta Política de Privacidade:</p>
+        <p>Para dúvidas, solicitações, suporte ou informações sobre esta Política de Privacidade:</p>
         <p>
-          E-mail de suporte:{' '}
-          <a href={`mailto:${LEGAL_SUPPORT_EMAIL}`} className="font-medium text-primary hover:underline">
-            {LEGAL_SUPPORT_EMAIL}
-          </a>
-        </p>
-        <p>
-          E-mail de privacidade/DPO:{' '}
-          <a href={`mailto:${LEGAL_PRIVACY_EMAIL}`} className="font-medium text-primary hover:underline">
-            {LEGAL_PRIVACY_EMAIL}
+          E-mail de contato:{' '}
+          <a href={`mailto:${LEGAL_CONTACT_EMAIL}`} className="font-medium text-primary hover:underline">
+            {LEGAL_CONTACT_EMAIL}
           </a>
         </p>
       </LegalSection>

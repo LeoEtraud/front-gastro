@@ -14,7 +14,7 @@ export function PrivacyPolicyModal({ open, onOpenChange }: PrivacyPolicyModalPro
       open={open}
       onOpenChange={onOpenChange}
       title="Política de Privacidade"
-      subtitle={`${LEGAL_ENTITY.platform} · LGPD (Lei nº 13.709/2018) · atualizado em ${LEGAL_LAST_UPDATED}`}
+      subtitle={`${LEGAL_ENTITY.platform} · LGPD (Lei nº 13.709/2018)`}
       icon={Shield}
       footerNote={`Documento vigente em ${LEGAL_LAST_UPDATED}. Para exercer direitos previstos na LGPD, utilize o canal de privacidade indicado no documento.`}
     >

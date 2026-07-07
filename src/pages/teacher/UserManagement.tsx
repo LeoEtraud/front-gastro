@@ -10,6 +10,8 @@ import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { Search, UserCheck, UserX, Clock, CheckCircle2, Users } from 'lucide-react';
 import { ManagedUser } from '@/types/api';
 import { formatCpf, formatPhoneBR } from '@/lib/profile-formatters';
+import { roleLabel } from '@/lib/permissions';
+import { useAuth } from '@/hooks/use-auth';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,12 +44,13 @@ function StatusBadge({ status }: { status: ManagedUser['status'] }) {
 function RoleBadge({ role }: { role: ManagedUser['role'] }) {
   return (
     <Badge variant="outline" className="text-xs">
-      {role === 'ADMIN' ? 'Administrador' : role === 'TEACHER' ? 'Professor' : 'Estudante'}
+      {roleLabel(role)}
     </Badge>
   );
 }
 
 export default function UserManagement() {
+  const { user } = useAuth();
   const { data: users = [], isLoading } = useAllUsers();
   const activateUser = useActivateUser();
   const deactivateUser = useDeactivateUser();
@@ -104,7 +107,9 @@ export default function UserManagement() {
         {/* Cabeçalho */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex flex-col gap-2">
-            <p className="mb-1 text-sm font-bold uppercase tracking-wider text-muted-foreground">Professor</p>
+            <p className="mb-1 text-sm font-bold uppercase tracking-wider text-muted-foreground">
+              {roleLabel(user?.role ?? 'TEACHER')}
+            </p>
             <div className="inline-flex w-fit flex-col gap-2">
               <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Gestão de Usuários</h1>
               <div className="h-1 w-full rounded-full bg-primary/80" />

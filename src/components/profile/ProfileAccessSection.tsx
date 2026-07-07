@@ -93,7 +93,7 @@ export function ProfileAccessSection({
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="profile-cpf" className="text-sm font-medium">
-                    CPF (opcional)
+                    CPF
                   </label>
                   <Input
                     id="profile-cpf"

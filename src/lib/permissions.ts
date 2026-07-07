@@ -23,3 +23,9 @@ export function canPublishCourse(role: Role): boolean {
 export function canManageCourseStructure(role: Role): boolean {
   return role === 'ADMIN';
 }
+
+export function roleLabel(role: Role): string {
+  if (role === 'ADMIN') return 'Administrador';
+  if (role === 'TEACHER') return 'Professor';
+  return 'Estudante';
+}

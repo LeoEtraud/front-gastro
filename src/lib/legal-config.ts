@@ -1,8 +1,11 @@
 /** Atualize estes valores quando publicar nova versão dos documentos legais. */
-export const LEGAL_LAST_UPDATED = '25 de maio de 2026';
+export const LEGAL_LAST_UPDATED = '7 de julho de 2026';
 
-export const LEGAL_SUPPORT_EMAIL = 'suporte@gastrocentro.com.br';
-export const LEGAL_PRIVACY_EMAIL = 'privacidade@gastrocentro.com.br';
+/** Canal único para suporte, privacidade, DPO e demais assuntos. */
+export const LEGAL_CONTACT_EMAIL = 'noreply@institutogastrocentro.com.br';
+
+export const LEGAL_SUPPORT_EMAIL = LEGAL_CONTACT_EMAIL;
+export const LEGAL_PRIVACY_EMAIL = LEGAL_CONTACT_EMAIL;
 
 /** Nome do encarregado (DPO), se designado; deixe vazio para omitir na exibição. */
 export const LEGAL_DPO_NAME = '';
