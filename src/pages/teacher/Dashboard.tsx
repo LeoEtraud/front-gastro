@@ -1,7 +1,7 @@
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useTeacherDashboard } from '@/hooks/use-teacher';
 import { Card, CardContent } from '@/components/ui/card';
-import { Users, FileVideo, Activity, Target } from 'lucide-react';
+import { Users, FileVideo, Target } from 'lucide-react';
 import { DashboardSkeleton, TeacherDashboardStatsSkeleton } from '@/components/ui/content-skeletons';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 
@@ -51,7 +51,7 @@ export default function TeacherDashboard() {
       <div className="mx-auto max-w-[92rem] min-w-0 space-y-6 sm:space-y-8">
         
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
           <Card>
             <CardContent className="p-4 sm:p-6">
               <FileVideo className="mb-3 h-7 w-7 text-primary sm:mb-4 sm:h-8 sm:w-8" />
@@ -71,13 +71,6 @@ export default function TeacherDashboard() {
               <Target className="mb-3 h-7 w-7 text-green-500 sm:mb-4 sm:h-8 sm:w-8" />
               <p className="text-sm font-medium text-muted-foreground">Taxa Conclusão Média</p>
               <h3 className="text-xl font-bold sm:text-2xl md:text-3xl">{data.averageCompletionRate}%</h3>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 sm:p-6">
-              <Activity className="mb-3 h-7 w-7 text-orange-500 sm:mb-4 sm:h-8 sm:w-8" />
-              <p className="text-sm font-medium text-muted-foreground">Média Avaliações</p>
-              <h3 className="text-xl font-bold sm:text-2xl md:text-3xl">{data.averageQuizScore}%</h3>
             </CardContent>
           </Card>
         </div>

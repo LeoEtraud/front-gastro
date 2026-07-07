@@ -70,14 +70,15 @@ export type PlatformCourse = {
 export type Specialist = {
   id: string;
   name: string;
-  specialty: string;
-  registration: string;
+  registration?: string;
   initials: string;
   color: string;
   photoSrc?: string;
   /** URL do LinkedIn — deixe vazio enquanto não estiver disponível. */
   linkedinUrl?: string;
 };
+
+const medicoPhoto = (filename: string) => `/medicos/${encodeURIComponent(filename)}`;
 
 export type Testimonial = {
   id: string;
@@ -214,79 +215,53 @@ export const platformCourse: PlatformCourse = {
 
 export const specialists: Specialist[] = [
   {
-    id: 'messias',
-    name: 'Dr. Messias Martins',
-    specialty: 'Gastroenterologista',
-    registration: 'CRM 12345',
-    initials: 'MM',
-    color: '#20C4C9',
-    photoSrc: img('photo-1612349317150-e413f6a5b16d', 200),
-    linkedinUrl: '',
-  },
-  {
-    id: 'juliana',
-    name: 'Dra. Juliana Andrade',
-    specialty: 'Endoscopia Digestiva',
-    registration: 'CRM 67890',
-    initials: 'JA',
-    color: '#FF6B35',
-    photoSrc: img('photo-1559839734-2b71ea197ec2', 200),
-    linkedinUrl: '',
-  },
-  {
-    id: 'rafael',
-    name: 'Dr. Rafael Nunes',
-    specialty: 'Hepatologista',
-    registration: 'CRM 11111',
-    initials: 'RN',
-    color: '#FFC533',
-    photoSrc: img('photo-1622253692010-333f2da6031d', 200),
-    linkedinUrl: '',
-  },
-  {
-    id: 'carlos',
-    name: 'Dr. Carlos Eduardo',
-    specialty: 'Cirurgia Digestiva',
-    registration: 'CRM 22222',
-    initials: 'CE',
+    id: 'jose-junior',
+    name: 'Dr. José Junior',
+    registration: 'CRM 3080 MA',
+    initials: 'JJ',
     color: '#082A4F',
-    photoSrc: img(unsplash.doctorPortrait, 200),
+    photoSrc: medicoPhoto('JOSÉ JUNIOR - CRM 3080 MA.png'),
     linkedinUrl: '',
   },
   {
-    id: 'docente-5',
-    name: 'Docente em atualização',
-    specialty: 'A definir',
-    registration: '',
-    initials: '—',
-    color: '#20C4C9',
-    linkedinUrl: '',
-  },
-  {
-    id: 'docente-6',
-    name: 'Docente em atualização',
-    specialty: 'A definir',
-    registration: '',
-    initials: '—',
+    id: 'jerusa-reis',
+    name: 'Dra. Jerusa Reis',
+    initials: 'JR',
     color: '#FF6B35',
+    photoSrc: medicoPhoto('JERUSA REIS.png'),
     linkedinUrl: '',
   },
   {
-    id: 'docente-7',
-    name: 'Docente em atualização',
-    specialty: 'A definir',
-    registration: '',
-    initials: '—',
-    color: '#082A4F',
+    id: 'tiago-vieira',
+    name: 'Dr. Tiago Vieira',
+    initials: 'TV',
+    color: '#FF6B35',
+    photoSrc: medicoPhoto('TIAGO VIEIRA.jpeg'),
     linkedinUrl: '',
   },
   {
-    id: 'docente-8',
-    name: 'Docente em atualização',
-    specialty: 'A definir',
-    registration: '',
-    initials: '—',
+    id: 'lalileia',
+    name: 'Dra. Lalileia',
+    initials: 'LA',
     color: '#FFC533',
+    photoSrc: medicoPhoto('LALILEIA.png'),
+    linkedinUrl: '',
+  },
+  {
+    id: 'glayton-costa',
+    name: 'Dr. Glayton Costa',
+    registration: 'CRM 2594 MA',
+    initials: 'GC',
+    color: '#20C4C9',
+    photoSrc: medicoPhoto('GLAYTON COSTA - CRM 2594 MA.png'),
+    linkedinUrl: '',
+  },
+  {
+    id: 'rogerio',
+    name: 'Dr. Rogério',
+    initials: 'RO',
+    color: '#20C4C9',
+    photoSrc: medicoPhoto('WhatsApp Image 2026-07-06 at 16.45.03.jpeg'),
     linkedinUrl: '',
   },
 ];

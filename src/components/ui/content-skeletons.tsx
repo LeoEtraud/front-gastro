@@ -106,8 +106,8 @@ export function StudentSingleCourseHomeOverviewSkeleton() {
 export function DashboardSkeleton() {
   return (
     <div className="mx-auto min-w-0 max-w-[92rem] space-y-6 sm:space-y-8">
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, index) => (
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, index) => (
           <Card key={`stat-${index}`}>
             <CardContent className="space-y-3 p-4 sm:space-y-4 sm:p-6">
               <Skeleton className="h-7 w-7 rounded-md sm:h-8 sm:w-8" />
@@ -426,9 +426,9 @@ export function StudentDashboardOverviewSkeleton() {
 /** Apenas a linha de métricas do dashboard do professor (carregamento rápido). */
 export function TeacherDashboardStatsSkeleton() {
   return (
-    <div className="mx-auto min-w-0 max-w-[92rem] space-y-6">
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
+    <div className="mx-auto min-w-0 max-w-[92rem] space-y-6 sm:space-y-8">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
           <Card key={i}>
             <CardContent className="space-y-3 p-4 sm:space-y-4 sm:p-6">
               <Skeleton className="h-7 w-7 rounded-md sm:h-8 sm:w-8" />
@@ -438,7 +438,43 @@ export function TeacherDashboardStatsSkeleton() {
           </Card>
         ))}
       </div>
-      <Skeleton className="h-48 w-full rounded-xl border border-border/60 sm:h-56" />
+
+      <Card>
+        <div className="border-b p-4 sm:p-6">
+          <Skeleton className="h-6 w-56 sm:h-7 sm:w-72" />
+        </div>
+        <div className="hidden space-y-0 md:block">
+          <div className="flex border-b bg-primary/10 px-4 py-3 lg:px-6 lg:py-4">
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="ml-8 h-4 w-20 lg:ml-12" />
+            <Skeleton className="ml-auto h-4 w-14 lg:mr-16" />
+            <Skeleton className="ml-8 h-4 w-20 lg:ml-12" />
+          </div>
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={`row-${index}`}
+              className="flex items-center gap-4 border-b border-border/60 px-4 py-3 last:border-b-0 lg:px-6 lg:py-4"
+            >
+              <Skeleton className="h-4 w-2/5 min-w-[8rem]" />
+              <Skeleton className="h-6 w-24 rounded-md" />
+              <Skeleton className="ml-auto h-4 w-8" />
+              <Skeleton className="h-4 w-10" />
+            </div>
+          ))}
+        </div>
+        <div className="space-y-3 p-4 md:hidden">
+          {Array.from({ length: 2 }).map((_, index) => (
+            <div key={`mob-${index}`} className="rounded-lg border border-border bg-muted/40 p-4">
+              <Skeleton className="mb-3 h-4 w-4/5" />
+              <div className="flex flex-wrap gap-2">
+                <Skeleton className="h-6 w-28 rounded-md" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-28" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
     </div>
   );
 }
