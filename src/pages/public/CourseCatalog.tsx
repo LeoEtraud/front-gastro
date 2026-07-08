@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { usePublicCourses } from '@/hooks/use-courses';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Clock, GraduationCap, ChevronRight, BookOpen, ArrowLeft } from 'lucide-react';
+import { Search, Clock3, GraduationCap, BookOpen, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -103,12 +103,15 @@ export default function CourseCatalog() {
             <p className="text-slate-500">Tente ajustar seus filtros de busca.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {data?.courses.map(course => (
-              <Card key={course.id} className="card-hover flex flex-col group">
-                <div className="aspect-video bg-slate-100 relative overflow-hidden">
-                  <div className="absolute inset-0 flex h-full w-full items-center justify-center bg-primary/5">
-                    <BookOpen className="w-12 h-12 text-primary/30" />
+              <Card
+                key={course.id}
+                className="group flex flex-col overflow-hidden border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden bg-muted">
+                  <div className="absolute inset-0 flex h-full w-full items-center justify-center text-muted-foreground">
+                    <BookOpen className="h-8 w-8" />
                   </div>
                   {course.coverImageUrl ? (
                     <img
@@ -116,35 +119,36 @@ export default function CourseCatalog() {
                       alt={normalizePtBrText(course.title)}
                       loading="lazy"
                       decoding="async"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="relative z-[1] h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       onError={(event) => {
                         event.currentTarget.style.display = 'none';
                       }}
                     />
                   ) : null}
-                  <Badge className="absolute top-3 right-3 bg-white/90 text-primary uppercase tracking-wide hover:bg-white">
+                  <Badge className="absolute top-3 right-3 z-[2] bg-white/90 text-primary uppercase tracking-wide hover:bg-white">
                     {formatCourseLevel(course.level)}
                   </Badge>
                 </div>
-                <CardContent className="p-6 flex flex-col flex-1">
-                  <div className="mt-3 mb-2 flex items-start justify-between gap-2">
-                    <span className="line-clamp-1 text-[11px] font-semibold uppercase tracking-wide text-primary sm:text-xs">
-                      {course.specialty || 'Geral'}
-                    </span>
-                  </div>
-                  <h3 className="text-xl font-bold mb-2 line-clamp-2">{normalizePtBrText(course.title)}</h3>
-                  <p className="text-slate-600 text-sm mb-6 line-clamp-2 flex-1">
+
+                <CardContent className="flex flex-col gap-1.5 p-2.5 sm:gap-2 sm:p-3">
+                  <span className="line-clamp-1 text-[10px] font-semibold uppercase tracking-wide text-primary sm:text-[11px]">
+                    {course.specialty || 'Geral'}
+                  </span>
+                  <h3 className="line-clamp-1 text-sm font-bold text-card-foreground sm:text-base">
+                    {normalizePtBrText(course.title)}
+                  </h3>
+                  <p className="line-clamp-1 text-xs text-muted-foreground sm:text-sm">
                     {normalizePtBrText(course.shortDescription || course.subtitle)}
                   </p>
-                  
-                  <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
-                    <div className="flex items-center gap-1 text-slate-500 text-sm">
-                      <Clock className="w-4 h-4" />
+
+                  <div className="flex items-center justify-between border-t border-border/70 pt-2">
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock3 className="h-3.5 w-3.5" />
                       {course.workloadHours ? `${course.workloadHours}h` : '--'}
                     </div>
                     <Link to={`/courses/${course.id}`}>
-                      <Button variant="ghost" className="text-primary hover:text-primary hover:bg-primary/5 p-0 gap-1 h-auto font-semibold">
-                        Ver Detalhes <ChevronRight className="w-4 h-4" />
+                      <Button size="sm" className="gap-1 text-xs">
+                        + Informações
                       </Button>
                     </Link>
                   </div>

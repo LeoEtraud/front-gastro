@@ -442,10 +442,10 @@ function DashboardInfoCard({
 }) {
   const card = (
     <Card className="premium-card gc-metric-card h-full border-border/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:shadow-none">
-      <CardContent className="flex h-[8rem] items-center gap-3.5 overflow-hidden p-4 sm:h-[8.5rem] sm:p-5">
+      <CardContent className="flex min-h-[7.5rem] flex-col gap-2 p-3 sm:min-h-[8.5rem] sm:flex-row sm:items-center sm:gap-3.5 sm:p-5">
         <div
           className={cn(
-            'gc-metric-icon-wrap flex h-11 w-11 shrink-0 items-center justify-center self-center rounded-full',
+            'gc-metric-icon-wrap flex h-8 w-8 shrink-0 items-center justify-center rounded-full [&_svg]:h-4 [&_svg]:w-4 sm:h-11 sm:w-11 sm:self-center sm:[&_svg]:h-5 sm:[&_svg]:w-5',
             iconWrapClass,
           )}
         >
@@ -453,7 +453,7 @@ function DashboardInfoCard({
         </div>
         <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5">
           {children}
-          {footer ? <div className="mt-1">{footer}</div> : null}
+          {footer ? <div className="mt-0.5">{footer}</div> : null}
         </div>
       </CardContent>
     </Card>
@@ -541,71 +541,71 @@ export function SingleCourseHomeExperience({ home }: Props) {
       </div>
 
       {/* 4 cards informativos */}
-      <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4 [&>*]:h-full [&>*]:min-w-0">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4 [&>*]:h-full [&>*]:min-w-0">
         <DashboardInfoCard
-          icon={<Target className="h-5 w-5 text-orange-500" aria-hidden />}
+          icon={<Target className="text-orange-500" aria-hidden />}
           iconWrapClass="bg-orange-100 dark:bg-orange-500/12 dark:text-orange-400"
           footer={
-            <p className="text-[10px] leading-snug text-muted-foreground">
+            <p className="text-[9px] leading-snug text-muted-foreground sm:text-[10px]">
               {completedLessons} de {totalPublishedLessons} aula{totalPublishedLessons !== 1 ? 's' : ''} concluída
               {completedLessons !== 1 ? 's' : ''}
             </p>
           }
         >
-          <p className="gc-metric-value">{progressRounded}%</p>
-          <p className="gc-metric-label">Meu Progresso</p>
-          <Progress value={home.mural.progressPercent} className="gc-progress-premium mt-2" />
+          <p className="gc-metric-value text-xl font-bold leading-none tabular-nums sm:text-2xl">{progressRounded}%</p>
+          <p className="gc-metric-label text-[10px] font-medium text-muted-foreground sm:text-xs">Meu Progresso</p>
+          <Progress value={home.mural.progressPercent} className="gc-progress-premium mt-1.5 sm:mt-2" />
         </DashboardInfoCard>
 
         <DashboardInfoCard
-          icon={<PlayCircle className="h-5 w-5 text-teal-500" aria-hidden />}
+          icon={<PlayCircle className="text-teal-500" aria-hidden />}
           iconWrapClass="bg-teal-100 dark:bg-teal-500/12 dark:text-teal-400"
           href={nextLesson && !isCourseCompleted ? `/student/courses/${home.courseId}/lessons/${nextLesson.lessonId}` : undefined}
           footer={
             nextLesson && !isCourseCompleted ? (
-              <p className="text-[10px] font-medium text-primary group-hover:underline">Continuar →</p>
+              <p className="text-[9px] font-medium text-primary group-hover:underline sm:text-[10px]">Continuar →</p>
             ) : undefined
           }
         >
-          <p className="line-clamp-2 text-base font-bold leading-snug text-foreground sm:text-lg dark:gc-metric-value dark:text-[1.125rem] dark:sm:text-xl">
+          <p className="line-clamp-2 break-words text-[11px] font-bold leading-snug text-foreground sm:text-base lg:text-lg dark:gc-metric-value dark:text-[1.125rem] dark:sm:text-xl">
             {nextLesson && !isCourseCompleted
               ? normalizePtBrText(nextLesson.title)
               : totalPublishedLessons === 0
                 ? 'Nenhuma aula publicada'
                 : 'Curso concluído! 🎉'}
           </p>
-          <p className="gc-metric-label">Próxima Aula</p>
+          <p className="gc-metric-label text-[10px] font-medium text-muted-foreground sm:text-xs">Próxima Aula</p>
         </DashboardInfoCard>
 
         <DashboardInfoCard
-          icon={<LayoutList className="h-5 w-5 text-yellow-500" aria-hidden />}
+          icon={<LayoutList className="text-yellow-500" aria-hidden />}
           iconWrapClass="bg-yellow-100 dark:bg-yellow-500/12 dark:text-yellow-400"
           footer={
-            <p className="text-[10px] leading-snug text-muted-foreground">
+            <p className="text-[9px] leading-snug text-muted-foreground sm:text-[10px]">
               {totalModules > 0
                 ? `${totalModules} ${totalModules === 1 ? 'módulo' : 'módulos'} no curso`
                 : 'Nenhum módulo cadastrado'}
             </p>
           }
         >
-          <p className="gc-metric-value">{remainingLessons}</p>
-          <p className="gc-metric-label">Aulas Restantes</p>
+          <p className="gc-metric-value text-xl font-bold leading-none tabular-nums sm:text-2xl">{remainingLessons}</p>
+          <p className="gc-metric-label text-[10px] font-medium text-muted-foreground sm:text-xs">Aulas Restantes</p>
         </DashboardInfoCard>
 
         <DashboardInfoCard
-          icon={<FileText className="h-5 w-5 text-primary" aria-hidden />}
+          icon={<FileText className="text-primary" aria-hidden />}
           iconWrapClass="bg-primary/10 dark:bg-primary/12 dark:text-primary"
           href={COURSE_MATERIALS_DRIVE_URL}
           footer={
-            <p className="text-[10px] font-medium text-primary group-hover:underline">
+            <p className="text-[9px] font-medium text-primary group-hover:underline sm:text-[10px]">
               Acessar materiais →
             </p>
           }
         >
-          <p className="line-clamp-2 text-base font-bold leading-snug text-foreground sm:text-lg dark:gc-metric-value dark:text-[1.125rem] dark:sm:text-xl">
+          <p className="line-clamp-2 break-words text-[11px] font-bold leading-snug text-foreground sm:text-base lg:text-lg dark:gc-metric-value dark:text-[1.125rem] dark:sm:text-xl">
             Materiais complementares
           </p>
-          <p className="gc-metric-label">Arquivos e documentos</p>
+          <p className="gc-metric-label text-[10px] font-medium text-muted-foreground sm:text-xs">Arquivos e documentos</p>
         </DashboardInfoCard>
       </div>
 

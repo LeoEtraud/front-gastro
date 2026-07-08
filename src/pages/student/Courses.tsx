@@ -81,7 +81,7 @@ export default function StudentCourses() {
                 key={enrollment.id}
                 className="flex h-full flex-col overflow-hidden border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
               >
-                <div className="relative aspect-video w-full bg-muted">
+                <div className="relative flex aspect-[4/3] w-full items-center justify-center bg-muted">
                   <div className="absolute inset-0 flex h-full w-full items-center justify-center text-muted-foreground">
                     <FileText className="h-8 w-8" />
                   </div>
@@ -89,7 +89,7 @@ export default function StudentCourses() {
                     <img
                       src={enrollment.course.coverImageUrl}
                       alt={`Capa do curso ${enrollment.course.title}`}
-                      className="absolute inset-0 h-full w-full object-cover"
+                      className="relative z-[1] h-full w-full object-contain"
                       onError={(event) => {
                         event.currentTarget.style.display = 'none';
                       }}
@@ -97,24 +97,12 @@ export default function StudentCourses() {
                   ) : null}
                 </div>
 
-                <CardContent className="flex h-full flex-col gap-3 p-3 sm:gap-3.5 sm:p-4 xl:gap-3 xl:p-3 2xl:gap-3.5 2xl:p-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="line-clamp-1 text-[11px] font-semibold uppercase tracking-wide text-primary sm:text-xs">
-                      {enrollment.course.specialty || 'Especialidade não informada'}
-                    </span>
-                    <span className="shrink-0 rounded-full border border-border/60 bg-muted/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground sm:text-xs">
-                      {Math.round(enrollment.progressPercent)}%
-                    </span>
-                  </div>
-
-                  <h3 className="line-clamp-2 text-base font-bold text-card-foreground sm:text-lg xl:text-base 2xl:text-lg">
+                <CardContent className="flex h-full flex-col gap-2.5 p-3 sm:gap-3 sm:p-4">
+                  <h3 className="line-clamp-2 text-base font-bold text-card-foreground sm:text-lg">
                     {normalizePtBrText(enrollment.course.title)}
                   </h3>
-                  <p className="line-clamp-2 text-xs leading-snug text-muted-foreground sm:text-sm xl:text-xs 2xl:text-sm">
-                    {normalizePtBrText(enrollment.course.shortDescription || enrollment.course.subtitle) || 'Sem descrição resumida.'}
-                  </p>
 
-                  <div className="flex items-center justify-between border-t border-border/80 pt-2.5 text-xs text-muted-foreground sm:pt-3 sm:text-sm">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground sm:text-sm">
                     <div className="flex items-center gap-1">
                       <Clock3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       {enrollment.course.workloadHours ? `${enrollment.course.workloadHours}h` : '--'}

@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { usePublicCourse } from '@/hooks/use-courses';
 import { useAuth } from '@/hooks/use-auth';
 import { useEnrollInCourse } from '@/hooks/use-student';
-import { Clock, PlayCircle, ShieldCheck, ChevronDown, User, ArrowLeft } from 'lucide-react';
+import { Clock, PlayCircle, ShieldCheck, ChevronDown, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -147,10 +147,6 @@ export default function CourseDetail() {
             </p>
 
             <ul className="flex flex-col gap-3 text-sm text-slate-300 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-2">
-              <li className="flex min-w-0 items-center gap-2">
-                <User className="h-5 w-5 shrink-0" aria-hidden />{' '}
-                <span className="truncate">Prof. {normalizePtBrText(course.teacherName)}</span>
-              </li>
               <li className="flex items-center gap-2">
                 <Clock className="h-5 w-5 shrink-0" aria-hidden /> {course.workloadHours} horas
               </li>
@@ -161,7 +157,6 @@ export default function CourseDetail() {
           </div>
 
           <div className="relative z-20 rounded-xl bg-white p-5 text-slate-900 shadow-2xl sm:p-6">
-            <div className="mb-4 text-center text-2xl font-bold text-primary sm:mb-6 sm:text-3xl">Gratuito</div>
             <Button
               size="lg"
               className="mb-4 h-12 w-full text-base shadow-lg shadow-primary/25 sm:h-14 sm:text-lg"

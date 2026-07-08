@@ -132,38 +132,32 @@ export default function CoursesList() {
                 key={course.id}
                 className="flex h-full flex-col overflow-hidden border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
               >
-                <div className="relative aspect-video w-full bg-muted">
+                <div className="relative flex aspect-[4/3] w-full items-center justify-center bg-muted">
                   <div className="absolute inset-0 flex h-full w-full items-center justify-center text-muted-foreground">
                     <FileText className="h-8 w-8" />
                   </div>
                   {course.coverImageUrl ? (
                     <img
                       src={course.coverImageUrl}
-                      className="absolute inset-0 h-full w-full object-cover"
                       alt={`Capa do curso ${course.title}`}
+                      className="relative z-[1] h-full w-full object-contain"
                       onError={(event) => {
                         event.currentTarget.style.display = 'none';
                       }}
                     />
                   ) : null}
                 </div>
-                <CardContent className="flex h-full flex-col gap-3 p-3 sm:gap-3.5 sm:p-4 xl:gap-3 xl:p-3 2xl:gap-3.5 2xl:p-4">
+                <CardContent className="flex h-full flex-col gap-2.5 p-3 sm:gap-3 sm:p-4">
                   <div className="flex items-start justify-between gap-2">
-                    <span className="line-clamp-1 text-[11px] font-semibold uppercase tracking-wide text-primary sm:text-xs">
-                      {course.specialty || 'Especialidade não informada'}
-                    </span>
-                    <Badge variant={course.status === 'PUBLISHED' ? 'success' : 'secondary'}>
+                    <h3 className="line-clamp-2 text-base font-bold text-card-foreground sm:text-lg">
+                      {course.title}
+                    </h3>
+                    <Badge variant={course.status === 'PUBLISHED' ? 'success' : 'secondary'} className="shrink-0">
                       {course.status === 'PUBLISHED' ? 'Publicado' : 'Rascunho'}
                     </Badge>
                   </div>
-                  <h3 className="line-clamp-2 text-base font-bold text-card-foreground sm:text-lg xl:text-base 2xl:text-lg">
-                    {course.title}
-                  </h3>
-                  <p className="line-clamp-2 text-xs leading-snug text-muted-foreground sm:text-sm xl:text-xs 2xl:text-sm">
-                    {course.shortDescription || course.subtitle || 'Sem descrição resumida.'}
-                  </p>
 
-                  <div className="flex items-center justify-between border-t border-border/80 pt-2.5 text-xs text-muted-foreground sm:pt-3 sm:text-sm">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground sm:text-sm">
                     <div className="flex items-center gap-1">
                       <Clock3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       {course.workloadHours ? `${course.workloadHours}h` : '--'}

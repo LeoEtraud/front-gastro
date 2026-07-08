@@ -5,6 +5,9 @@ import { handleGastroAnchorClick } from '@/components/gastrocentro/gastro-nav';
 import { useLegalDocuments } from '@/hooks/use-legal-documents';
 import { cn } from '@/lib/utils';
 
+const GASTRO_CONTACT_PHONE = '(98) 99105-2081';
+const GASTRO_CONTACT_PHONE_HREF = 'tel:+5598991052081';
+
 const GASTRO_INSTAGRAM_URL = 'https://www.instagram.com/gastrocentroslz/';
 /** Configure quando o link oficial estiver disponível. */
 const GASTRO_YOUTUBE_URL = '#';
@@ -126,6 +129,16 @@ export function GastroFooter() {
                 {institutional.map((item) => (
                   <li key={item.label}>
                     <FooterLink {...item} />
+                    {item.label === 'Contato' ? (
+                      <p className="mt-1.5 text-[12px] text-white/45 sm:text-[13px]">
+                        <a
+                          href={GASTRO_CONTACT_PHONE_HREF}
+                          className="transition-colors duration-150 hover:text-gc-teal"
+                        >
+                          {GASTRO_CONTACT_PHONE}
+                        </a>
+                      </p>
+                    ) : null}
                   </li>
                 ))}
               </ul>

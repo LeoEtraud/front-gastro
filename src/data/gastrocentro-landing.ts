@@ -118,8 +118,8 @@ export const heroSlides: HeroSlide[] = [
       'Conteúdos organizados para sua formação em saúde digestiva, com expansão contínua de novos cursos.',
     primaryCta: 'Acessar plataforma',
     primaryHref: '/login',
-    imageSrc: img('photo-1582719478250-c89cae4dc85b'),
-    imageAlt: 'Equipamento médico de endoscopia digestiva',
+    imageSrc: '/images/gastro.png',
+    imageAlt: 'Profissionais da GastroCentro em ambiente clínico',
   },
   {
     id: 'slide-3',
@@ -226,6 +226,7 @@ export const specialists: Specialist[] = [
   {
     id: 'jerusa-reis',
     name: 'Dra. Jerusa Reis',
+    registration: 'CRM 5644 MA',
     initials: 'JR',
     color: '#FF6B35',
     photoSrc: medicoPhoto('JERUSA REIS.png'),
@@ -234,6 +235,7 @@ export const specialists: Specialist[] = [
   {
     id: 'tiago-vieira',
     name: 'Dr. Tiago Vieira',
+    registration: 'CRM 8444 MA',
     initials: 'TV',
     color: '#FF6B35',
     photoSrc: medicoPhoto('TIAGO VIEIRA.jpeg'),
@@ -257,9 +259,10 @@ export const specialists: Specialist[] = [
     linkedinUrl: '',
   },
   {
-    id: 'rogerio',
-    name: 'Dr. Rogério',
-    initials: 'RO',
+    id: 'rogerio-soares',
+    name: 'Dr. Rogério Soares',
+    registration: 'CRM 4165 MA',
+    initials: 'RS',
     color: '#20C4C9',
     photoSrc: medicoPhoto('WhatsApp Image 2026-07-06 at 16.45.03.jpeg'),
     linkedinUrl: '',

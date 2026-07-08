@@ -10,7 +10,7 @@ import {
   useCreateModule,
   useUpdateModule,
 } from "@/hooks/use-teacher";
-import type { CourseLevel, LessonType } from "@/types/api";
+import type { CourseLevel } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,7 +25,6 @@ import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import {
   Select,
@@ -135,7 +134,6 @@ const courseSchema = z.object({
   workloadHours: z
     .union([z.literal(""), z.coerce.number().int().min(1, "Carga horária deve ser maior que 0")])
     .optional(),
-  tags: z.string().trim().optional(),
 });
 
 type CreateCourseModalProps = {
@@ -164,7 +162,6 @@ export function CreateCourseModal({ open, onOpenChange }: CreateCourseModalProps
       specialty: "",
       level: "BASIC",
       workloadHours: "",
-      tags: "",
     },
   });
 
@@ -209,12 +206,7 @@ export function CreateCourseModal({ open, onOpenChange }: CreateCourseModalProps
         specialty: values.specialty || undefined,
         level: values.level,
         workloadHours: values.workloadHours === "" ? undefined : values.workloadHours,
-        tags: values.tags
-          ? values.tags
-              .split(",")
-              .map((tag) => tag.trim())
-              .filter(Boolean)
-          : [],
+        tags: [],
       });
       toast({ variant: "success", title: "Curso criado com sucesso" });
       onOpenChange(false);
@@ -334,22 +326,26 @@ export function CreateCourseModal({ open, onOpenChange }: CreateCourseModalProps
             className="hidden"
             onChange={handleCoverChange}
           />
-          <div className="space-y-2 rounded-lg border border-border/70 bg-background p-2.5">
+          <div className="flex flex-col gap-3 rounded-lg border border-border/70 bg-background p-2.5 sm:flex-row">
             {coverPreview ? (
-              <div className="overflow-hidden rounded-md border border-border/70 bg-muted">
-                <img src={coverPreview} alt="Pré-visualização da capa" className="h-36 w-full object-cover" />
+              <div className="overflow-hidden rounded-md border border-border/70 bg-muted sm:w-1/2">
+                <img
+                  src={coverPreview}
+                  alt="Pré-visualização da capa"
+                  className="h-48 w-full object-cover sm:h-64"
+                />
               </div>
             ) : (
-              <div className="flex h-28 items-center justify-center rounded-md border border-dashed border-border bg-muted/40 text-sm text-muted-foreground">
+              <div className="flex h-48 items-center justify-center rounded-md border border-dashed border-border bg-muted/40 text-sm text-muted-foreground sm:h-64 sm:w-1/2">
                 Nenhuma imagem selecionada
               </div>
             )}
-            <div className="flex flex-wrap items-center justify-center gap-2">
+            <div className="flex flex-1 flex-col items-center justify-center gap-2">
               <Button
                 type="button"
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-green-600 text-white hover:bg-green-700 dark:bg-green-600 dark:text-white dark:hover:bg-green-700"
+                className="w-full bg-green-600 text-white hover:bg-green-700 dark:bg-green-600 dark:text-white dark:hover:bg-green-700 sm:w-auto"
               >
                 <ImagePlus className="mr-2 h-4 w-4" />
                 {coverPreview ? "Trocar imagem da capa" : "Selecionar imagem da capa"}
@@ -359,7 +355,7 @@ export function CreateCourseModal({ open, onOpenChange }: CreateCourseModalProps
                   type="button"
                   size="sm"
                   onClick={handleRemoveCover}
-                  className="bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:text-white dark:hover:bg-red-700"
+                  className="w-full bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:text-white dark:hover:bg-red-700 sm:w-auto"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                   Remover
@@ -369,12 +365,6 @@ export function CreateCourseModal({ open, onOpenChange }: CreateCourseModalProps
           </div>
           {coverUploadError ? <p className="text-xs font-medium text-destructive">{coverUploadError}</p> : null}
           <p className="text-xs text-muted-foreground">Formatos aceitos: JPEG, PNG, WebP ou GIF (até 3 MB).</p>
-        </div>
-
-        <div className="space-y-2 sm:col-span-2">
-          <label className="text-sm font-medium">Tags</label>
-          <Input className="bg-background" {...form.register("tags")} placeholder="cardio, ecg, emergência" />
-          <p className="text-xs text-muted-foreground">Separe por vírgula.</p>
         </div>
       </div>
     </ModalShell>
@@ -447,8 +437,8 @@ export function CreateModuleModal({ open, onOpenChange, courseId, defaultOrder }
       errorMessage={requestError}
       submitLabel="Criar módulo"
     >
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div className="space-y-2 sm:col-span-2">
+      <div className="grid gap-5">
+        <div className="space-y-2">
           <label className="text-sm font-medium">Título *</label>
           <Input className="bg-background" {...form.register("title")} placeholder="Ex.: Fundamentos de ECG" />
           {form.formState.errors.title ? (
@@ -456,7 +446,7 @@ export function CreateModuleModal({ open, onOpenChange, courseId, defaultOrder }
           ) : null}
         </div>
 
-        <div className="space-y-2 sm:col-span-2">
+        <div className="space-y-2">
           <label className="text-sm font-medium">Descrição</label>
           <Textarea
             rows={3}
@@ -464,14 +454,6 @@ export function CreateModuleModal({ open, onOpenChange, courseId, defaultOrder }
             {...form.register("description")}
             placeholder="Resumo do conteúdo do módulo"
           />
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Ordem</label>
-          <Input type="number" min={0} className="bg-background" {...form.register("order")} />
-          {form.formState.errors.order ? (
-            <p className="text-xs font-medium text-destructive">{form.formState.errors.order.message}</p>
-          ) : null}
         </div>
       </div>
     </ModalShell>
@@ -708,49 +690,6 @@ export function CreateLessonModal({
           <label className="text-sm font-medium">Descrição</label>
           <Textarea rows={3} className="bg-background" {...form.register("description")} />
         </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Tipo</label>
-          <Select
-            value={form.watch("type")}
-            onValueChange={(value) => form.setValue("type", value as LessonType, { shouldValidate: true })}
-          >
-            <SelectTrigger className="bg-background">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="VIDEO">Vídeo</SelectItem>
-              <SelectItem value="TEXT">Texto</SelectItem>
-              <SelectItem value="PDF">PDF</SelectItem>
-              <SelectItem value="QUIZ">Quiz</SelectItem>
-              <SelectItem value="MIXED">Misto</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Ordem</label>
-          <Input type="number" min={0} className="bg-background" {...form.register("order")} />
-          {form.formState.errors.order ? (
-            <p className="text-xs font-medium text-destructive">{form.formState.errors.order.message}</p>
-          ) : null}
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Duração (minutos)</label>
-          <Input type="number" min={1} className="bg-background" {...form.register("duration")} />
-          {form.formState.errors.duration ? (
-            <p className="text-xs font-medium text-destructive">{form.formState.errors.duration.message}</p>
-          ) : null}
-        </div>
-
-        <label className="mt-6 flex items-center gap-2 text-sm font-medium">
-          <Checkbox
-            checked={form.watch("isPublished")}
-            onCheckedChange={(checked) => form.setValue("isPublished", checked === true)}
-          />
-          Publicar aula imediatamente
-        </label>
       </div>
     </ModalShell>
   );
