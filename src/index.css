@@ -186,19 +186,24 @@
   }
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar — mesma cor do plano de fundo */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--background)) hsl(var(--background));
+}
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: hsl(var(--background));
 }
 ::-webkit-scrollbar-thumb {
-  @apply rounded-full bg-border;
+  border-radius: 9999px;
+  background: hsl(var(--background));
 }
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-muted-foreground/50;
+  background: hsl(var(--background));
 }
 
 /* ─────────────────────────────────────────────────
@@ -262,6 +267,42 @@
     }
   }
 
+  /* Modal de mini currículo — painel sobe com leve escala (já centralizado via flex) */
+  .gc-specialist-modal-panel[data-state='open'],
+  [data-state='open'] > .gc-specialist-modal-panel {
+    animation: gc-specialist-modal-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .gc-specialist-modal[data-state='open'] .gc-specialist-modal-panel {
+    animation: gc-specialist-modal-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .gc-specialist-modal[data-state='closed'] .gc-specialist-modal-panel {
+    animation: gc-specialist-modal-out 0.22s ease-in both;
+  }
+
+  @keyframes gc-specialist-modal-in {
+    from {
+      opacity: 0;
+      transform: translateY(28px) scale(0.94);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes gc-specialist-modal-out {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(16px) scale(0.97);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .gc-ken-burns {
       animation: none;
@@ -270,6 +311,10 @@
       animation: none;
       opacity: 1;
       transform: none;
+    }
+    .gc-specialist-modal[data-state='open'] .gc-specialist-modal-panel,
+    .gc-specialist-modal[data-state='closed'] .gc-specialist-modal-panel {
+      animation: none;
     }
   }
 

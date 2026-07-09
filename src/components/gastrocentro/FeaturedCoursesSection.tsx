@@ -58,7 +58,7 @@ export function FeaturedCoursesSection() {
                 </ul>
               </div>
 
-              <div className="mt-5">
+              <div className="mt-5 flex justify-center">
                 <GastroButton href="/login" variant="primary" size="lg" className="w-full sm:w-auto">
                   Acessar plataforma
                 </GastroButton>

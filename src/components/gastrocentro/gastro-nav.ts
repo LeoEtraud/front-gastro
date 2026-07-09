@@ -6,11 +6,14 @@ export const GASTRO_ABOUT_URL = 'https://gastrocentroslz.com.br/';
 /** @deprecated Use GASTRO_ABOUT_URL */
 export const GASTRO_APPOINTMENT_URL = GASTRO_ABOUT_URL;
 
-/** Altura do header fixo (px) — manter em sync com `h-[84px]` no GastroHeader. */
-export const GASTRO_HEADER_HEIGHT_PX = 84;
+/** Altura do header fixo (px) — manter em sync com `h-[88px]` no GastroHeader. */
+export const GASTRO_HEADER_HEIGHT_PX = 88;
 
-/** Espaço extra acima da seção ao rolar via âncora (header + respiro). */
-export const GASTRO_SCROLL_OFFSET_PX = GASTRO_HEADER_HEIGHT_PX + 16;
+/** Respiro visual entre o header e o conteúdo da seção ao navegar por âncora. */
+export const GASTRO_SCROLL_GAP_PX = 12;
+
+/** Offset total usado no scroll-margin CSS e no marcador de seção ativa. */
+export const GASTRO_SCROLL_OFFSET_PX = GASTRO_HEADER_HEIGHT_PX + GASTRO_SCROLL_GAP_PX;
 
 /**
  * Itens do menu na ordem das seções na página (GastrocentroHome).
@@ -35,14 +38,28 @@ function scrollBehavior(preferred: ScrollBehavior = 'smooth'): ScrollBehavior {
   return preferred;
 }
 
+/**
+ * Rola até a âncora posicionando o conteúdo útil (após o padding da seção)
+ * logo abaixo do header fixo — evita título escondido ou excesso de espaço vazio.
+ */
 export function scrollToGastroAnchor(hash: string, behavior: ScrollBehavior = 'smooth') {
   const id = hash.startsWith('#') ? hash.slice(1) : hash;
   if (!id) return;
 
+  // Início: sempre no topo absoluto da página
+  if (id === 'topo') {
+    window.scrollTo({ top: 0, behavior: scrollBehavior(behavior) });
+    return;
+  }
+
   const target = document.getElementById(id);
   if (!target) return;
 
-  const top = target.getBoundingClientRect().top + window.scrollY - GASTRO_SCROLL_OFFSET_PX;
+  const paddingTop = parseFloat(getComputedStyle(target).paddingTop) || 0;
+  const contentTop =
+    target.getBoundingClientRect().top + window.scrollY + paddingTop;
+  const top = contentTop - GASTRO_SCROLL_OFFSET_PX;
+
   window.scrollTo({ top: Math.max(0, top), behavior: scrollBehavior(behavior) });
 }
 

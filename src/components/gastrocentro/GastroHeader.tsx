@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { GastroButton } from '@/components/gastrocentro/GastroButton';
 import {
   GASTRO_ABOUT_URL,
+  GASTRO_SCROLL_OFFSET_PX,
   gastroNavItems,
   handleGastroAnchorClick,
   type GastroNavItem,
@@ -14,12 +15,57 @@ import { cn } from '@/lib/utils';
 
 const HEADER_HEIGHT = 'h-[88px]';
 
+function useActiveGastroSection() {
+  const [activeHref, setActiveHref] = useState<string>(gastroNavItems[0]?.href ?? '#topo');
+
+  useEffect(() => {
+    const sectionIds = gastroNavItems.map((item) => item.href.slice(1));
+    const elements = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => Boolean(el));
+
+    if (elements.length === 0) return;
+
+    const resolveActive = () => {
+      const marker = window.scrollY + GASTRO_SCROLL_OFFSET_PX;
+      let current = gastroNavItems[0]?.href ?? '#topo';
+
+      for (const el of elements) {
+        const paddingTop = parseFloat(getComputedStyle(el).paddingTop) || 0;
+        const contentTop = el.offsetTop + paddingTop;
+        if (contentTop <= marker) {
+          current = `#${el.id}`;
+        }
+      }
+
+      // No fim da página, prioriza a última seção (contato)
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) {
+        current = gastroNavItems[gastroNavItems.length - 1]?.href ?? current;
+      }
+
+      setActiveHref(current);
+    };
+
+    resolveActive();
+    window.addEventListener('scroll', resolveActive, { passive: true });
+    window.addEventListener('resize', resolveActive);
+    return () => {
+      window.removeEventListener('scroll', resolveActive);
+      window.removeEventListener('resize', resolveActive);
+    };
+  }, []);
+
+  return activeHref;
+}
+
 function NavLink({
   item,
+  active,
   onNavigate,
   className,
 }: {
   item: GastroNavItem;
+  active?: boolean;
   onNavigate?: () => void;
   className?: string;
 }) {
@@ -29,8 +75,10 @@ function NavLink({
     <a
       href={item.href}
       onClick={(e) => handleGastroAnchorClick(e, item.href, onNavigate)}
+      aria-current={active ? 'true' : undefined}
       className={cn(
-        'group relative whitespace-nowrap px-2.5 py-2 text-[13px] font-semibold text-white/85 transition-colors duration-150 hover:text-white xl:px-3',
+        'group relative whitespace-nowrap px-2.5 py-2 text-[13px] font-semibold transition-colors duration-150 xl:px-3',
+        active ? 'text-white' : 'text-white/85 hover:text-white',
         className,
       )}
     >
@@ -42,9 +90,12 @@ function NavLink({
       ) : (
         item.label
       )}
-      {/* Animated underline indicator */}
+      {/* Underline — mesmo do hover, permanente quando a seção está ativa */}
       <span
-        className="absolute inset-x-2.5 bottom-0 h-[2px] origin-left scale-x-0 rounded-full bg-gc-teal transition-transform duration-200 group-hover:scale-x-100 xl:inset-x-3"
+        className={cn(
+          'absolute inset-x-2.5 bottom-0 h-[2px] origin-left rounded-full bg-gc-teal transition-transform duration-200 xl:inset-x-3',
+          active ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100',
+        )}
         aria-hidden
       />
     </a>
@@ -54,6 +105,7 @@ function NavLink({
 export function GastroHeader() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const activeHref = useActiveGastroSection();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -99,7 +151,7 @@ export function GastroHeader() {
             aria-label="Principal"
           >
             {gastroNavItems.map((item) => (
-              <NavLink key={item.href} item={item} />
+              <NavLink key={item.href} item={item} active={activeHref === item.href} />
             ))}
           </nav>
 
@@ -147,16 +199,25 @@ export function GastroHeader() {
                     <SheetTitle className="text-white">Navegação</SheetTitle>
                   </SheetHeader>
                   <nav className="mt-6 flex flex-col gap-1" aria-label="Principal">
-                    {gastroNavItems.map((item) => (
-                      <a
-                        key={item.href}
-                        href={item.href}
-                        onClick={(e) => handleGastroAnchorClick(e, item.href, closeMobileMenu)}
-                        className="rounded-xl px-4 py-3 text-[14px] font-semibold text-white/80 transition-colors duration-150 hover:bg-white/10 hover:text-white"
-                      >
-                        {item.label}
-                      </a>
-                    ))}
+                    {gastroNavItems.map((item) => {
+                      const active = activeHref === item.href;
+                      return (
+                        <a
+                          key={item.href}
+                          href={item.href}
+                          onClick={(e) => handleGastroAnchorClick(e, item.href, closeMobileMenu)}
+                          aria-current={active ? 'true' : undefined}
+                          className={cn(
+                            'rounded-xl px-4 py-3 text-[14px] font-semibold transition-colors duration-150',
+                            active
+                              ? 'bg-white/10 text-white'
+                              : 'text-white/80 hover:bg-white/10 hover:text-white',
+                          )}
+                        >
+                          {item.label}
+                        </a>
+                      );
+                    })}
                     <div className="mt-5 flex flex-col gap-2.5 border-t border-white/10 pt-5">
                       <a
                         href={GASTRO_ABOUT_URL}

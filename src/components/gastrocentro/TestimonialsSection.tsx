@@ -10,8 +10,6 @@ import { cn } from '@/lib/utils';
 
 const PLACEHOLDER_QUOTE =
   'Depoimentos de alunos e médicos serão publicados em breve. Esta área está preparada para receber experiências com a GastroCentro.';
-const PLACEHOLDER_NAME = 'Em breve';
-const PLACEHOLDER_ROLE = 'Aluno / Profissional de saúde';
 
 export function TestimonialsSection() {
   return (
@@ -29,7 +27,7 @@ export function TestimonialsSection() {
       <GastroContainer className="relative z-10">
         <SectionHeader
           title="Experiências de quem já conhece a GastroCentro"
-          subtitle="Espaço reservado para depoimentos de alunos e profissionais de saúde."
+          subtitle="Depoimentos de alunos e profissionais de saúde em formação."
           dark
         />
 
@@ -37,8 +35,6 @@ export function TestimonialsSection() {
           {testimonials.map((item) => {
             const isPlaceholder = item.placeholder || !item.quote;
             const quote = isPlaceholder ? PLACEHOLDER_QUOTE : item.quote;
-            const name = isPlaceholder ? PLACEHOLDER_NAME : item.name;
-            const role = isPlaceholder ? PLACEHOLDER_ROLE : item.role;
             const initials = isPlaceholder ? '…' : item.initials;
 
             return (
@@ -47,18 +43,27 @@ export function TestimonialsSection() {
                 className="flex min-h-full min-w-0 flex-col rounded-[22px] border border-white/10 bg-white/[0.07] p-7 backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.10] sm:p-8"
               >
                 <header className="flex flex-col items-center text-center">
-                  <span
-                    className={cn(
-                      'flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-sm font-bold ring-1 sm:h-16 sm:w-16 sm:text-base',
-                      isPlaceholder
-                        ? 'bg-white/10 text-white/45 ring-white/15'
-                        : 'bg-gc-teal/25 text-gc-teal ring-gc-teal/30',
-                    )}
-                  >
-                    {initials}
-                  </span>
-                  <p className="mt-4 text-[14px] font-semibold text-white sm:text-[15px]">{name}</p>
-                  <p className="mt-1 text-xs text-white/50">{role}</p>
+                  {item.photoSrc && !isPlaceholder ? (
+                    <span className="relative aspect-square w-36 shrink-0 overflow-hidden rounded-2xl ring-2 ring-gc-teal/30 sm:w-44">
+                      <img
+                        src={item.photoSrc}
+                        alt=""
+                        loading="lazy"
+                        className="h-full w-full object-cover object-[center_20%]"
+                      />
+                    </span>
+                  ) : (
+                    <span
+                      className={cn(
+                        'flex aspect-square w-36 shrink-0 items-center justify-center rounded-2xl text-lg font-bold ring-2 sm:w-44 sm:text-xl',
+                        isPlaceholder
+                          ? 'bg-white/10 text-white/45 ring-white/15'
+                          : 'bg-gc-teal/25 text-gc-teal ring-gc-teal/30',
+                      )}
+                    >
+                      {initials}
+                    </span>
+                  )}
                 </header>
 
                 <blockquote

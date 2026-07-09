@@ -80,38 +80,41 @@ export function GastroHorizontalCarousel({
     return () => window.removeEventListener('resize', updateState);
   }, [slideCount, updateState]);
 
-  const showControls = slideCount > 1;
+  const hasOverflow = canPrev || canNext;
+  const showControls = slideCount > 1 && hasOverflow;
 
   return (
     <div className={cn('relative mt-8 overflow-visible', className)} role="region" aria-label={ariaLabel}>
       {showControls ? (
         <>
-          <button
-            type="button"
-            onClick={() => scrollByDir(-1)}
-            disabled={!canPrev}
-            className={cn(
-              navButtonBase,
-              'hidden sm:left-0 sm:inline-flex',
-              '-translate-x-[calc(100%+0.625rem)] -translate-y-1/2 lg:-translate-x-[calc(100%+0.75rem)]',
-            )}
-            aria-label="Ver itens anteriores"
-          >
-            <ChevronLeft className="h-5 w-5" aria-hidden />
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollByDir(1)}
-            disabled={!canNext}
-            className={cn(
-              navButtonBase,
-              'hidden sm:right-0 sm:inline-flex',
-              'translate-x-[calc(100%+0.625rem)] -translate-y-1/2 lg:translate-x-[calc(100%+0.75rem)]',
-            )}
-            aria-label="Ver próximos itens"
-          >
-            <ChevronRight className="h-5 w-5" aria-hidden />
-          </button>
+          {canPrev ? (
+            <button
+              type="button"
+              onClick={() => scrollByDir(-1)}
+              className={cn(
+                navButtonBase,
+                'hidden sm:left-0 sm:inline-flex',
+                '-translate-x-[calc(100%+0.625rem)] -translate-y-1/2 lg:-translate-x-[calc(100%+0.75rem)]',
+              )}
+              aria-label="Ver itens anteriores"
+            >
+              <ChevronLeft className="h-5 w-5" aria-hidden />
+            </button>
+          ) : null}
+          {canNext ? (
+            <button
+              type="button"
+              onClick={() => scrollByDir(1)}
+              className={cn(
+                navButtonBase,
+                'hidden sm:right-0 sm:inline-flex',
+                'translate-x-[calc(100%+0.625rem)] -translate-y-1/2 lg:translate-x-[calc(100%+0.75rem)]',
+              )}
+              aria-label="Ver próximos itens"
+            >
+              <ChevronRight className="h-5 w-5" aria-hidden />
+            </button>
+          ) : null}
         </>
       ) : null}
 

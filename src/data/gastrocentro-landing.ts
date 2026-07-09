@@ -70,7 +70,11 @@ export type PlatformCourse = {
 export type Specialist = {
   id: string;
   name: string;
-  registration?: string;
+  /** Nome completo exibido no modal de currículo. */
+  fullName?: string;
+  specialty?: string;
+  /** Itens do mini currículo profissional. */
+  bio?: string[];
   initials: string;
   color: string;
   photoSrc?: string;
@@ -78,7 +82,8 @@ export type Specialist = {
   linkedinUrl?: string;
 };
 
-const medicoPhoto = (filename: string) => `/medicos/${encodeURIComponent(filename)}`;
+/** Versão WebP redimensionada (~480px) para cards e modal — bem mais leve. */
+const medicoPhotoOptimized = (slug: string) => `/medicos/optimized/${slug}.webp`;
 
 export type Testimonial = {
   id: string;
@@ -86,6 +91,7 @@ export type Testimonial = {
   name: string;
   role: string;
   initials: string;
+  photoSrc?: string;
   /** Quando true, exibe placeholder editorial em vez de depoimento fictício. */
   placeholder?: boolean;
 };
@@ -217,82 +223,105 @@ export const specialists: Specialist[] = [
   {
     id: 'jose-junior',
     name: 'Dr. José Junior',
-    registration: 'CRM 3080 MA',
+    fullName: 'Dr. José Luiz da Silva Junior',
+    specialty: 'Cirurgia do aparelho digestivo e endoscopia',
+    bio: [
+      'Cirurgião do aparelho digestivo e vias biliares — Hospital das Clínicas FMUSP',
+      'Endoscopia digestiva alta — Hospital do Servidor Público Municipal de São Paulo',
+      'Endoscopia de vias biliares — Hospital Nove de Julho São Paulo',
+    ],
     initials: 'JJ',
     color: '#082A4F',
-    photoSrc: medicoPhoto('JOSÉ JUNIOR - CRM 3080 MA.png'),
+    photoSrc: medicoPhotoOptimized('jose-junior'),
     linkedinUrl: '',
   },
   {
     id: 'jerusa-reis',
     name: 'Dra. Jerusa Reis',
-    registration: 'CRM 5644 MA',
+    fullName: 'Dra. Jerusa Reis',
+    specialty: 'Gastroenterologia e endoscopia digestiva',
+    bio: [
+      'Médica gastroenterologista especialista pela FBG',
+      'Médica endoscopista especialista pela SOBED',
+      'Fellow em ecoendoscopia, pâncreas e vias biliares pelo centro de treinamento H9Julho e USP de Ribeirão Preto',
+      'Cocoordenadora do Serviço de Endoscopia UDI/Rede D’or São Luís — MA',
+    ],
     initials: 'JR',
     color: '#FF6B35',
-    photoSrc: medicoPhoto('JERUSA REIS.png'),
+    photoSrc: medicoPhotoOptimized('jerusa-reis'),
     linkedinUrl: '',
   },
   {
     id: 'tiago-vieira',
     name: 'Dr. Tiago Vieira',
-    registration: 'CRM 8444 MA',
     initials: 'TV',
     color: '#FF6B35',
-    photoSrc: medicoPhoto('TIAGO VIEIRA.jpeg'),
+    photoSrc: medicoPhotoOptimized('tiago-vieira'),
     linkedinUrl: '',
   },
   {
     id: 'lalileia',
-    name: 'Dra. Lalileia',
-    initials: 'LA',
+    name: 'Profa. Dra. Lilalea',
+    fullName: 'Professora Dra. Lilalea Gonçalves França',
+    specialty: 'Farmacêutica Bioquímica',
+    bio: [
+      'Farmacêutica Bioquímica',
+      'Mestre em Biofísica UFRJ/UMAB — USA',
+      'Doutora em Biotecnologia',
+      'Coordenadora científica — IGEP',
+    ],
+    initials: 'LG',
     color: '#FFC533',
-    photoSrc: medicoPhoto('LALILEIA.png'),
+    photoSrc: medicoPhotoOptimized('lalileia'),
     linkedinUrl: '',
   },
   {
     id: 'glayton-costa',
     name: 'Dr. Glayton Costa',
-    registration: 'CRM 2594 MA',
+    fullName: 'Dr. Glayton Stanley Lima Costa',
+    specialty: 'Gastroenterologia e endoscopia digestiva',
+    bio: [
+      'Médico especialista em Gastroenterologia pelo Instituto de Pós-Graduação Médica Carlos Chagas — RJ, RQE: 966',
+      'Médico especialista em Endoscopia Digestiva pelo Hospital Universitário Clementino Fraga Filho (UFRJ) — RJ, RQE: 968',
+      'Membro Associado da Federação Brasileira de Gastroenterologia (FBG)',
+      'Membro Associado da Sociedade Brasileira de Endoscopia Digestiva (SOBED)',
+      'Membro Associado da Organização Brasileira de Doença de Crohn e Colite (GEDIIB)',
+    ],
     initials: 'GC',
     color: '#20C4C9',
-    photoSrc: medicoPhoto('GLAYTON COSTA - CRM 2594 MA.png'),
+    photoSrc: medicoPhotoOptimized('glayton-costa'),
     linkedinUrl: '',
   },
   {
     id: 'rogerio-soares',
     name: 'Dr. Rogério Soares',
-    registration: 'CRM 4165 MA',
     initials: 'RS',
     color: '#20C4C9',
-    photoSrc: medicoPhoto('WhatsApp Image 2026-07-06 at 16.45.03.jpeg'),
+    photoSrc: medicoPhotoOptimized('rogerio-soares'),
     linkedinUrl: '',
   },
 ];
 
+const alunoPhoto = (filename: string) => `/alunos/${encodeURIComponent(filename)}`;
+
 export const testimonials: Testimonial[] = [
   {
-    id: 'placeholder-1',
-    quote: '',
-    name: '',
-    role: '',
-    initials: '?',
-    placeholder: true,
+    id: 'aluno-01',
+    quote:
+      'O curso de endoscopia da Gastrocentro tem me dado experiência além do que eu imaginava. As aulas teóricas e práticas são bem conduzidas. Os staffs são referência nas áreas de atuação e favorecem o aprendizado real. Sem dúvida, é uma formação importante para minha prática profissional e só vai contribuir no cuidado com meus pacientes.',
+    name: 'Aluno',
+    role: 'Curso de Endoscopia',
+    initials: 'A1',
+    photoSrc: alunoPhoto('aluno-01.jpg'),
   },
   {
-    id: 'placeholder-2',
-    quote: '',
-    name: '',
-    role: '',
-    initials: '?',
-    placeholder: true,
-  },
-  {
-    id: 'placeholder-3',
-    quote: '',
-    name: '',
-    role: '',
-    initials: '?',
-    placeholder: true,
+    id: 'aluno-02',
+    quote:
+      'A pós graduação está sendo muito proveitosa, temos a oportunidade de unir a prática bem estruturada com o conhecimento grandioso dos preceptores. Tenho certeza que iremos sair capacitados para ofertar o melhor para os nossos pacientes.',
+    name: 'Dr. Wilken Soares Batista',
+    role: 'Cirurgião Geral',
+    initials: 'WS',
+    photoSrc: alunoPhoto('aluno-02.jpg'),
   },
 ];
 
