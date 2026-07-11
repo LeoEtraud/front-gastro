@@ -1,15 +1,79 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { GastroButton } from '@/components/gastrocentro/GastroButton';
 import { handleGastroAnchorClick } from '@/components/gastrocentro/gastro-nav';
 import { GC_SCROLL_ANCHOR, GastroContainer, GastroSection } from '@/components/gastrocentro/GastroLayout';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { GASTRO_INTRO_VIDEO_URL, heroSlides } from '@/data/gastrocentro-landing';
+import { GASTRO_INTRO_VIDEO_URL, heroSlides, type HeroSlide } from '@/data/gastrocentro-landing';
 import { useCarousel } from '@/hooks/use-carousel';
 import { cn } from '@/lib/utils';
 
 const primaryButtonClass =
   'inline-flex h-[52px] items-center justify-center rounded-full bg-gc-coral px-8 text-[15px] font-semibold text-white shadow-[0_6px_20px_-4px_rgba(255,107,53,0.50)] transition-all duration-200 hover:bg-[#e85f2d] hover:shadow-[0_8px_28px_-4px_rgba(255,107,53,0.60)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gc-teal focus-visible:ring-offset-2 active:scale-[0.97]';
+
+function HeroSlideBackground({
+  slide,
+  active,
+  reducedMotion,
+}: {
+  slide: HeroSlide;
+  active: boolean;
+  reducedMotion: boolean;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (active) {
+      void video.play().catch(() => undefined);
+    } else {
+      video.pause();
+    }
+  }, [active]);
+
+  return (
+    <>
+      {slide.videoSrc ? (
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster={slide.imageSrc}
+          className="absolute inset-0 h-full w-full object-cover"
+        >
+          <source src={slide.videoSrc} type="video/mp4" />
+          Seu navegador não suporta vídeo.
+        </video>
+      ) : (
+        <img
+          src={slide.imageSrc}
+          alt={slide.imageAlt}
+          className={cn(
+            'absolute inset-0 h-full w-full object-cover',
+            active && !reducedMotion && 'gc-ken-burns',
+          )}
+        />
+      )}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(90deg, rgba(3,24,48,0.97) 0%, rgba(5,38,72,0.82) 45%, rgba(5,38,72,0.42) 75%, rgba(5,38,72,0.18) 100%)',
+        }}
+      />
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'linear-gradient(180deg, rgba(3,24,48,0.15) 0%, transparent 40%, rgba(3,24,48,0.60) 100%)',
+        }}
+      />
+    </>
+  );
+}
 
 export function HeroCarousel() {
   const [videoOpen, setVideoOpen] = useState(false);
@@ -70,27 +134,7 @@ export function HeroCarousel() {
               )}
               aria-hidden={i !== index}
             >
-              <img
-                src={s.imageSrc}
-                alt={s.imageAlt}
-                className={cn(
-                  'absolute inset-0 h-full w-full object-cover',
-                  i === index && !reducedMotion && 'gc-ken-burns',
-                )}
-              />
-              <div
-                className="absolute inset-0"
-                style={{
-                  background:
-                    'linear-gradient(90deg, rgba(3,24,48,0.97) 0%, rgba(5,38,72,0.82) 45%, rgba(5,38,72,0.42) 75%, rgba(5,38,72,0.18) 100%)',
-                }}
-              />
-              <div
-                className="absolute inset-0"
-                style={{
-                  background: 'linear-gradient(180deg, rgba(3,24,48,0.15) 0%, transparent 40%, rgba(3,24,48,0.60) 100%)',
-                }}
-              />
+              <HeroSlideBackground slide={s} active={i === index} reducedMotion={reducedMotion} />
             </div>
           ))}
 

@@ -146,17 +146,18 @@ export default function CoursesList() {
                       }}
                     />
                   ) : null}
+                  <Badge
+                    variant={course.status === 'PUBLISHED' ? 'success' : 'secondary'}
+                    className={
+                      course.status === 'PUBLISHED'
+                        ? 'absolute right-3 top-3 z-[2] shrink-0 border-emerald-200/80 bg-emerald-50 text-emerald-800 shadow-sm hover:bg-emerald-50 dark:border-transparent dark:bg-green-500/15 dark:text-green-400 dark:hover:bg-green-500/15'
+                        : 'absolute right-3 top-3 z-[2] shrink-0'
+                    }
+                  >
+                    {course.status === 'PUBLISHED' ? 'Publicado' : 'Rascunho'}
+                  </Badge>
                 </div>
                 <CardContent className="flex h-full flex-col gap-2.5 p-3 sm:gap-3 sm:p-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="line-clamp-2 text-base font-bold text-card-foreground sm:text-lg">
-                      {course.title}
-                    </h3>
-                    <Badge variant={course.status === 'PUBLISHED' ? 'success' : 'secondary'} className="shrink-0">
-                      {course.status === 'PUBLISHED' ? 'Publicado' : 'Rascunho'}
-                    </Badge>
-                  </div>
-
                   <div className="flex items-center justify-between text-xs text-muted-foreground sm:text-sm">
                     <div className="flex items-center gap-1">
                       <Clock3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />

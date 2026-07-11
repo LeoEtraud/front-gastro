@@ -7,7 +7,6 @@ import { Progress } from '@/components/ui/progress';
 import { Clock3, PlayCircle, FileText } from 'lucide-react';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { StudentCoursesGridSkeleton } from '@/components/ui/content-skeletons';
-import { normalizePtBrText } from '@/lib/normalize-ptbr';
 
 const levelLabel: Record<string, string> = {
   BASIC: 'Básico',
@@ -98,10 +97,6 @@ export default function StudentCourses() {
                 </div>
 
                 <CardContent className="flex h-full flex-col gap-2.5 p-3 sm:gap-3 sm:p-4">
-                  <h3 className="line-clamp-2 text-base font-bold text-card-foreground sm:text-lg">
-                    {normalizePtBrText(enrollment.course.title)}
-                  </h3>
-
                   <div className="flex items-center justify-between text-xs text-muted-foreground sm:text-sm">
                     <div className="flex items-center gap-1">
                       <Clock3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />

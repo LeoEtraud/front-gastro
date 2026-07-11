@@ -560,7 +560,6 @@ const courseInfoSchema = z.object({
   workloadHours: z
     .union([z.literal(''), z.coerce.number().int().min(1, 'Carga horária deve ser maior que 0')])
     .optional(),
-  tags: z.string().trim().optional(),
   coverImageUrl: z.string().trim().optional(),
 });
 
@@ -601,7 +600,6 @@ export default function CourseEditor() {
       specialty: '',
       level: 'BASIC',
       workloadHours: '',
-      tags: '',
       coverImageUrl: '',
     },
   });
@@ -617,7 +615,6 @@ export default function CourseEditor() {
       specialty: hasKnownSpecialty ? course.specialty ?? '' : '',
       level: course.level ?? 'BASIC',
       workloadHours: course.workloadHours ?? '',
-      tags: course.tags?.join(', ') ?? '',
       coverImageUrl: course.coverImageUrl ?? '',
     });
     setCoverUploadError(null);
@@ -636,12 +633,6 @@ export default function CourseEditor() {
           level: data.level,
           workloadHours: data.workloadHours === '' ? undefined : data.workloadHours,
           coverImageUrl: data.coverImageUrl || undefined,
-          tags: data.tags
-            ? data.tags
-                .split(',')
-                .map((tag) => tag.trim())
-                .filter(Boolean)
-            : [],
         },
       });
       toast({ variant: 'success', title: 'Curso atualizado' });
@@ -937,9 +928,9 @@ export default function CourseEditor() {
                   onChange={handleCoverChange}
                 />
 
-                <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
-                  <div className="order-2 space-y-4 xl:order-1">
-                    <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)] xl:grid-cols-[minmax(0,1fr)_minmax(18rem,26rem)] lg:items-start">
+                  <div className="order-2 space-y-4 lg:order-1">
+                    <div className="grid gap-4 sm:grid-cols-2">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Título *</label>
                         <Input {...form.register('title')} />
@@ -988,17 +979,12 @@ export default function CourseEditor() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-2 sm:col-span-1">
                         <label className="text-sm font-medium">Carga horária (horas)</label>
                         <Input type="number" min={1} {...form.register('workloadHours')} />
                         {form.formState.errors.workloadHours ? (
                           <p className="text-xs font-medium text-destructive">{form.formState.errors.workloadHours.message}</p>
                         ) : null}
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Tags</label>
-                        <Input {...form.register('tags')} placeholder="cardio, urgência, internato" />
-                        <p className="text-xs text-muted-foreground">Separe as tags por vírgula.</p>
                       </div>
                     </div>
 
@@ -1014,33 +1000,33 @@ export default function CourseEditor() {
                       <label className="text-sm font-medium">Descrição Completa</label>
                       <textarea
                         {...form.register('description')}
-                        className="min-h-32 w-full resize-y rounded-md border border-input bg-background p-3 text-base md:text-sm"
+                        className="min-h-36 w-full resize-y rounded-md border border-input bg-background p-3 text-base text-foreground md:text-sm"
                       />
                     </div>
                   </div>
 
-                  <Card className="order-1 h-fit xl:order-2">
-                    <CardContent className="space-y-3 pt-6">
+                  <Card className="order-1 h-fit lg:order-2 lg:sticky lg:top-4">
+                    <CardContent className="space-y-3 p-4 sm:p-6">
                       <p className="text-sm font-medium">Capa do curso</p>
-                      <div className="space-y-2 rounded-lg border border-border/70 p-3">
+                      <div className="space-y-3 rounded-lg border border-border/70 p-3">
                         {form.watch('coverImageUrl') ? (
-                          <div className="overflow-hidden rounded-md border border-border/70 bg-muted">
+                          <div className="aspect-[16/10] min-h-[13rem] overflow-hidden rounded-md border border-border/70 bg-muted sm:min-h-[15rem] xl:min-h-[17rem]">
                             <img
                               src={form.watch('coverImageUrl')}
                               alt="Pré-visualização da capa"
-                              className="h-40 w-full object-cover"
+                              className="h-full w-full object-cover"
                             />
                           </div>
                         ) : (
-                          <div className="flex h-28 items-center justify-center rounded-md border border-dashed border-border bg-muted/40 text-sm text-muted-foreground">
+                          <div className="flex aspect-[16/10] min-h-[13rem] items-center justify-center rounded-md border border-dashed border-border bg-muted/40 px-3 text-center text-sm text-muted-foreground sm:min-h-[15rem] xl:min-h-[17rem]">
                             Nenhuma imagem selecionada
                           </div>
                         )}
-                        <div className="flex flex-wrap items-center justify-center gap-2">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
                           <Button
                             type="button"
                             size="sm"
-                            className="flex-1 basis-32 sm:max-w-[11rem] bg-green-600 text-white hover:bg-green-700 dark:bg-green-600 dark:text-white dark:hover:bg-green-700"
+                            className="w-full bg-green-600 text-white hover:bg-green-700 dark:bg-green-600 dark:text-white dark:hover:bg-green-700 sm:w-auto sm:min-w-[10.5rem]"
                             onClick={() => fileInputRef.current?.click()}
                           >
                             <ImagePlus className="mr-2 h-4 w-4" />
@@ -1050,7 +1036,7 @@ export default function CourseEditor() {
                             <Button
                               type="button"
                               size="sm"
-                              className="flex-1 basis-32 sm:max-w-[11rem] bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:text-white dark:hover:bg-red-700"
+                              className="w-full bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:text-white dark:hover:bg-red-700 sm:w-auto sm:min-w-[10.5rem]"
                               onClick={handleRemoveCover}
                             >
                               <Trash2 className="mr-2 h-4 w-4" />

@@ -288,7 +288,7 @@ export function CourseCardGridSkeleton({ count = 6 }: { count?: number }) {
   );
 }
 
-/** Skeleton de “Gerenciar Cursos” — espelha `CoursesList` (título + badge, carga/nível, botões). */
+/** Skeleton de “Gerenciar Cursos” — espelha `CoursesList` (capa + badge, carga/nível, botões). */
 export function TeacherCoursesGridSkeleton({ count = 4 }: { count?: number }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -299,13 +299,9 @@ export function TeacherCoursesGridSkeleton({ count = 4 }: { count?: number }) {
         >
           <div className="relative flex aspect-[4/3] w-full items-center justify-center bg-muted">
             <Skeleton className="h-full w-full rounded-none" />
+            <Skeleton className="absolute right-3 top-3 z-[2] h-5 w-20 shrink-0 rounded-full" />
           </div>
           <CardContent className="flex h-full flex-col gap-2.5 p-3 sm:gap-3 sm:p-4">
-            <div className="flex items-start justify-between gap-2">
-              <Skeleton className="h-5 w-4/5 sm:h-6" />
-              <Skeleton className="h-5 w-20 shrink-0 rounded-full" />
-            </div>
-
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">
                 <Skeleton className="h-3.5 w-3.5 rounded-full sm:h-4 sm:w-4" />
@@ -325,7 +321,7 @@ export function TeacherCoursesGridSkeleton({ count = 4 }: { count?: number }) {
   );
 }
 
-/** Skeleton de “Meus Cursos” (aluno) — espelha `Courses` (título, carga/nível, progresso, botão). */
+/** Skeleton de “Meus Cursos” (aluno) — espelha `Courses` (carga/nível, progresso, botão). */
 export function StudentCoursesGridSkeleton({ count = 4 }: { count?: number }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -338,8 +334,6 @@ export function StudentCoursesGridSkeleton({ count = 4 }: { count?: number }) {
             <Skeleton className="h-full w-full rounded-none" />
           </div>
           <CardContent className="flex h-full flex-col gap-2.5 p-3 sm:gap-3 sm:p-4">
-            <Skeleton className="h-5 w-4/5 sm:h-6" />
-
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">
                 <Skeleton className="h-3.5 w-3.5 rounded-full sm:h-4 sm:w-4" />

@@ -47,6 +47,8 @@ export type HeroSlide = {
   secondaryHref?: string;
   imageSrc: string;
   imageAlt: string;
+  /** Vídeo de fundo (mp4) — quando definido, substitui a imagem no slide. */
+  videoSrc?: string;
 };
 
 export type StartHereCard = {
@@ -82,7 +84,7 @@ export type Specialist = {
   linkedinUrl?: string;
 };
 
-/** Versão WebP redimensionada (~480px) para cards e modal — bem mais leve. */
+/** Versão WebP redimensionada (480×600) para cards e modal — gerada por `scripts/optimize-medico-photos.py`. */
 const medicoPhotoOptimized = (slug: string) => `/medicos/optimized/${slug}.webp`;
 
 export type Testimonial = {
@@ -115,6 +117,7 @@ export const heroSlides: HeroSlide[] = [
     primaryAction: 'video',
     imageSrc: img('photo-1576091160399-112ba8d25d1d'),
     imageAlt: 'Profissionais de saúde em ambiente clínico moderno',
+    videoSrc: '/media/videos/home.mp4',
   },
   {
     id: 'slide-2',
@@ -298,6 +301,15 @@ export const specialists: Specialist[] = [
     initials: 'RS',
     color: '#20C4C9',
     photoSrc: medicoPhotoOptimized('rogerio-soares'),
+    linkedinUrl: '',
+  },
+  {
+    id: 'bruno-campelo',
+    name: 'Dr. Bruno Campelo',
+    fullName: 'Dr. Bruno Campelo',
+    initials: 'BC',
+    color: '#0E3D6E',
+    photoSrc: medicoPhotoOptimized('bruno-campelo'),
     linkedinUrl: '',
   },
 ];
