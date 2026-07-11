@@ -4,20 +4,35 @@ import { GastroButton } from '@/components/gastrocentro/GastroButton';
 import { handleGastroAnchorClick } from '@/components/gastrocentro/gastro-nav';
 import { GC_SCROLL_ANCHOR, GastroContainer, GastroSection } from '@/components/gastrocentro/GastroLayout';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { GASTRO_INTRO_VIDEO_URL, heroSlides, type HeroSlide } from '@/data/gastrocentro-landing';
+import { heroSlides, type HeroSlide } from '@/data/gastrocentro-landing';
 import { useCarousel } from '@/hooks/use-carousel';
 import { cn } from '@/lib/utils';
 
 const primaryButtonClass =
   'inline-flex h-[52px] items-center justify-center rounded-full bg-gc-coral px-8 text-[15px] font-semibold text-white shadow-[0_6px_20px_-4px_rgba(255,107,53,0.50)] transition-all duration-200 hover:bg-[#e85f2d] hover:shadow-[0_8px_28px_-4px_rgba(255,107,53,0.60)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gc-teal focus-visible:ring-offset-2 active:scale-[0.97]';
 
+/** Resolve path público respeitando `BASE_URL` (ex.: `/media/videos/home.mp4`). */
+function publicMediaUrl(path: string) {
+  if (/^https?:\/\//i.test(path)) return path;
+  const base = import.meta.env.BASE_URL.endsWith('/')
+    ? import.meta.env.BASE_URL
+    : `${import.meta.env.BASE_URL}/`;
+  return `${base}${path.replace(/^\//, '')}`;
+}
+
+const HERO_HOME_VIDEO_SRC = publicMediaUrl(
+  heroSlides.find((s) => s.videoSrc)?.videoSrc ?? '/media/videos/home.mp4',
+);
+
 function HeroSlideBackground({
   slide,
   active,
+  paused,
   reducedMotion,
 }: {
   slide: HeroSlide;
   active: boolean;
+  paused: boolean;
   reducedMotion: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -25,12 +40,12 @@ function HeroSlideBackground({
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    if (active) {
+    if (active && !paused) {
       void video.play().catch(() => undefined);
     } else {
       video.pause();
     }
-  }, [active]);
+  }, [active, paused]);
 
   return (
     <>
@@ -41,11 +56,10 @@ function HeroSlideBackground({
           muted
           loop
           playsInline
-          preload="metadata"
-          poster={slide.imageSrc}
-          className="absolute inset-0 h-full w-full object-cover"
+          preload="auto"
+          className="absolute inset-0 h-full w-full object-cover object-center"
         >
-          <source src={slide.videoSrc} type="video/mp4" />
+          <source src={publicMediaUrl(slide.videoSrc)} type="video/mp4" />
           Seu navegador não suporta vídeo.
         </video>
       ) : (
@@ -61,14 +75,17 @@ function HeroSlideBackground({
       <div
         className="absolute inset-0"
         style={{
-          background:
-            'linear-gradient(90deg, rgba(3,24,48,0.97) 0%, rgba(5,38,72,0.82) 45%, rgba(5,38,72,0.42) 75%, rgba(5,38,72,0.18) 100%)',
+          background: slide.videoSrc
+            ? 'linear-gradient(90deg, rgba(3,24,48,0.94) 0%, rgba(5,38,72,0.72) 38%, rgba(5,38,72,0.28) 62%, rgba(5,38,72,0.08) 100%)'
+            : 'linear-gradient(90deg, rgba(3,24,48,0.97) 0%, rgba(5,38,72,0.82) 45%, rgba(5,38,72,0.42) 75%, rgba(5,38,72,0.18) 100%)',
         }}
       />
       <div
         className="absolute inset-0"
         style={{
-          background: 'linear-gradient(180deg, rgba(3,24,48,0.15) 0%, transparent 40%, rgba(3,24,48,0.60) 100%)',
+          background: slide.videoSrc
+            ? 'linear-gradient(180deg, rgba(3,24,48,0.12) 0%, transparent 45%, rgba(3,24,48,0.45) 100%)'
+            : 'linear-gradient(180deg, rgba(3,24,48,0.15) 0%, transparent 40%, rgba(3,24,48,0.60) 100%)',
         }}
       />
     </>
@@ -134,7 +151,12 @@ export function HeroCarousel() {
               )}
               aria-hidden={i !== index}
             >
-              <HeroSlideBackground slide={s} active={i === index} reducedMotion={reducedMotion} />
+              <HeroSlideBackground
+                slide={s}
+                active={i === index}
+                paused={videoOpen}
+                reducedMotion={reducedMotion}
+              />
             </div>
           ))}
 
@@ -211,31 +233,29 @@ export function HeroCarousel() {
       </section>
 
       <Dialog open={videoOpen} onOpenChange={setVideoOpen}>
-        <DialogContent className="max-w-4xl gap-0 overflow-hidden border-0 p-0 sm:max-w-4xl" closeButtonClassName="text-white hover:text-white/80">
+        <DialogContent
+          className="max-w-5xl gap-0 overflow-hidden border-0 bg-black p-0 sm:max-w-5xl"
+          closeButtonClassName="text-white hover:text-white/80"
+        >
           <DialogTitle className="sr-only">Vídeo de apresentação do curso</DialogTitle>
-          {GASTRO_INTRO_VIDEO_URL ? (
-            <div className="relative mx-auto w-full max-w-[420px] bg-gc-navy">
-              <div className="relative aspect-[9/16] w-full max-h-[min(85vh,720px)] sm:max-h-[min(85vh,780px)]">
-                <iframe
-                  src={GASTRO_INTRO_VIDEO_URL}
-                  title="Apresentação do curso Fellowship em Endoscopia Digestiva Alta"
-                  className="absolute inset-0 h-full w-full border-0"
-                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                  allowFullScreen
-                  scrolling="no"
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="flex aspect-video w-full items-center justify-center bg-gc-navy px-8 text-center">
-              <p className="text-sm leading-relaxed text-white/70 sm:text-base">
-                O vídeo de apresentação do curso será disponibilizado em breve.
-                <span className="mt-2 block text-xs text-white/45">
-                  Configure a URL em <code className="text-gc-teal">GASTRO_INTRO_VIDEO_URL</code>.
-                </span>
-              </p>
-            </div>
-          )}
+          <div className="relative aspect-video w-full bg-black">
+            {videoOpen ? (
+              <video
+                key="hero-intro-dialog"
+                autoPlay
+                controls
+                controlsList="nodownload"
+                disablePictureInPicture
+                playsInline
+                preload="metadata"
+                onContextMenu={(e) => e.preventDefault()}
+                className="absolute inset-0 h-full w-full object-contain"
+              >
+                <source src={HERO_HOME_VIDEO_SRC} type="video/mp4" />
+                Seu navegador não suporta vídeo.
+              </video>
+            ) : null}
+          </div>
         </DialogContent>
       </Dialog>
     </>

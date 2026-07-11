@@ -133,6 +133,12 @@ export default defineConfig({
         target: process.env.VITE_API_ORIGIN ?? "http://127.0.0.1:8080",
         changeOrigin: true,
       },
+      // Em dev o arquivo não está em public/; a VPS já serve /media/videos/*.mp4
+      "/media": {
+        target: process.env.VITE_MEDIA_ORIGIN ?? "https://institutogastrocentro.com.br",
+        changeOrigin: true,
+        secure: true,
+      },
     },
     fs: {
       strict: true,

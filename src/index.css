@@ -186,24 +186,24 @@
   }
 }
 
-/* Custom Scrollbar — mesma cor do plano de fundo */
-html {
+/* Custom Scrollbar — azul apenas na página inicial; demais páginas usam o padrão do navegador */
+html.gc-home-scroll {
   scrollbar-width: thin;
-  scrollbar-color: hsl(var(--background)) hsl(var(--background));
+  scrollbar-color: hsl(var(--primary)) hsl(var(--background));
 }
-::-webkit-scrollbar {
+html.gc-home-scroll::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
-::-webkit-scrollbar-track {
+html.gc-home-scroll::-webkit-scrollbar-track {
   background: hsl(var(--background));
 }
-::-webkit-scrollbar-thumb {
+html.gc-home-scroll::-webkit-scrollbar-thumb {
   border-radius: 9999px;
-  background: hsl(var(--background));
+  background: hsl(var(--primary));
 }
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--background));
+html.gc-home-scroll::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.85);
 }
 
 /* ─────────────────────────────────────────────────

@@ -14,6 +14,11 @@ import { TestimonialsSection } from '@/components/gastrocentro/TestimonialsSecti
 /** Landing institucional GastroCentro — plataforma de educação médica em saúde digestiva. */
 export default function GastrocentroHome() {
   useEffect(() => {
+    document.documentElement.classList.add('gc-home-scroll');
+    return () => document.documentElement.classList.remove('gc-home-scroll');
+  }, []);
+
+  useEffect(() => {
     const hash = window.location.hash;
     if (!hash) return;
 
