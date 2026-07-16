@@ -5,8 +5,8 @@ import { handleGastroAnchorClick } from '@/components/gastrocentro/gastro-nav';
 import { useLegalDocuments } from '@/hooks/use-legal-documents';
 import { cn } from '@/lib/utils';
 
-const GASTRO_CONTACT_PHONE = '(98) 99105-2081';
-const GASTRO_CONTACT_PHONE_HREF = 'tel:+5598991052081';
+const GASTRO_CONTACT_PHONE = '(98) 98514-9175';
+const GASTRO_CONTACT_PHONE_HREF = 'tel:+5598985149175';
 
 const GASTRO_INSTAGRAM_URL = 'https://www.instagram.com/gastrocentroslz/';
 /** Configure quando o link oficial estiver disponível. */

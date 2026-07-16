@@ -47,7 +47,7 @@ export default function Login() {
       toast({
         title: 'Cadastro realizado com sucesso!',
         description:
-          'Após a confirmação do pagamento, o coordenador do curso irá habilitar seu acesso. Você receberá um e-mail para criar sua senha e acessar a plataforma.',
+          'O coordenador do curso irá habilitar seu acesso. Você receberá um e-mail para criar sua senha e acessar a plataforma.',
         duration: 12000,
       });
       window.history.replaceState({}, '');
@@ -121,8 +121,7 @@ export default function Login() {
           >
             <Clock className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" aria-hidden />
             <p>
-              Sua conta está <strong>aguardando habilitação</strong>. Após a confirmação do
-              pagamento, o coordenador irá liberar seu acesso.
+              Sua conta está <strong>aguardando habilitação</strong>. O coordenador irá liberar seu acesso.
             </p>
           </div>
         )}

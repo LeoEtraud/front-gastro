@@ -306,3 +306,43 @@ export interface TeacherDashboard {
   averageQuizScore: number;
   courses: CourseWithStats[];
 }
+
+export interface LessonMaterial {
+  id: string;
+  lessonId: string;
+  title: string;
+  originalFileName: string;
+  fileExtension: string;
+  fileSize: number;
+  displayOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LessonMaterialsLimits {
+  maxFiles: number;
+  maxFileSizeMb: number;
+  maxTotalSizeMb: number;
+  allowedFormats: string[];
+  guidanceText: string;
+}
+
+export interface LessonMaterialsListResponse {
+  materials: LessonMaterial[];
+  limits: LessonMaterialsLimits;
+}
+
+export interface LessonMaterialsStorageStats {
+  storageRoot: string;
+  totalBytes: number | null;
+  usedBytes: number | null;
+  availableBytes: number | null;
+  usedPercent: number | null;
+  level: 'ok' | 'warning' | 'critical' | 'blocked';
+  totalMaterials: number;
+  totalMaterialsBytes: number;
+  byCourse: Array<{ courseId: string; materialCount: number; totalBytes: number }>;
+  byLesson: Array<{ lessonId: string; courseId: string; materialCount: number; totalBytes: number }>;
+  alerts: string[];
+  uploadsBlocked: boolean;
+}

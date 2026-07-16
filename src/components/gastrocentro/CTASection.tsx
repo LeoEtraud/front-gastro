@@ -25,7 +25,7 @@ export function CTASection() {
             </div>
             <div className="flex min-w-0 flex-col gap-3.5 sm:flex-row lg:flex-col lg:items-stretch lg:min-w-[220px]">
               <GastroButton href="/login" variant="primary" size="lg" className="w-full text-center">
-                Acessar plataforma
+                Entrar na plataforma
               </GastroButton>
             </div>
           </div>

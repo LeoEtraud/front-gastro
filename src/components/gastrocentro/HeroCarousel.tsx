@@ -8,8 +8,8 @@ import { heroSlides, type HeroSlide } from '@/data/gastrocentro-landing';
 import { useCarousel } from '@/hooks/use-carousel';
 import { cn } from '@/lib/utils';
 
-const primaryButtonClass =
-  'inline-flex h-[52px] items-center justify-center rounded-full bg-gc-coral px-8 text-[15px] font-semibold text-white shadow-[0_6px_20px_-4px_rgba(255,107,53,0.50)] transition-all duration-200 hover:bg-[#e85f2d] hover:shadow-[0_8px_28px_-4px_rgba(255,107,53,0.60)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gc-teal focus-visible:ring-offset-2 active:scale-[0.97]';
+const cardButtonClass =
+  'inline-flex h-[52px] items-center justify-center rounded-full bg-[#FF6A2A] px-8 text-[15px] font-semibold text-white shadow-none transition-all duration-200 hover:bg-[#FF5416] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gc-teal focus-visible:ring-offset-2';
 
 /** Resolve path público respeitando `BASE_URL` (ex.: `/media/videos/home.mp4`). */
 function publicMediaUrl(path: string) {
@@ -68,7 +68,8 @@ function HeroSlideBackground({
           alt={slide.imageAlt}
           className={cn(
             'absolute inset-0 h-full w-full object-cover',
-            active && !reducedMotion && 'gc-ken-burns',
+            slide.imageObjectClass ?? 'object-center',
+            active && !reducedMotion && !slide.disableKenBurns && 'gc-ken-burns',
           )}
         />
       )}
@@ -104,7 +105,7 @@ export function HeroCarousel() {
   const renderPrimaryCta = () => {
     if (slide.primaryAction === 'video') {
       return (
-        <button type="button" onClick={() => setVideoOpen(true)} className={cn(primaryButtonClass, 'w-full sm:w-auto')}>
+        <button type="button" onClick={() => setVideoOpen(true)} className={cn(cardButtonClass, 'w-full sm:w-auto')}>
           {slide.primaryCta}
         </button>
       );
@@ -115,7 +116,7 @@ export function HeroCarousel() {
         <a
           href={slide.primaryHref}
           onClick={(e) => handleGastroAnchorClick(e, slide.primaryHref)}
-          className={cn(primaryButtonClass, 'w-full sm:w-auto')}
+          className={cn(cardButtonClass, 'w-full sm:w-auto')}
         >
           {slide.primaryCta}
         </a>
@@ -123,7 +124,7 @@ export function HeroCarousel() {
     }
 
     return (
-      <GastroButton href={slide.primaryHref} variant="primary" size="lg" className="w-full sm:w-auto">
+      <GastroButton href={slide.primaryHref} variant="card" size="lg" className="w-full sm:w-auto">
         {slide.primaryCta}
       </GastroButton>
     );

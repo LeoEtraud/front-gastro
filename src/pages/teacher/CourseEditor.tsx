@@ -26,6 +26,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { CompactContentSkeleton, CourseEditorSkeleton } from '@/components/ui/content-skeletons';
+import { LessonMaterialsManager } from '@/components/lesson-materials/LessonMaterialsManager';
 import { useForm } from 'react-hook-form';
 import {
   Plus,
@@ -165,7 +166,7 @@ function LessonEditorRow({
         ? 'external'
         : 'none';
   const sourceLabel = hasVimeo
-    ? 'Vimeo'
+    ? 'Vídeo Incorporado'
     : hasLegacy
       ? 'Migração S3'
       : hasExternal
@@ -176,13 +177,13 @@ function LessonEditorRow({
   const onSaveVimeo = async () => {
     const raw = vimeoInput.trim();
     if (!raw) {
-      toast({ variant: 'destructive', title: 'Informe o ID ou link do Vimeo' });
+      toast({ variant: 'destructive', title: 'Informe o ID ou link do vídeo' });
       return;
     }
     if (!isValidVimeoInput(raw)) {
       toast({
         variant: 'destructive',
-        title: 'ID ou URL do Vimeo inválido',
+        title: 'ID ou URL do vídeo inválido',
         description: 'Ex.: 123456789, https://vimeo.com/123456789 ou https://player.vimeo.com/video/123456789',
       });
       return;
@@ -192,7 +193,7 @@ function LessonEditorRow({
         id: lesson.id,
         data: { type: 'VIDEO', vimeoInput: raw },
       });
-      toast({ variant: 'success', title: 'Vídeo Vimeo salvo' });
+      toast({ variant: 'success', title: 'Vídeo salvo' });
     } catch (err: unknown) {
       const ax = err as { response?: { data?: { error?: string } } };
       toast({
@@ -368,7 +369,7 @@ function LessonEditorRow({
                   </p>
                   {hasLegacy ? (
                     <p className="rounded-md border border-amber-300/60 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
-                      Esta aula ainda possui vídeo legado no S3. Salve um ID do Vimeo para concluir a migração.
+                      Esta aula ainda possui vídeo legado no S3. Salve o ID ou link do vídeo para concluir a migração.
                     </p>
                   ) : null}
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
@@ -390,7 +391,7 @@ function LessonEditorRow({
                       isLoading={updateLesson.isPending}
                       className="sm:shrink-0"
                     >
-                      Salvar Vimeo
+                      Salvar Vídeo
                     </Button>
                   </div>
                   {previewVimeoId ? (
@@ -402,7 +403,7 @@ function LessonEditorRow({
                     </div>
                   ) : (
                     <p className="rounded-md border border-dashed border-border bg-muted/30 px-3 py-4 text-center text-xs text-muted-foreground sm:text-sm">
-                      Nenhum vídeo Vimeo configurado. Cole o ID ou link e clique em Salvar.
+                      Nenhum vídeo configurado. Cole o ID ou link e clique em Salvar Vídeo.
                     </p>
                   )}
                 </TabsContent>
@@ -432,11 +433,13 @@ function LessonEditorRow({
                   </div>
                   {hasVimeo ? (
                     <p className="text-xs text-muted-foreground">
-                      Salvar um link externo substitui o vídeo Vimeo desta aula.
+                      Salvar um link externo substitui o vídeo desta aula.
                     </p>
                   ) : null}
                 </TabsContent>
               </Tabs>
+
+              <LessonMaterialsManager lessonId={lesson.id} readOnly={readOnly} />
               </>
               ) : null}
             </Accordion.Body>
@@ -453,7 +456,7 @@ function LessonEditorRow({
             <AlertDialogTitle>Remover vídeo da aula</AlertDialogTitle>
             <AlertDialogDescription>
               Tem certeza que deseja remover o vídeo desta aula? A reprodução ficará indisponível para os alunos até que
-              um novo vídeo Vimeo ou link externo seja informado.
+              um novo vídeo ou link externo seja informado.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -512,7 +515,7 @@ function LessonEditorRow({
                 Informações do vídeo
               </DialogTitle>
               <DialogDescription className="text-sm leading-relaxed text-muted-foreground">
-                Dados do vídeo Vimeo configurado para esta aula.
+                Dados do vídeo configurado para esta aula.
               </DialogDescription>
             </div>
             <Separator className="mt-3" />

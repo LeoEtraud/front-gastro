@@ -7,7 +7,7 @@ import { ArrowLeft, CheckCircle2, FileText, Loader2, PlayCircle } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { LessonVimeoPlayer } from '@/components/video/LessonVimeoPlayer';
-import { COURSE_MATERIALS_DRIVE_URL } from '@/lib/course-materials-config';
+import { LessonMaterialsSection } from '@/components/lesson-materials/LessonMaterialsSection';
 import { CompactContentSkeleton, LessonViewerSkeleton } from '@/components/ui/content-skeletons';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { normalizePtBrText } from '@/lib/normalize-ptbr';
@@ -177,17 +177,16 @@ export default function LessonViewer() {
 
   return (
     <AppLayout>
-      <div className="flex w-full min-w-0 flex-col gap-4 lg:min-h-[min(100%,calc(100dvh-5rem))] lg:flex-row lg:gap-6">
-        <div className="order-2 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground lg:order-2 lg:min-h-[min(100%,calc(100dvh-5rem))]">
+      <div className="flex w-full min-w-0 flex-col gap-4 lg:flex-row lg:gap-6">
+        <div className="order-2 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground lg:order-2 lg:overflow-visible">
           <div className="shrink-0 overflow-hidden rounded-t-xl">
             <LessonVideoPanel lesson={lesson} courseId={courseId ?? ''} loading={isLessonSwitching} />
           </div>
 
-          <div className="min-h-0 flex-1 rounded-b-xl border-t border-border p-4 sm:p-6 md:p-8 lg:overflow-y-auto">
+          <div className="min-h-0 flex-1 rounded-b-xl border-t border-border p-4 sm:p-6 md:p-8">
             <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
               <div className="min-w-0 text-card-foreground">
                 <h1 className="mb-1 font-display text-xl font-bold text-card-foreground sm:text-2xl">{normalizePtBrText(lesson.title)}</h1>
-                <p className="text-sm text-muted-foreground">Aula de Módulo</p>
               </div>
               <Button
                 onClick={handleComplete}
@@ -218,10 +217,12 @@ export default function LessonViewer() {
                 <Button className="w-full sm:w-auto">Iniciar Avaliação</Button>
               </div>
             )}
+
+            <LessonMaterialsSection lessonId={actualLessonId} />
           </div>
         </div>
 
-        <aside className="order-1 flex max-h-[min(42vh,20rem)] w-full shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-card lg:order-1 lg:max-h-none lg:h-auto lg:max-h-[min(100%,calc(100dvh-5rem))] lg:w-80">
+        <aside className="order-1 flex max-h-[min(42vh,20rem)] w-full shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-card lg:order-1 lg:h-auto lg:max-h-none lg:w-80 lg:overflow-visible">
           <div className="shrink-0 border-b border-border bg-muted/50 p-3 sm:p-4">
             <Button
               type="button"
@@ -238,19 +239,9 @@ export default function LessonViewer() {
               <h3 className="line-clamp-2 min-w-0 flex-1 font-display text-sm font-bold text-foreground sm:text-base">
                 {normalizePtBrText(course.title)}
               </h3>
-              <a
-                href={COURSE_MATERIALS_DRIVE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
-                aria-label="Materiais complementares"
-                title="Materiais complementares"
-              >
-                <FileText className="h-4 w-4" aria-hidden />
-              </a>
             </div>
           </div>
-          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain p-2 sm:space-y-4">
+          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-auto p-2 sm:space-y-4 lg:overflow-visible">
             {course.modules?.map((mod, i) => (
               <div key={mod.id}>
                 <div className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground sm:px-3 sm:py-2 sm:text-xs">

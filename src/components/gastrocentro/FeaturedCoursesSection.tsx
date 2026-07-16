@@ -59,7 +59,7 @@ export function FeaturedCoursesSection() {
               </div>
 
               <div className="mt-5 flex justify-center">
-                <GastroButton href="/login" variant="primary" size="lg" className="w-full sm:w-auto">
+                <GastroButton href="/login" variant="card" size="lg" className="w-full sm:w-auto">
                   Acessar plataforma
                 </GastroButton>
               </div>

@@ -22,8 +22,8 @@ export const GASTRO_SCROLL_OFFSET_PX = GASTRO_HEADER_HEIGHT_PX + GASTRO_SCROLL_G
 export const gastroNavItems = [
   { label: 'Início', href: '#topo' },
   { label: 'Comece por aqui', shortLabel: 'Comece', href: '#comece-aqui' },
-  { label: 'Fellowship', shortLabel: 'Curso', href: '#cursos-destaque' },
-  { label: 'Médicos', href: '#especialistas' },
+  { label: 'Cursos', href: '#cursos-destaque' },
+  { label: 'Professores', href: '#especialistas' },
   { label: 'Depoimentos', href: '#depoimentos' },
   { label: 'Contato', href: '#contato' },
 ] as const;

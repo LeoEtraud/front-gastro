@@ -47,6 +47,10 @@ export type HeroSlide = {
   secondaryHref?: string;
   imageSrc: string;
   imageAlt: string;
+  /** Posicionamento do `object-cover` (ex.: `object-[center_28%]`). */
+  imageObjectClass?: string;
+  /** Desativa o zoom Ken Burns neste slide. */
+  disableKenBurns?: boolean;
   /** Vídeo de fundo (mp4) — quando definido, substitui a imagem no slide. */
   videoSrc?: string;
 };
@@ -137,8 +141,11 @@ export const heroSlides: HeroSlide[] = [
     subtitle: 'Conteúdos conduzidos por médicos experientes e reconhecidos na prática clínica.',
     primaryCta: 'Conhecer especialistas',
     primaryHref: '#especialistas',
-    imageSrc: img('photo-1612349317150-e413f6a5b16d'),
-    imageAlt: 'Médico especialista em consulta',
+    imageSrc: '/medicos/MEDICOS.png',
+    imageAlt: 'Médicos especialistas da GastroCentro',
+    // Crop mais largo: ancora no topo/rostos para o grupo não perder a cabeça no hero.
+    imageObjectClass: 'object-[center_22%]',
+    disableKenBurns: true,
   },
   {
     id: 'slide-4',
@@ -257,6 +264,15 @@ export const specialists: Specialist[] = [
   {
     id: 'tiago-vieira',
     name: 'Dr. Tiago Vieira',
+    fullName: 'Dr. Tiago Vieira',
+    specialty: 'Endoscopia digestiva e hepatologia',
+    bio: [
+      'Médico endoscopista e fellow em endoscopia avançada/oncológica pela Beneficência Portuguesa de São Paulo',
+      'Membro titular da Sociedade Brasileira de Endoscopia Digestiva',
+      'Preceptor da residência de endoscopia digestiva no Hospital Universitário Presidente Dutra/HUUFMA',
+      'Coordenador do serviço de endoscopia do Hospital de Oncologia do Maranhão',
+      'Médico hepatologista clínico do Programa de Transplante Hepático — INFIG/HCM',
+    ],
     initials: 'TV',
     color: '#FF6B35',
     photoSrc: medicoPhotoOptimized('tiago-vieira'),
@@ -281,7 +297,7 @@ export const specialists: Specialist[] = [
   {
     id: 'glayton-costa',
     name: 'Dr. Glayton Costa',
-    fullName: 'Dr. Glayton Stanley Lima Costa',
+    fullName: 'Dr. Glayton Costa',
     specialty: 'Gastroenterologia e endoscopia digestiva',
     bio: [
       'Médico especialista em Gastroenterologia pelo Instituto de Pós-Graduação Médica Carlos Chagas — RJ, RQE: 966',
@@ -298,6 +314,17 @@ export const specialists: Specialist[] = [
   {
     id: 'rogerio-soares',
     name: 'Dr. Rogério Soares',
+    fullName: 'Dr. Rogério Soares',
+    specialty: 'Gastroenterologia, hepatologia e endoscopia',
+    bio: [
+      'Membro Titular da Federação Brasileira de Gastroenterologia',
+      'Membro Titular da Sociedade Brasileira de Hepatologia',
+      'Membro Titular da Sociedade Brasileira de Endoscopia Digestiva',
+      'Mestre em Ciências da Saúde — UFMA',
+      'Médico hepatologista e preceptor do HU-UFMA',
+      'Médico hepatologista clínico do Programa de Transplante Hepático — HU-UFMA',
+      'Médico Gastroenterologista, Hepatologista e Endoscopista do Hospital UDI — Rede D’Or',
+    ],
     initials: 'RS',
     color: '#20C4C9',
     photoSrc: medicoPhotoOptimized('rogerio-soares'),
@@ -307,6 +334,14 @@ export const specialists: Specialist[] = [
     id: 'bruno-campelo',
     name: 'Dr. Bruno Campelo',
     fullName: 'Dr. Bruno Campelo',
+    specialty: 'Cirurgia e endoscopia digestiva',
+    bio: [
+      'Residência em cirurgia básica — Hospital Universitário Presidente Dutra — HUUFMA',
+      'Residência em endoscopia digestiva — Hospital do Amor Barretos, SP',
+      'Membro titular da Sociedade Brasileira de Endoscopia Digestiva',
+      'Coordenador do serviço de endoscopia do Hospital Maranhense',
+      'Coordenador do serviço de endoscopia do Hospital Natus Lumine',
+    ],
     initials: 'BC',
     color: '#0E3D6E',
     photoSrc: medicoPhotoOptimized('bruno-campelo'),

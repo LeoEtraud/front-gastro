@@ -160,28 +160,28 @@ export function GastroHeader() {
             <div className="hidden items-center gap-3 lg:flex xl:gap-3.5">
               <GastroButton
                 href="/login"
-                variant="secondary"
-                className="h-[42px] whitespace-nowrap border-white/30 px-5 text-[13px] font-semibold hover:border-white/50 xl:px-6"
-              >
-                Acessar plataforma
-              </GastroButton>
-              <GastroButton
-                href={GASTRO_ABOUT_URL}
                 variant="primary"
                 className="h-[42px] whitespace-nowrap px-5 text-[13px] font-semibold xl:px-6"
               >
-                Sobre nós
+                Entrar na plataforma
+              </GastroButton>
+              <GastroButton
+                href={GASTRO_ABOUT_URL}
+                variant="secondary"
+                className="h-[42px] whitespace-nowrap px-5 text-[13px] font-semibold xl:px-6"
+              >
+                Conheça a clínica
               </GastroButton>
             </div>
 
             {/* Mobile / tablet */}
             <div className="flex items-center gap-1 sm:gap-1.5 lg:hidden">
               <GastroButton
-                href={GASTRO_ABOUT_URL}
+                href="/login"
                 variant="primary"
                 className="hidden h-9 px-3 text-xs sm:inline-flex sm:h-10 sm:px-4 sm:text-[13px]"
               >
-                Sobre nós
+                Entrar na plataforma
               </GastroButton>
               <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger asChild>
@@ -219,22 +219,22 @@ export function GastroHeader() {
                       );
                     })}
                     <div className="mt-5 flex flex-col gap-2.5 border-t border-white/10 pt-5">
+                      <Link
+                        to="/login"
+                        onClick={closeMobileMenu}
+                        className="inline-flex h-11 w-full items-center justify-center rounded-full bg-[linear-gradient(90deg,#FF6A2A_0%,#FF8745_100%)] px-6 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(255,106,42,0.30)] transition-all duration-200 hover:bg-[#FF5416] hover:[background-image:none]"
+                      >
+                        Entrar na plataforma
+                      </Link>
                       <a
                         href={GASTRO_ABOUT_URL}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={closeMobileMenu}
-                        className="inline-flex h-11 w-full items-center justify-center rounded-full bg-gc-coral px-6 text-sm font-semibold text-white shadow-[0_6px_20px_-4px_rgba(255,107,53,0.50)] transition-all duration-200 hover:bg-[#e85f2d] active:scale-[0.97]"
+                        className="inline-flex h-11 w-full items-center justify-center rounded-full border border-white/35 bg-transparent px-6 text-sm font-semibold text-white transition-all duration-150 hover:bg-white/[0.08]"
                       >
-                        Sobre nós
+                        Conheça a clínica
                       </a>
-                      <Link
-                        to="/login"
-                        onClick={closeMobileMenu}
-                        className="inline-flex h-11 w-full items-center justify-center rounded-full border border-white/30 px-6 text-sm font-semibold text-white transition-all duration-150 hover:border-white/50 hover:bg-white/10"
-                      >
-                        Acessar plataforma
-                      </Link>
                     </div>
                   </nav>
                 </SheetContent>

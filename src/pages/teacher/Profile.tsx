@@ -153,9 +153,11 @@ export default function TeacherProfile() {
     <AppLayout>
       <div className="mx-auto max-w-[92rem] min-w-0 space-y-6">
         <div className="flex flex-col gap-2">
-          <p className="mb-1 text-sm font-bold uppercase tracking-wider text-muted-foreground">
-            {roleLabel(profile.role)}
-          </p>
+          {profile.role !== 'ADMIN' ? (
+            <p className="mb-1 text-sm font-bold uppercase tracking-wider text-muted-foreground">
+              {roleLabel(profile.role)}
+            </p>
+          ) : null}
           <div className="inline-flex w-fit flex-col gap-2">
             <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Meu Perfil</h1>
             <div className="h-1 w-full rounded-full bg-primary/80" />

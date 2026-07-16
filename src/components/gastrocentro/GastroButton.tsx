@@ -2,7 +2,14 @@ import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 type GastroButtonProps = {
-  variant?: 'primary' | 'secondary' | 'outline';
+  /**
+   * Escala de CTAs:
+   * - primary: conversão global (Header, CTA final)
+   * - card: ação em seções/cards/slides (mais discreto)
+   * - secondary: CTA auxiliar em fundo escuro
+   * - outline: ação neutra em fundo claro
+   */
+  variant?: 'primary' | 'card' | 'secondary' | 'outline';
   size?: 'default' | 'lg';
   href: string;
   children: React.ReactNode;
@@ -27,7 +34,7 @@ export function GastroButton({
   ariaLabel,
 }: GastroButtonProps) {
   const base =
-    'inline-flex items-center justify-center rounded-full font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gc-teal focus-visible:ring-offset-2 active:scale-[0.97]';
+    'inline-flex items-center justify-center rounded-full font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gc-teal focus-visible:ring-offset-2';
 
   const sizes = {
     default: 'h-11 px-6 text-[14px]',
@@ -35,12 +42,16 @@ export function GastroButton({
   };
 
   const variants = {
+    // Nível 1 — conversão principal
     primary:
-      'bg-gc-coral text-white shadow-[0_6px_20px_-4px_rgba(255,107,53,0.50)] hover:bg-[#e85f2d] hover:shadow-[0_8px_28px_-4px_rgba(255,107,53,0.60)] active:shadow-[0_2px_10px_-2px_rgba(255,107,53,0.40)]',
+      'bg-[linear-gradient(90deg,#FF6A2A_0%,#FF8745_100%)] text-white shadow-[0_10px_30px_rgba(255,106,42,0.30)] hover:bg-[#FF5416] hover:[background-image:none] hover:shadow-[0_12px_34px_rgba(255,106,42,0.36)]',
+    // Nível 2 — ação local em cards
+    card:
+      'bg-[#FF6A2A] text-white shadow-none hover:bg-[#FF5416] focus-visible:ring-offset-gc-ice',
     secondary:
-      'border border-white/35 bg-white/6 text-white backdrop-blur-sm hover:border-white/55 hover:bg-white/12 focus-visible:ring-offset-gc-navy',
+      'border border-white/35 bg-transparent text-white hover:bg-white/[0.08] focus-visible:ring-offset-gc-navy',
     outline:
-      'border border-gc-border bg-white text-gc-text shadow-[var(--gc-shadow-sm)] hover:border-gc-teal/40 hover:text-gc-navy hover:shadow-[var(--gc-shadow-md)] focus-visible:ring-offset-gc-ice',
+      'border-2 border-[#FF6A2A] bg-white text-[#FF6A2A] shadow-none hover:bg-[#FF6A2A]/[0.06] focus-visible:ring-offset-gc-ice',
   };
 
   const cls = cn(base, sizes[size], variants[variant], className);
