@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, FileText, Loader2, Presentation } from 'lucide-react';
+import { ChevronDown, Download, FileText, Loader2, Presentation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useToast } from '@/hooks/use-toast';
@@ -104,11 +104,14 @@ export function LessonMaterialsSection({ lessonId }: LessonMaterialsSectionProps
                 >
                   {downloadingId === material.id ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
                       Baixando...
                     </>
                   ) : (
-                    'Baixar material'
+                    <>
+                      <Download className="mr-2 h-4 w-4" aria-hidden />
+                      Baixar
+                    </>
                   )}
                 </Button>
               </div>

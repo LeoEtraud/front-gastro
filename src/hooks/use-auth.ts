@@ -51,7 +51,9 @@ export function useAuth() {
         void queryClient.prefetchQuery({
           queryKey: ["student-dashboard"],
           queryFn: async () => {
-            const res = await api.get<StudentDashboard>("/student/dashboard");
+            const res = await api.get<StudentDashboard>("/student/dashboard", {
+              headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+            });
             return res.data;
           },
           staleTime: 5 * 60_000,

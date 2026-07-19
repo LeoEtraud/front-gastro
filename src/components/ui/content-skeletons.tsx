@@ -321,7 +321,7 @@ export function TeacherCoursesGridSkeleton({ count = 4 }: { count?: number }) {
   );
 }
 
-/** Skeleton de “Meus Cursos” (aluno) — espelha `Courses` (carga/nível, progresso, botão). */
+/** Skeleton de “Meus Cursos” (aluno) — espelha `Courses` (capa 4:3, carga/nível, progresso, botão). */
 export function StudentCoursesGridSkeleton({ count = 4 }: { count?: number }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -330,28 +330,28 @@ export function StudentCoursesGridSkeleton({ count = 4 }: { count?: number }) {
           key={index}
           className="flex h-full flex-col overflow-hidden border-border/70 bg-card shadow-sm"
         >
-          <div className="relative flex aspect-[4/3] w-full items-center justify-center bg-muted">
-            <Skeleton className="h-full w-full rounded-none" />
+          <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+            <Skeleton className="absolute inset-0 rounded-none" />
           </div>
-          <CardContent className="flex h-full flex-col gap-2.5 p-3 sm:gap-3 sm:p-4">
+          <CardContent className="flex flex-col gap-2.5 p-3 sm:gap-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">
-                <Skeleton className="h-3.5 w-3.5 rounded-full sm:h-4 sm:w-4" />
-                <Skeleton className="h-3 w-10 sm:h-3.5" />
+                <Skeleton className="h-3.5 w-3.5 shrink-0 rounded-full sm:h-4 sm:w-4" />
+                <Skeleton className="h-3.5 w-8 sm:h-4 sm:w-10" />
               </div>
-              <Skeleton className="h-3 w-20 sm:h-3.5" />
+              <Skeleton className="h-3 w-14 sm:h-3.5 sm:w-16" />
             </div>
 
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <Skeleton className="h-3 w-16" />
-                <Skeleton className="h-3 w-8" />
+                <Skeleton className="h-3.5 w-14" />
+                <Skeleton className="h-3.5 w-7" />
               </div>
               <Skeleton className="h-2 w-full rounded-full" />
             </div>
 
-            <div className="mt-auto pt-1">
-              <Skeleton className="h-11 w-full rounded-md sm:h-9" />
+            <div className="pt-1">
+              <Skeleton className="min-h-11 w-full rounded-md sm:h-9 sm:min-h-9" />
             </div>
           </CardContent>
         </Card>

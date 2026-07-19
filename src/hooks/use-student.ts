@@ -7,11 +7,13 @@ export function useStudentDashboard() {
   return useQuery({
     queryKey: ['student-dashboard'],
     queryFn: async () => {
-      const res = await api.get<StudentDashboard>('/student/dashboard');
+      const res = await api.get<StudentDashboard>('/student/dashboard', {
+        // Evita resposta stale do HTTP cache do browser após marcar progresso.
+        headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
+      });
       return res.data;
     },
-    // Dashboard muda raramente; 5 min de stale evita refetch desnecessário
-    // entre navegações e mantém o dado prefetchado pelo login em cache.
+    // Mantém prefetch do login; invalidate em useMarkLessonProgress força refetch.
     staleTime: 5 * 60_000,
     // Mantém dado anterior visível enquanto busca em background (sem flash de skeleton)
     placeholderData: (prev) => prev,
@@ -62,13 +64,34 @@ export function useStudentLesson(lessonId: string) {
 export function useMarkLessonProgress() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ lessonId, isCompleted }: { lessonId: string, isCompleted: boolean }) => {
+    mutationFn: async ({ lessonId, isCompleted }: { lessonId: string; isCompleted: boolean }) => {
       const res = await api.post(`/student/lessons/${lessonId}/progress`, { isCompleted });
       return res.data;
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['student-lesson', variables.lessonId] });
-      queryClient.invalidateQueries({ queryKey: ['student-enrollments'] });
+    onMutate: async ({ lessonId, isCompleted }) => {
+      await queryClient.cancelQueries({ queryKey: ['student-lesson', lessonId] });
+      const previous = queryClient.getQueryData<LessonWithProgress>(['student-lesson', lessonId]);
+      if (previous) {
+        queryClient.setQueryData<LessonWithProgress>(['student-lesson', lessonId], {
+          ...previous,
+          isCompleted,
+        });
+      }
+      return { previous };
+    },
+    onError: (_err, variables, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['student-lesson', variables.lessonId], context.previous);
+      }
+    },
+    onSuccess: async (_data, variables) => {
+      // refetchType: 'all' atualiza também queries inativas (dashboard/cursos em cache),
+      // para a barra de progresso já vir correta ao navegar de volta — sem precisar de F5.
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['student-lesson', variables.lessonId] }),
+        queryClient.invalidateQueries({ queryKey: ['student-enrollments'], refetchType: 'all' }),
+        queryClient.refetchQueries({ queryKey: ['student-dashboard'], type: 'all' }),
+      ]);
     },
   });
 }

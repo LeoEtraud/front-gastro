@@ -230,7 +230,7 @@ export interface StudentDashboardLessonPreview {
   watchedSeconds: number;
   status: LessonPreviewStatus;
   videoUrl?: string | null;
-  /** Vídeo no Vimeo — sem preview no carrossel (apenas thumbnail). */
+  /** Vídeo no Vimeo — prévia no carrossel via embed autenticado. */
   hasVimeoVideo?: boolean;
 }
 

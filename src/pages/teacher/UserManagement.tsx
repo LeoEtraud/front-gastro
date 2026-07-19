@@ -1,13 +1,19 @@
 import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useAllUsers, useActivateUser, useDeactivateUser } from '@/hooks/use-coordinator';
+import {
+  useAllUsers,
+  useActivateUser,
+  useDeactivateUser,
+  useDeleteUser,
+} from '@/hooks/use-coordinator';
+import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
-import { Search, UserCheck, UserX, Clock, CheckCircle2, Users } from 'lucide-react';
+import { Search, UserCheck, UserX, Clock, CheckCircle2, Users, Trash2 } from 'lucide-react';
 import { ManagedUser } from '@/types/api';
 import { formatCpf, formatPhoneBR } from '@/lib/profile-formatters';
 import { roleLabel } from '@/lib/permissions';
@@ -24,6 +30,7 @@ import {
 import { CompactContentSkeleton, UserManagementCardsSkeleton } from '@/components/ui/content-skeletons';
 
 type FilterStatus = 'ALL' | 'PENDING' | 'ACTIVE';
+type UserAction = 'activate' | 'deactivate' | 'delete';
 
 function StatusBadge({ status }: { status: ManagedUser['status'] }) {
   if (status === 'ACTIVE') {
@@ -48,20 +55,54 @@ function RoleBadge({ role }: { role: ManagedUser['role'] }) {
   );
 }
 
+function dialogCopy(action: UserAction, userName: string) {
+  if (action === 'activate') {
+    return {
+      title: 'Habilitar usuário',
+      description: `Ao habilitar ${userName}, o sistema enviará automaticamente um e-mail com o link para criação de senha. O usuário poderá acessar a plataforma após criar a senha.`,
+      confirmLabel: 'Habilitar e enviar e-mail',
+      confirmClass: 'bg-emerald-600 hover:bg-emerald-700',
+    };
+  }
+  if (action === 'deactivate') {
+    return {
+      title: 'Desabilitar acesso',
+      description: `Ao desabilitar ${userName}, o acesso à plataforma será bloqueado imediatamente. A conta não será excluída.`,
+      confirmLabel: 'Desabilitar acesso',
+      confirmClass: 'bg-amber-600 text-white hover:bg-amber-700',
+    };
+  }
+  return {
+    title: 'Excluir usuário',
+    description: (
+      <>
+        Tem certeza que deseja excluir o usuário{' '}
+        <span className="font-semibold text-foreground">"{userName}"</span>? Esta ação é permanente e
+        removerá a conta, matrículas e progresso associados.
+      </>
+    ),
+    confirmLabel: 'Excluir usuário',
+    confirmClass: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+  };
+}
+
 export default function UserManagement() {
+  const { user: currentUser } = useAuth();
   const { data: users = [], isLoading } = useAllUsers();
   const activateUser = useActivateUser();
   const deactivateUser = useDeactivateUser();
+  const deleteUser = useDeleteUser();
   const showLoading = useDelayedFlag(isLoading);
   const { toast } = useToast();
 
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('ALL');
-  const [actionTarget, setActionTarget] = useState<{ user: ManagedUser; action: 'activate' | 'deactivate' } | null>(null);
+  const [actionTarget, setActionTarget] = useState<{ user: ManagedUser; action: UserAction } | null>(
+    null,
+  );
 
   const filtered = users.filter((u) => {
-    const matchesStatus =
-      filterStatus === 'ALL' || u.status === filterStatus;
+    const matchesStatus = filterStatus === 'ALL' || u.status === filterStatus;
     const q = search.toLowerCase();
     const matchesSearch =
       !q ||
@@ -72,6 +113,8 @@ export default function UserManagement() {
   });
 
   const pendingCount = users.filter((u) => u.status === 'PENDING').length;
+  const isWorking = activateUser.isPending || deactivateUser.isPending || deleteUser.isPending;
+  const copy = actionTarget ? dialogCopy(actionTarget.action, actionTarget.user.name) : null;
 
   const handleConfirm = async () => {
     if (!actionTarget) return;
@@ -86,18 +129,30 @@ export default function UserManagement() {
             ? 'E-mail de criação de senha enviado com sucesso.'
             : 'Usuário ativado, mas o e-mail não pôde ser enviado. Verifique as configurações de e-mail.',
         });
-      } else {
+      } else if (action === 'deactivate') {
         await deactivateUser.mutateAsync(user.id);
-        toast({ variant: 'success', title: `Acesso de ${user.name} suspenso.` });
+        toast({ variant: 'success', title: `Acesso de ${user.name} desabilitado.` });
+      } else {
+        await deleteUser.mutateAsync(user.id);
+        toast({
+          variant: 'success',
+          title: 'Usuário excluído',
+          description: `"${user.name}" foi removido com sucesso.`,
+        });
       }
-    } catch {
-      toast({ variant: 'destructive', title: 'Erro ao processar solicitação.' });
-    } finally {
       setActionTarget(null);
+    } catch (error: unknown) {
+      const ax = error as { response?: { data?: { error?: string } } };
+      toast({
+        variant: 'destructive',
+        title:
+          action === 'delete'
+            ? 'Não foi possível excluir o usuário'
+            : 'Erro ao processar solicitação.',
+        description: ax?.response?.data?.error ?? 'Tente novamente.',
+      });
     }
   };
-
-  const isWorking = activateUser.isPending || deactivateUser.isPending;
 
   return (
     <AppLayout>
@@ -110,7 +165,7 @@ export default function UserManagement() {
               <div className="h-1 w-full rounded-full bg-primary/80" />
             </div>
             <p className="max-w-2xl text-sm text-muted-foreground">
-              Habilite ou suspenda o acesso de alunos e professores à plataforma.
+              Habilite, desabilite ou exclua o acesso de alunos e professores à plataforma.
             </p>
           </div>
           {pendingCount > 0 && (
@@ -160,77 +215,93 @@ export default function UserManagement() {
           </div>
         ) : (
           <div className="space-y-3">
-            {filtered.map((user) => (
-              <Card
-                key={user.id}
-                className="border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
-              >
-                <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
-                  <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-semibold text-card-foreground">{user.name}</span>
-                      <StatusBadge status={user.status} />
-                      <RoleBadge role={user.role} />
+            {filtered.map((user) => {
+              const isSelf = currentUser?.id === user.id;
+              return (
+                <Card
+                  key={user.id}
+                  className="border-border/70 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
+                    <div className="flex min-w-0 flex-1 flex-col gap-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-semibold text-card-foreground">{user.name}</span>
+                        <StatusBadge status={user.status} />
+                        <RoleBadge role={user.role} />
+                      </div>
+                      <span className="text-sm text-muted-foreground">{user.email}</span>
+                      <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
+                        {user.cpf && <span>CPF: {formatCpf(user.cpf)}</span>}
+                        {user.phone && <span>Tel: {formatPhoneBR(user.phone)}</span>}
+                        <span>Cadastro: {new Date(user.createdAt).toLocaleDateString('pt-BR')}</span>
+                      </div>
                     </div>
-                    <span className="text-sm text-muted-foreground">{user.email}</span>
-                    <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
-                      {user.cpf && <span>CPF: {formatCpf(user.cpf)}</span>}
-                      {user.phone && <span>Tel: {formatPhoneBR(user.phone)}</span>}
-                      <span>Cadastro: {new Date(user.createdAt).toLocaleDateString('pt-BR')}</span>
-                    </div>
-                  </div>
-                  <div className="flex shrink-0 gap-2">
-                    {user.status === 'PENDING' ? (
-                      <Button
-                        size="sm"
-                        className="w-full gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700 sm:w-auto"
-                        disabled={isWorking}
-                        onClick={() => setActionTarget({ user, action: 'activate' })}
-                      >
-                        <UserCheck className="h-4 w-4" /> Habilitar
-                      </Button>
-                    ) : (
+                    <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+                      {user.status === 'PENDING' ? (
+                        <Button
+                          size="sm"
+                          className="w-full gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700 sm:w-auto"
+                          disabled={isWorking}
+                          onClick={() => setActionTarget({ user, action: 'activate' })}
+                        >
+                          <UserCheck className="h-4 w-4" /> Habilitar
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full gap-1.5 border-amber-500/40 text-amber-700 hover:border-amber-600 hover:bg-amber-600 hover:text-white focus-visible:ring-amber-500 dark:text-amber-400 dark:hover:bg-amber-600 dark:hover:text-white sm:w-auto"
+                          disabled={isWorking || isSelf}
+                          onClick={() => setActionTarget({ user, action: 'deactivate' })}
+                        >
+                          <UserX className="h-4 w-4" /> Desabilitar
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         variant="outline"
                         className="w-full gap-1.5 border-destructive/30 text-destructive hover:border-destructive hover:bg-destructive hover:text-destructive-foreground focus-visible:ring-destructive sm:w-auto"
-                        disabled={isWorking}
-                        onClick={() => setActionTarget({ user, action: 'deactivate' })}
+                        disabled={isWorking || isSelf}
+                        onClick={() => setActionTarget({ user, action: 'delete' })}
+                        aria-label={`Excluir usuário ${user.name}`}
                       >
-                        <UserX className="h-4 w-4" /> Suspender
+                        <Trash2 className="h-4 w-4" /> Excluir
                       </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>
 
-      <AlertDialog open={!!actionTarget} onOpenChange={(open) => !open && setActionTarget(null)}>
+      <AlertDialog
+        open={!!actionTarget}
+        onOpenChange={(open) => {
+          if (!open && !isWorking) setActionTarget(null);
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {actionTarget?.action === 'activate' ? 'Habilitar usuário' : 'Suspender acesso'}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {actionTarget?.action === 'activate'
-                ? `Ao habilitar ${actionTarget?.user.name}, o sistema enviará automaticamente um e-mail com o link para criação de senha. O usuário poderá acessar a plataforma após criar a senha.`
-                : `Ao suspender ${actionTarget?.user.name}, o acesso à plataforma será bloqueado imediatamente. A conta não será excluída.`}
-            </AlertDialogDescription>
+            <AlertDialogTitle>{copy?.title}</AlertDialogTitle>
+            <AlertDialogDescription>{copy?.description}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={isWorking}>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleConfirm}
-              className={
-                actionTarget?.action === 'activate'
-                  ? 'bg-emerald-600 hover:bg-emerald-700'
-                  : 'bg-destructive hover:bg-destructive/90'
-              }
+              className={copy?.confirmClass}
+              disabled={isWorking}
+              onClick={(event) => {
+                event.preventDefault();
+                void handleConfirm();
+              }}
             >
-              {actionTarget?.action === 'activate' ? 'Habilitar e enviar e-mail' : 'Suspender acesso'}
+              {isWorking
+                ? actionTarget?.action === 'delete'
+                  ? 'Excluindo...'
+                  : 'Processando...'
+                : copy?.confirmLabel}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

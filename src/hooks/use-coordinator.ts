@@ -57,3 +57,18 @@ export function useDeactivateUser() {
     },
   });
 }
+
+// FUNÇÃO PARA EXCLUIR UM USUÁRIO PERMANENTEMENTE
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const res = await api.delete<{ message: string }>(`/coordinator/users/${userId}`);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['coordinator-pending-users'] });
+      queryClient.invalidateQueries({ queryKey: ['coordinator-all-users'] });
+    },
+  });
+}

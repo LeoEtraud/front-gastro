@@ -23,8 +23,9 @@ import { normalizePtBrText } from '@/lib/normalize-ptbr';
 import { COURSE_MATERIALS_DRIVE_URL } from '@/lib/course-materials-config';
 import { cn } from '@/lib/utils';
 import { useStudentProfile } from '@/hooks/use-student';
+import { useLessonVideo } from '@/hooks/use-lesson-video';
 
-const LESSON_COVER_URL = '/capa-curso.jpg';
+const VIMEO_PLAYER_ORIGIN = 'https://player.vimeo.com';
 
 function youtubeVideoId(videoUrl: string): string | null {
   try {
@@ -44,6 +45,36 @@ function youtubeVideoId(videoUrl: string): string | null {
   return null;
 }
 
+function youtubeThumbnailUrl(videoId: string): string {
+  return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+}
+
+/** Embed do card: sem autoplay mostra o frame/poster; no hover a API dá play. */
+function buildVimeoPreviewSrc(embedUrl: string | null | undefined, videoId: string): string {
+  try {
+    const url = new URL(embedUrl?.trim() || `${VIMEO_PLAYER_ORIGIN}/video/${videoId}`);
+    url.searchParams.set('autoplay', '0');
+    url.searchParams.set('muted', '1');
+    url.searchParams.set('loop', '1');
+    url.searchParams.set('controls', '0');
+    url.searchParams.set('title', '0');
+    url.searchParams.set('byline', '0');
+    url.searchParams.set('portrait', '0');
+    url.searchParams.set('playsinline', '1');
+    url.searchParams.set('dnt', '1');
+    url.searchParams.set('api', '1');
+    return url.toString();
+  } catch {
+    return `${VIMEO_PLAYER_ORIGIN}/video/${videoId}?autoplay=0&muted=1&loop=1&controls=0&title=0&byline=0&portrait=0&playsinline=1&api=1`;
+  }
+}
+
+function sendVimeoCommand(iframe: HTMLIFrameElement | null, method: string, value?: unknown) {
+  if (!iframe?.contentWindow) return;
+  const payload = value === undefined ? { method } : { method, value };
+  iframe.contentWindow.postMessage(JSON.stringify(payload), VIMEO_PLAYER_ORIGIN);
+}
+
 function lessonStatusLabel(status: StudentDashboardLessonPreview['status']): string {
   if (status === 'COMPLETED') return 'Concluída';
   if (status === 'COMING_SOON') return 'Em breve';
@@ -53,7 +84,6 @@ function lessonStatusLabel(status: StudentDashboardLessonPreview['status']): str
 function LessonPreviewCard({
   courseId,
   courseTitle,
-  courseCover,
   audioPreferenceEnabled,
   onAudioPreferenceChange,
   lesson,
@@ -63,7 +93,6 @@ function LessonPreviewCard({
 }: {
   courseId: string;
   courseTitle: string;
-  courseCover?: string | null;
   audioPreferenceEnabled: boolean;
   onAudioPreferenceChange: (enabled: boolean) => void;
   lesson: StudentDashboardLessonPreview;
@@ -76,20 +105,32 @@ function LessonPreviewCard({
 }) {
   const containerRef = useRef<HTMLElement | null>(null);
   const youtubeFrameRef = useRef<HTMLIFrameElement | null>(null);
+  const vimeoFrameRef = useRef<HTMLIFrameElement | null>(null);
   const [isHovering, setIsHovering] = useState(false);
   const [isAudioEnabled, setIsAudioEnabled] = useState(false);
   const [isSubtitleEnabled, setIsSubtitleEnabled] = useState(false);
   const [isYoutubeReady, setIsYoutubeReady] = useState(false);
+  const [isVimeoReady, setIsVimeoReady] = useState(false);
   const [isPreviewWarmedUp, setIsPreviewWarmedUp] = useState(false);
 
   const label = `${normalizePtBrText(courseTitle)} — ${normalizePtBrText(lesson.title)} — ${normalizePtBrText(lesson.moduleTitle)}`;
-  const ytVideoId = lesson.videoUrl ? youtubeVideoId(lesson.videoUrl) : null;
-  const canPreview = Boolean(ytVideoId);
+  const ytVideoId = !lesson.hasVimeoVideo && lesson.videoUrl ? youtubeVideoId(lesson.videoUrl) : null;
+  const canUseVimeo = Boolean(lesson.hasVimeoVideo);
+  const canPreview = Boolean(canUseVimeo || ytVideoId);
+  // Busca o embed cedo para mostrar o poster do Vimeo no lugar da capa estática.
+  const { data: vimeoVideo } = useLessonVideo(courseId, lesson.id, canUseVimeo);
   const shouldMountYoutubeIframe = Boolean(ytVideoId && isHovering);
-  const canToggleSubtitle = Boolean(ytVideoId);
+  // Mantém o iframe Vimeo montado para exibir o frame/poster inicial do vídeo.
+  const shouldMountVimeoIframe = Boolean(canUseVimeo && vimeoVideo?.vimeoVideoId);
+  const canToggleSubtitle = Boolean(ytVideoId || canUseVimeo);
+  const youtubeThumbSrc = ytVideoId ? youtubeThumbnailUrl(ytVideoId) : null;
   const youtubePreviewSrc = ytVideoId
     ? `https://www.youtube.com/embed/${ytVideoId}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&playsinline=1&loop=1&playlist=${ytVideoId}&cc_load_policy=1&cc_lang_pref=pt&enablejsapi=1`
     : null;
+  const vimeoPreviewSrc =
+    shouldMountVimeoIframe && vimeoVideo?.vimeoVideoId
+      ? buildVimeoPreviewSrc(vimeoVideo.embedUrl, vimeoVideo.vimeoVideoId)
+      : null;
 
   const sendYoutubeCommand = (func: string, args: unknown[] = []) => {
     if (!youtubeFrameRef.current?.contentWindow) return;
@@ -110,6 +151,17 @@ function LessonPreviewCard({
     sendYoutubeCommand('unloadModule', ['captions']);
   };
 
+  const applyVimeoPreferences = (audioEnabled: boolean, subtitleEnabled: boolean) => {
+    sendVimeoCommand(vimeoFrameRef.current, 'setMuted', !audioEnabled);
+    sendVimeoCommand(vimeoFrameRef.current, 'setVolume', audioEnabled ? 1 : 0);
+    if (subtitleEnabled) {
+      // Player API: enableTextTrack(kind, language)
+      sendVimeoCommand(vimeoFrameRef.current, 'enableTextTrack', ['captions', 'pt']);
+      return;
+    }
+    sendVimeoCommand(vimeoFrameRef.current, 'disableTextTrack');
+  };
+
   useEffect(() => {
     if (!shouldMountYoutubeIframe || !isYoutubeReady) return;
     applyYoutubePreferences(isAudioEnabled, isSubtitleEnabled);
@@ -122,6 +174,44 @@ function LessonPreviewCard({
   }, [isAudioEnabled, isSubtitleEnabled, shouldMountYoutubeIframe, isYoutubeReady]);
 
   useEffect(() => {
+    if (!shouldMountVimeoIframe || !isVimeoReady) return;
+    if (isHovering) {
+      applyVimeoPreferences(isAudioEnabled, isSubtitleEnabled);
+      sendVimeoCommand(vimeoFrameRef.current, 'play');
+      const retry1 = window.setTimeout(() => {
+        applyVimeoPreferences(isAudioEnabled, isSubtitleEnabled);
+        sendVimeoCommand(vimeoFrameRef.current, 'play');
+      }, 220);
+      const retry2 = window.setTimeout(() => applyVimeoPreferences(isAudioEnabled, isSubtitleEnabled), 520);
+      return () => {
+        window.clearTimeout(retry1);
+        window.clearTimeout(retry2);
+      };
+    }
+    sendVimeoCommand(vimeoFrameRef.current, 'setMuted', true);
+    sendVimeoCommand(vimeoFrameRef.current, 'pause');
+    sendVimeoCommand(vimeoFrameRef.current, 'setCurrentTime', 0);
+  }, [isAudioEnabled, isSubtitleEnabled, shouldMountVimeoIframe, isVimeoReady, isHovering]);
+
+  useEffect(() => {
+    if (!shouldMountVimeoIframe) return;
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== VIMEO_PLAYER_ORIGIN) return;
+      let data: { event?: string } | null = null;
+      try {
+        data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+      } catch {
+        return;
+      }
+      if (data?.event === 'ready') {
+        setIsVimeoReady(true);
+      }
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [shouldMountVimeoIframe]);
+
+  useEffect(() => {
     if (!isHovering) {
       setIsYoutubeReady(false);
     }
@@ -131,14 +221,18 @@ function LessonPreviewCard({
     containerRef,
     () => setIsPreviewWarmedUp(true),
     {
-      enabled: canPreview && !isPreviewWarmedUp && !!ytVideoId,
+      enabled: canPreview && !isPreviewWarmedUp,
       delayMs: 400 + preloadOrder * 700,
     },
   );
 
   useEffect(() => {
-    if (!isPreviewWarmedUp || !ytVideoId) return;
-    const hosts = ['https://www.youtube.com', 'https://i.ytimg.com'];
+    if (!isPreviewWarmedUp) return;
+    const hosts = ytVideoId
+      ? ['https://www.youtube.com', 'https://i.ytimg.com']
+      : canUseVimeo
+        ? [VIMEO_PLAYER_ORIGIN, 'https://i.vimeocdn.com']
+        : [];
     for (const href of hosts) {
       if (!document.querySelector(`link[rel="preconnect"][href="${href}"]`)) {
         const link = document.createElement('link');
@@ -147,7 +241,7 @@ function LessonPreviewCard({
         document.head.appendChild(link);
       }
     }
-  }, [isPreviewWarmedUp, ytVideoId]);
+  }, [isPreviewWarmedUp, ytVideoId, canUseVimeo]);
 
   const handlePreviewStart = () => {
     setIsHovering(true);
@@ -163,6 +257,11 @@ function LessonPreviewCard({
       sendYoutubeCommand('mute');
       sendYoutubeCommand('stopVideo');
     }
+    if (vimeoFrameRef.current) {
+      sendVimeoCommand(vimeoFrameRef.current, 'setMuted', true);
+      sendVimeoCommand(vimeoFrameRef.current, 'pause');
+      sendVimeoCommand(vimeoFrameRef.current, 'setCurrentTime', 0);
+    }
   };
 
   const handleToggleAudio: MouseEventHandler<HTMLButtonElement> = (event) => {
@@ -174,6 +273,9 @@ function LessonPreviewCard({
     if (shouldMountYoutubeIframe && isYoutubeReady) {
       applyYoutubePreferences(nextAudioEnabled, isSubtitleEnabled);
     }
+    if (shouldMountVimeoIframe && isVimeoReady) {
+      applyVimeoPreferences(nextAudioEnabled, isSubtitleEnabled);
+    }
   };
 
   const handleToggleSubtitle: MouseEventHandler<HTMLButtonElement> = (event) => {
@@ -182,11 +284,22 @@ function LessonPreviewCard({
     if (!canToggleSubtitle) return;
     const nextSubtitleEnabled = !isSubtitleEnabled;
     setIsSubtitleEnabled(nextSubtitleEnabled);
+    if (shouldMountVimeoIframe && isVimeoReady) {
+      applyVimeoPreferences(isAudioEnabled, nextSubtitleEnabled);
+    }
   };
 
   const handleYoutubeLoaded = () => {
     setIsYoutubeReady(true);
     applyYoutubePreferences(isAudioEnabled, isSubtitleEnabled);
+  };
+
+  const handleVimeoLoaded = () => {
+    setIsVimeoReady(true);
+    // Poster parado até o hover; evita áudio no carregamento.
+    sendVimeoCommand(vimeoFrameRef.current, 'setMuted', true);
+    sendVimeoCommand(vimeoFrameRef.current, 'pause');
+    sendVimeoCommand(vimeoFrameRef.current, 'setCurrentTime', 0);
   };
 
   if (visualOnly) {
@@ -211,16 +324,21 @@ function LessonPreviewCard({
           onMouseEnter={canPreview ? handlePreviewStart : undefined}
           onMouseLeave={canPreview ? handlePreviewStop : undefined}
         >
-          <img
-            src={LESSON_COVER_URL}
-            alt=""
-            loading="lazy"
-            className={cn(
-              'gc-lesson-card-media transition-opacity duration-200',
-              isHovering && canPreview && 'opacity-0',
-              isHovering && !canPreview && 'scale-[1.03]',
-            )}
+          <div
+            className="gc-lesson-card-media absolute inset-0 bg-gradient-to-br from-primary/25 via-primary/10 to-muted"
+            aria-hidden
           />
+          {youtubeThumbSrc && !shouldMountYoutubeIframe ? (
+            <img
+              src={youtubeThumbSrc}
+              alt=""
+              loading="lazy"
+              className={cn(
+                'gc-lesson-card-media absolute inset-0 z-[1] h-full w-full object-cover transition-transform duration-200',
+                isHovering && !canPreview && 'scale-[1.03]',
+              )}
+            />
+          ) : null}
           {shouldMountYoutubeIframe && youtubePreviewSrc ? (
             <iframe
               ref={youtubeFrameRef}
@@ -229,6 +347,21 @@ function LessonPreviewCard({
               allow="autoplay; encrypted-media; picture-in-picture"
               className="pointer-events-none absolute inset-0 z-[3] h-full w-full object-cover opacity-100"
               onLoad={handleYoutubeLoaded}
+              tabIndex={-1}
+              aria-hidden
+            />
+          ) : null}
+          {shouldMountVimeoIframe && vimeoPreviewSrc ? (
+            <iframe
+              ref={vimeoFrameRef}
+              src={vimeoPreviewSrc}
+              title={`Prévia da aula ${normalizePtBrText(lesson.title)}`}
+              allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+              className={cn(
+                'pointer-events-none absolute inset-0 z-[3] h-full w-full object-cover opacity-100',
+                isHovering && 'scale-[1.03]',
+              )}
+              onLoad={handleVimeoLoaded}
               tabIndex={-1}
               aria-hidden
             />
@@ -300,16 +433,17 @@ function LessonPreviewCard({
       onMouseEnter={canPreview ? handlePreviewStart : undefined}
       onMouseLeave={canPreview ? handlePreviewStop : undefined}
     >
-      <img
-        src={LESSON_COVER_URL}
-        alt=""
-        loading="lazy"
-        className={cn(
-          'absolute inset-0 z-[1] h-full w-full object-cover transition-opacity duration-200',
-          isHovering && canPreview && 'opacity-0',
-          isHovering && !canPreview && 'scale-[1.03]',
-        )}
-      />
+      {youtubeThumbSrc && !shouldMountYoutubeIframe ? (
+        <img
+          src={youtubeThumbSrc}
+          alt=""
+          loading="lazy"
+          className={cn(
+            'absolute inset-0 z-[1] h-full w-full object-cover transition-transform duration-200',
+            isHovering && !canPreview && 'scale-[1.03]',
+          )}
+        />
+      ) : null}
       {shouldMountYoutubeIframe && youtubePreviewSrc ? (
         <iframe
           ref={youtubeFrameRef}
@@ -318,6 +452,21 @@ function LessonPreviewCard({
           allow="autoplay; encrypted-media; picture-in-picture"
           className="pointer-events-none absolute inset-0 z-[3] h-full w-full opacity-100"
           onLoad={handleYoutubeLoaded}
+          tabIndex={-1}
+          aria-hidden
+        />
+      ) : null}
+      {shouldMountVimeoIframe && vimeoPreviewSrc ? (
+        <iframe
+          ref={vimeoFrameRef}
+          src={vimeoPreviewSrc}
+          title={`Prévia da aula ${normalizePtBrText(lesson.title)}`}
+          allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+          className={cn(
+            'pointer-events-none absolute inset-0 z-[3] h-full w-full opacity-100',
+            isHovering && 'scale-[1.03]',
+          )}
+          onLoad={handleVimeoLoaded}
           tabIndex={-1}
           aria-hidden
         />
@@ -642,7 +791,6 @@ export function SingleCourseHomeExperience({ home }: Props) {
                   <LessonPreviewCard
                     courseId={home.courseId}
                     courseTitle={home.courseTitle}
-                    courseCover={home.courseCover}
                     audioPreferenceEnabled={audioPreferenceEnabled}
                     onAudioPreferenceChange={setAudioPreferenceEnabled}
                     lesson={lesson}
