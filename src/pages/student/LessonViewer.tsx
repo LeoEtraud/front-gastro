@@ -9,6 +9,8 @@ import { useToast } from '@/hooks/use-toast';
 import { LessonVimeoPlayer } from '@/components/video/LessonVimeoPlayer';
 import { LessonMaterialsSection } from '@/components/lesson-materials/LessonMaterialsSection';
 import { CompactContentSkeleton, LessonViewerSkeleton } from '@/components/ui/content-skeletons';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { COURSE_MATERIALS_DRIVE_URL } from '@/lib/course-materials-config';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 import { normalizePtBrText } from '@/lib/normalize-ptbr';
 
@@ -239,6 +241,20 @@ export default function LessonViewer() {
               <h3 className="line-clamp-2 min-w-0 flex-1 font-display text-sm font-bold text-foreground sm:text-base">
                 {normalizePtBrText(course.title)}
               </h3>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a
+                    href={COURSE_MATERIALS_DRIVE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
+                    aria-label="Materiais complementares"
+                  >
+                    <FileText className="h-4 w-4" aria-hidden />
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent side="left">Materiais complementares</TooltipContent>
+              </Tooltip>
             </div>
           </div>
           <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-auto p-2 sm:space-y-4 lg:overflow-visible">
