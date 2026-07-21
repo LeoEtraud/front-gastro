@@ -104,7 +104,7 @@ export default function Register() {
   return (
     <AuthLayout
       heroBg={`${import.meta.env.BASE_URL}img-de-fundo-2.jpg`}
-      heroTitle="Comece sua jornada no GastroCentro"
+      heroTitle="Comece sua jornada na GastroCentro"
       heroSubtitle="Crie sua conta e acesse cursos, materiais e uma comunidade focada em educação médica de qualidade."
       formMaxWidth="max-w-[480px]"
     >

@@ -135,9 +135,9 @@ export default function ResetPassword() {
           <img
             src="/logo-menu-login.png"
             alt="Gastrocentro"
-            className="mx-auto mb-8 h-20 w-20 object-contain"
-            width={100}
-            height={100}
+            className="mx-auto mb-4 h-[110px] w-[110px] object-contain"
+            width={110}
+            height={110}
           />
           <h2 className="text-4xl font-display font-bold mb-4 text-white">Nova senha</h2>
           <p className="text-lg text-white">Escolha uma senha forte e guarde em local seguro.</p>
@@ -151,9 +151,9 @@ export default function ResetPassword() {
               <img
                 src="/logo-menu-login.png"
                 alt="Gastrocentro"
-                className="h-20 w-20 object-contain"
-                width={100}
-                height={100}
+                className="h-[110px] w-[110px] object-contain"
+                width={110}
+                height={110}
               />
             </div>
             <CardTitle className="font-display text-2xl font-bold sm:text-3xl">Redefinir senha</CardTitle>

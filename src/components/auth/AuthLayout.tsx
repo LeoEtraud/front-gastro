@@ -51,9 +51,9 @@ export function AuthLayout({
           <img
             src="/logo-menu-login.png"
             alt="GastroCentro"
-            className="mx-auto mb-9 h-[68px] w-[68px] object-contain drop-shadow-[0_4px_16px_rgba(0,0,0,0.35)]"
-            width={68}
-            height={68}
+            className="mx-auto mb-4 h-[110px] w-[110px] object-contain drop-shadow-[0_4px_16px_rgba(0,0,0,0.35)]"
+            width={110}
+            height={110}
           />
           <h2 className="text-focus-in mb-5 font-display text-[30px] font-extrabold leading-[1.15] tracking-tight text-white">
             {heroTitle}

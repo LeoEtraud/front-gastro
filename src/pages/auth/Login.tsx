@@ -86,7 +86,7 @@ export default function Login() {
   return (
     <AuthLayout
       heroBg={`${import.meta.env.BASE_URL}img-de-fundo.jpg`}
-      heroTitle="Bem-vindo de volta ao GastroCentro"
+      heroTitle="Bem-vindo de volta à GastroCentro"
       heroSubtitle="Acesse seus cursos, continue seu aprendizado e expanda seus conhecimentos em saúde digestiva."
     >
       {/* ── Card ── */}
