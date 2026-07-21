@@ -271,7 +271,6 @@ export const specialists: Specialist[] = [
       'Membro titular da Sociedade Brasileira de Endoscopia Digestiva',
       'Preceptor da residência de endoscopia digestiva no Hospital Universitário Presidente Dutra/HUUFMA',
       'Coordenador do serviço de endoscopia do Hospital de Oncologia do Maranhão',
-      'Médico hepatologista clínico do Programa de Transplante Hepático — INFIG/HCM',
     ],
     initials: 'TV',
     color: '#FF6B35',
