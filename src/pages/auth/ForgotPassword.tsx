@@ -80,7 +80,7 @@ export default function ForgotPassword() {
             Esqueci minha senha
           </h1>
           <p className="mt-1.5 text-[14px] leading-relaxed text-slate-500">
-            Digite o e-mail cadastrado no GastroCentro.
+            Digite o e-mail cadastrado na GastroCentro.
           </p>
         </div>
 
