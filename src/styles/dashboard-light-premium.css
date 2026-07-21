@@ -42,6 +42,7 @@
 .gc-lesson-card--stacked {
   display: flex;
   flex-direction: column;
+  height: 100%;
   overflow: hidden;
   border-radius: 22px;
   box-shadow: var(--gc-light-shadow-card);
@@ -157,6 +158,8 @@
   font-size: 1rem;
   font-weight: 700;
   line-height: 1.35;
+  /* Reserva 2 linhas para alinhar cards na mesma altura */
+  min-height: calc(1em * 1.35 * 2);
   color: hsl(var(--foreground));
 }
 
@@ -169,6 +172,8 @@
 .gc-lesson-card-desc {
   font-size: 0.8125rem;
   line-height: 1.5;
+  /* Reserva 2 linhas mesmo com texto curto ou ausente */
+  min-height: calc(0.8125rem * 1.5 * 2);
   color: hsl(var(--muted-foreground));
 }
 

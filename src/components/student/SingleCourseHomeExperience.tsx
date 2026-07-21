@@ -312,7 +312,7 @@ function LessonPreviewCard({
         ref={containerRef as React.Ref<HTMLAnchorElement>}
         to={`/student/courses/${courseId}/lessons/${lesson.id}`}
         className={cn(
-          'group gc-lesson-card gc-lesson-card--stacked w-full min-w-0 cursor-pointer border border-border/80 bg-card',
+          'group gc-lesson-card gc-lesson-card--stacked h-full w-full min-w-0 cursor-pointer border border-border/80 bg-card',
           'transition-all duration-300 ease-out motion-reduce:transition-none',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           className,
@@ -409,9 +409,7 @@ function LessonPreviewCard({
           <h3 className="gc-lesson-card-title line-clamp-2">
             {normalizePtBrText(lesson.title)}
           </h3>
-          {subtitleText ? (
-            <p className="gc-lesson-card-desc line-clamp-2">{subtitleText}</p>
-          ) : null}
+          <p className="gc-lesson-card-desc line-clamp-2">{subtitleText || '\u00A0'}</p>
           <div className="mt-auto flex flex-wrap gap-1.5 pt-1">
             <Badge variant="outline" className="px-2 py-0 text-[10px] font-semibold uppercase tracking-wide sm:text-[11px]">
               {lesson.type}
@@ -782,7 +780,7 @@ export function SingleCourseHomeExperience({ home }: Props) {
 
         {featuredLessons.length > 0 ? (
           <Carousel opts={lessonsCarouselOptions} className="w-full">
-            <CarouselContent className="-ml-3 sm:-ml-4">
+            <CarouselContent className="-ml-3 items-stretch sm:-ml-4">
               {featuredLessons.map((lesson, idx) => (
                 <CarouselItem
                   key={lesson.id}
@@ -804,7 +802,7 @@ export function SingleCourseHomeExperience({ home }: Props) {
                   key="lesson-placeholder"
                   className="basis-[88%] pl-3 min-[420px]:basis-[62%] sm:basis-[48%] sm:pl-4 md:basis-[38%] lg:basis-[28%] xl:basis-1/4"
                 >
-                  <Card className="gc-lesson-card--stacked premium-card flex min-h-[18rem] min-w-0 flex-col items-center justify-center border-dashed border-muted-foreground/25 bg-muted/10 px-3 text-center text-xs text-muted-foreground sm:min-h-[20rem] sm:text-sm">
+                  <Card className="gc-lesson-card--stacked premium-card flex h-full min-h-[18rem] min-w-0 flex-col items-center justify-center border-dashed border-muted-foreground/25 bg-muted/10 px-3 text-center text-xs text-muted-foreground sm:min-h-[20rem] sm:text-sm">
                     <p>Sem quarta aula publicada neste módulo.</p>
                   </Card>
                 </CarouselItem>
