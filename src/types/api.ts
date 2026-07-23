@@ -346,3 +346,112 @@ export interface LessonMaterialsStorageStats {
   alerts: string[];
   uploadsBlocked: boolean;
 }
+
+// ---------------------------------------------------------------------------
+// Comentários de aulas
+// ---------------------------------------------------------------------------
+export type CommentStatus =
+  | 'published'
+  | 'pending_review'
+  | 'hidden'
+  | 'removed'
+  | 'edit_requested';
+
+export type CommentRiskLevel = 'low' | 'medium' | 'high';
+
+export type CommentSort = 'recent' | 'oldest';
+
+export interface CommentAuthor {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+  role: Role;
+}
+
+export interface LessonCommentDto {
+  id: string;
+  lessonId: string;
+  parentCommentId: string | null;
+  text: string;
+  status: CommentStatus;
+  isEdited: boolean;
+  createdAt: string;
+  updatedAt: string;
+  author: CommentAuthor;
+  isTeacher: boolean;
+  isModerator: boolean;
+  isOwn: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+  canReply: boolean;
+  riskLevel: CommentRiskLevel | null;
+  replies: LessonCommentDto[];
+}
+
+export interface ListCommentsResponse {
+  comments: LessonCommentDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
+export interface CreateCommentResponse {
+  comment: LessonCommentDto | null;
+  moderation: {
+    status: CommentStatus;
+    messageKey: 'published' | 'in_review' | 'inappropriate' | 'patient_data';
+    message: string;
+    published: boolean;
+  };
+}
+
+export interface PendingComment {
+  id: string;
+  lessonId: string;
+  lessonTitle: string | null;
+  courseId: string | null;
+  courseTitle: string | null;
+  parentCommentId: string | null;
+  originalText: string;
+  currentText: string;
+  status: CommentStatus;
+  riskLevel: CommentRiskLevel;
+  moderationCategories: string[];
+  moderationScore: number | null;
+  isEdited: boolean;
+  createdAt: string;
+  author: {
+    id: string;
+    name: string;
+    email: string;
+    avatarUrl: string | null;
+    role: Role;
+  };
+  authorHistory: {
+    total: number;
+    pending: number;
+    removed: number;
+    hidden: number;
+  };
+}
+
+export interface ListPendingCommentsResponse {
+  comments: PendingComment[];
+  total: number;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
+export interface CommentModerationHistoryEntry {
+  id: string;
+  commentId: string | null;
+  lessonId: string | null;
+  targetUserId: string | null;
+  action: string;
+  performedById: string | null;
+  reason: string | null;
+  details: Record<string, unknown> | null;
+  createdAt: string;
+}

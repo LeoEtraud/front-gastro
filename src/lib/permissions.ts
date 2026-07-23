@@ -8,6 +8,10 @@ export function canManageUsers(role: Role): boolean {
   return role === 'ADMIN';
 }
 
+export function canModerateComments(role: Role): boolean {
+  return role === 'ADMIN';
+}
+
 export function canCreateCourse(role: Role): boolean {
   return role === 'ADMIN';
 }

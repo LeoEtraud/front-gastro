@@ -27,6 +27,7 @@ const CoursesList = lazy(() => import("@/pages/teacher/CoursesList"));
 const CourseEditor = lazy(() => import("@/pages/teacher/CourseEditor"));
 const TeacherProfile = lazy(() => import("@/pages/teacher/Profile"));
 const UserManagement = lazy(() => import("@/pages/teacher/UserManagement"));
+const CommentModeration = lazy(() => import("@/pages/teacher/CommentModeration"));
 
 export function AppRoutes() {
   return (
@@ -60,9 +61,10 @@ export function AppRoutes() {
         <Route path="/teacher/profile" element={<TeacherProfile />} />
       </Route>
 
-      {/* Gestão de usuários — somente ADMIN */}
+      {/* Gestão de usuários e moderação — somente ADMIN */}
       <Route element={<PrivateRoute allowedRoles={["ADMIN"]} />}>
         <Route path="/teacher/users" element={<UserManagement />} />
+        <Route path="/teacher/comments" element={<CommentModeration />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

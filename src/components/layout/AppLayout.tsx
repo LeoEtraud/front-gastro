@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { BookOpen, FileVideo, LayoutDashboard, Users } from 'lucide-react';
-import { canManageUsers, isStaffRole } from '@/lib/permissions';
+import { BookOpen, FileVideo, LayoutDashboard, MessageSquare, Users } from 'lucide-react';
+import { canManageUsers, canModerateComments, isStaffRole } from '@/lib/permissions';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { THEME_KEY, applyTheme, getStoredTheme, type ThemeMode } from '@/lib/theme';
@@ -26,6 +26,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       { href: '/teacher/courses', label: 'Gerenciar Cursos', icon: FileVideo },
       ...(user?.role && canManageUsers(user.role)
         ? [{ href: '/teacher/users', label: 'Gestão de Usuários', icon: Users }]
+        : []),
+      ...(user?.role && canModerateComments(user.role)
+        ? [{ href: '/teacher/comments', label: 'Moderação', icon: MessageSquare }]
         : []),
     ],
     [user?.role],

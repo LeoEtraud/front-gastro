@@ -7,7 +7,7 @@ import { ArrowLeft, CheckCircle2, FileText, Loader2, PlayCircle } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { LessonVimeoPlayer } from '@/components/video/LessonVimeoPlayer';
-import { LessonMaterialsSection } from '@/components/lesson-materials/LessonMaterialsSection';
+import { LessonContentTabs } from '@/components/lesson/LessonContentTabs';
 import { CompactContentSkeleton, LessonViewerSkeleton } from '@/components/ui/content-skeletons';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { COURSE_MATERIALS_DRIVE_URL } from '@/lib/course-materials-config';
@@ -202,25 +202,7 @@ export default function LessonViewer() {
               </Button>
             </div>
 
-            <div className="prose prose-sm max-w-none text-card-foreground/90 prose-headings:text-card-foreground prose-p:text-card-foreground/90 sm:prose-base dark:prose-invert">
-              {lesson.description ? (
-                <p>{normalizePtBrText(lesson.description)}</p>
-              ) : (
-                <p className="italic text-muted-foreground">Nenhuma descrição adicional para esta aula.</p>
-              )}
-            </div>
-
-            {lesson.type === 'QUIZ' && lesson.quiz && (
-              <div className="mt-8 rounded-xl border border-primary/25 bg-primary/10 p-4 text-center sm:mt-10 sm:p-6">
-                <h3 className="mb-2 text-lg font-bold text-card-foreground sm:text-xl">{normalizePtBrText(lesson.quiz.title)}</h3>
-                <p className="mb-4 text-sm text-muted-foreground sm:mb-6 sm:text-base">
-                  Avaliação com {lesson.quiz.questions.length} questões. Nota para passar: {lesson.quiz.passingScore}%
-                </p>
-                <Button className="w-full sm:w-auto">Iniciar Avaliação</Button>
-              </div>
-            )}
-
-            <LessonMaterialsSection lessonId={actualLessonId} />
+            <LessonContentTabs lesson={lesson} lessonId={actualLessonId} />
           </div>
         </div>
 
