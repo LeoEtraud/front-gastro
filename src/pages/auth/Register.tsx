@@ -126,8 +126,7 @@ export default function Register() {
             Criar conta
           </h1>
           <p className="mx-auto mt-1.5 max-w-[340px] text-[14px] leading-relaxed text-slate-500">
-            Junte-se à plataforma. Após o cadastro, enviaremos um e-mail para você definir sua senha
-            de acesso.
+            Junte-se à plataforma. Após o cadastro, o coordenador irá habilitar seu acesso. Você receberá um e-mail para criar sua senha.
           </p>
         </div>
 

@@ -41,6 +41,18 @@ export function useActivateUser() {
   });
 }
 
+// FUNÇÃO PARA REENVIAR O E-MAIL DE CRIAÇÃO DE SENHA
+export function useResendPasswordEmail() {
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const res = await api.post<{ message: string; emailSent: boolean }>(
+        `/coordinator/users/${userId}/resend-password-email`,
+      );
+      return res.data;
+    },
+  });
+}
+
 // FUNÇÃO PARA DESABILITAR UM USUÁRIO
 export function useDeactivateUser() {
   const queryClient = useQueryClient();

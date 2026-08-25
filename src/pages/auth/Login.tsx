@@ -47,7 +47,7 @@ export default function Login() {
       toast({
         title: 'Cadastro realizado com sucesso!',
         description:
-          'O coordenador do curso irá habilitar seu acesso. Você receberá um e-mail para criar sua senha e acessar a plataforma.',
+          'O coordenador do curso irá habilitar seu acesso. Você receberá um e-mail para criar sua senha (válido por 24 horas).',
         duration: 12000,
       });
       window.history.replaceState({}, '');
@@ -217,6 +217,16 @@ export default function Login() {
             >
               Cadastre-se
             </Link>
+          </p>
+          <p className="text-[12px] leading-relaxed text-slate-400">
+            Conta habilitada e o link de senha expirou? Use{' '}
+            <Link
+              to="/forgot-password"
+              className="font-medium text-slate-500 underline-offset-2 transition-colors hover:text-primary hover:underline"
+            >
+              Esqueci minha senha
+            </Link>
+            .
           </p>
           <p className="text-[12px] leading-relaxed text-slate-400">
             Ao entrar, você concorda com os{' '}

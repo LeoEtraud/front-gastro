@@ -5,6 +5,7 @@ import {
   useActivateUser,
   useDeactivateUser,
   useDeleteUser,
+  useResendPasswordEmail,
 } from '@/hooks/use-coordinator';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
-import { Search, UserCheck, UserX, Clock, CheckCircle2, Users, Trash2 } from 'lucide-react';
+import { Search, UserCheck, UserX, Clock, CheckCircle2, Users, Trash2, Mail } from 'lucide-react';
 import { ManagedUser } from '@/types/api';
 import { formatCpf, formatPhoneBR } from '@/lib/profile-formatters';
 import { roleLabel } from '@/lib/permissions';
@@ -30,7 +31,7 @@ import {
 import { CompactContentSkeleton, UserManagementCardsSkeleton } from '@/components/ui/content-skeletons';
 
 type FilterStatus = 'ALL' | 'PENDING' | 'ACTIVE';
-type UserAction = 'activate' | 'deactivate' | 'delete';
+type UserAction = 'activate' | 'deactivate' | 'delete' | 'resend';
 
 function StatusBadge({ status }: { status: ManagedUser['status'] }) {
   if (status === 'ACTIVE') {
@@ -59,9 +60,17 @@ function dialogCopy(action: UserAction, userName: string) {
   if (action === 'activate') {
     return {
       title: 'Habilitar usuário',
-      description: `Ao habilitar ${userName}, o sistema enviará automaticamente um e-mail com o link para criação de senha. O usuário poderá acessar a plataforma após criar a senha.`,
+      description: `Ao habilitar ${userName}, o sistema enviará um e-mail com o link para criação de senha, válido por 24 horas. Se o link expirar, o usuário pode usar Esqueci minha senha na tela de login.`,
       confirmLabel: 'Habilitar e enviar e-mail',
       confirmClass: 'bg-emerald-600 hover:bg-emerald-700',
+    };
+  }
+  if (action === 'resend') {
+    return {
+      title: 'Reenviar e-mail de senha',
+      description: `Um novo link de criação de senha, válido por 24 horas, será enviado para ${userName}. O link anterior deixará de funcionar.`,
+      confirmLabel: 'Reenviar e-mail',
+      confirmClass: 'bg-sky-600 hover:bg-sky-700',
     };
   }
   if (action === 'deactivate') {
@@ -92,6 +101,7 @@ export default function UserManagement() {
   const activateUser = useActivateUser();
   const deactivateUser = useDeactivateUser();
   const deleteUser = useDeleteUser();
+  const resendPasswordEmail = useResendPasswordEmail();
   const showLoading = useDelayedFlag(isLoading);
   const { toast } = useToast();
 
@@ -113,7 +123,11 @@ export default function UserManagement() {
   });
 
   const pendingCount = users.filter((u) => u.status === 'PENDING').length;
-  const isWorking = activateUser.isPending || deactivateUser.isPending || deleteUser.isPending;
+  const isWorking =
+    activateUser.isPending ||
+    deactivateUser.isPending ||
+    deleteUser.isPending ||
+    resendPasswordEmail.isPending;
   const copy = actionTarget ? dialogCopy(actionTarget.action, actionTarget.user.name) : null;
 
   const handleConfirm = async () => {
@@ -126,8 +140,17 @@ export default function UserManagement() {
           variant: 'success',
           title: `${user.name} habilitado`,
           description: result.emailSent
-            ? 'E-mail de criação de senha enviado com sucesso.'
-            : 'Usuário ativado, mas o e-mail não pôde ser enviado. Verifique as configurações de e-mail.',
+            ? 'E-mail de criação de senha enviado (válido por 24 horas).'
+            : 'Usuário ativado, mas o e-mail não pôde ser enviado. Use Reenviar e-mail após corrigir o SMTP.',
+        });
+      } else if (action === 'resend') {
+        const result = await resendPasswordEmail.mutateAsync(user.id);
+        toast({
+          variant: result.emailSent ? 'success' : 'destructive',
+          title: result.emailSent ? 'E-mail reenviado' : 'Não foi possível enviar o e-mail',
+          description: result.emailSent
+            ? `Novo link enviado para ${user.email}. Válido por 24 horas.`
+            : 'Verifique as configurações de e-mail e tente novamente.',
         });
       } else if (action === 'deactivate') {
         await deactivateUser.mutateAsync(user.id);
@@ -148,7 +171,9 @@ export default function UserManagement() {
         title:
           action === 'delete'
             ? 'Não foi possível excluir o usuário'
-            : 'Erro ao processar solicitação.',
+            : action === 'resend'
+              ? 'Não foi possível reenviar o e-mail'
+              : 'Erro ao processar solicitação.',
         description: ax?.response?.data?.error ?? 'Tente novamente.',
       });
     }
@@ -165,7 +190,7 @@ export default function UserManagement() {
               <div className="h-1 w-full rounded-full bg-primary/80" />
             </div>
             <p className="max-w-2xl text-sm text-muted-foreground">
-              Habilite, desabilite ou exclua o acesso de alunos e professores à plataforma.
+              Habilite, desabilite ou exclua o acesso de alunos e professores. Usuários ativos podem receber um novo e-mail de senha se o link expirar.
             </p>
           </div>
           {pendingCount > 0 && (
@@ -247,15 +272,27 @@ export default function UserManagement() {
                           <UserCheck className="h-4 w-4" /> Habilitar
                         </Button>
                       ) : (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="w-full gap-1.5 border-amber-500/40 text-amber-700 hover:border-amber-600 hover:bg-amber-600 hover:text-white focus-visible:ring-amber-500 dark:text-amber-400 dark:hover:bg-amber-600 dark:hover:text-white sm:w-auto"
-                          disabled={isWorking || isSelf}
-                          onClick={() => setActionTarget({ user, action: 'deactivate' })}
-                        >
-                          <UserX className="h-4 w-4" /> Desabilitar
-                        </Button>
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full gap-1.5 sm:w-auto"
+                            disabled={isWorking || isSelf}
+                            onClick={() => setActionTarget({ user, action: 'resend' })}
+                            aria-label={`Reenviar e-mail de senha para ${user.name}`}
+                          >
+                            <Mail className="h-4 w-4" /> Reenviar e-mail
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full gap-1.5 border-amber-500/40 text-amber-700 hover:border-amber-600 hover:bg-amber-600 hover:text-white focus-visible:ring-amber-500 dark:text-amber-400 dark:hover:bg-amber-600 dark:hover:text-white sm:w-auto"
+                            disabled={isWorking || isSelf}
+                            onClick={() => setActionTarget({ user, action: 'deactivate' })}
+                          >
+                            <UserX className="h-4 w-4" /> Desabilitar
+                          </Button>
+                        </>
                       )}
                       <Button
                         size="sm"
@@ -300,7 +337,9 @@ export default function UserManagement() {
               {isWorking
                 ? actionTarget?.action === 'delete'
                   ? 'Excluindo...'
-                  : 'Processando...'
+                  : actionTarget?.action === 'resend'
+                    ? 'Enviando...'
+                    : 'Processando...'
                 : copy?.confirmLabel}
             </AlertDialogAction>
           </AlertDialogFooter>

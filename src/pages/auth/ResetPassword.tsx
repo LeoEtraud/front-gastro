@@ -84,7 +84,7 @@ export default function ResetPassword() {
         if (!cancelled) {
           if (status === 400) {
             setTokenOk(false);
-            setErrorMsg('Link inválido ou expirado. Solicite um novo e-mail em Esqueci minha senha.');
+            setErrorMsg('Este link expirou ou já foi usado. Use Esqueci minha senha para receber um novo.');
           } else {
             setTokenOk(true);
           }
@@ -176,7 +176,7 @@ export default function ResetPassword() {
               <p className="text-sm text-slate-600 text-center py-8">Verificando link…</p>
             ) : !tokenOk ? (
               <div className="p-4 text-sm text-amber-800 bg-amber-50 rounded-md border border-amber-100">
-                {errorMsg || 'Link inválido ou expirado.'}{' '}
+                {errorMsg || 'Este link expirou ou já foi usado.'}{' '}
                 <Link to="/forgot-password" className="font-semibold text-primary hover:underline">
                   Solicitar novo link
                 </Link>
