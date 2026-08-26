@@ -5,6 +5,11 @@ import { Users, FileVideo, Target } from 'lucide-react';
 import { DashboardSkeleton, TeacherDashboardStatsSkeleton } from '@/components/ui/content-skeletons';
 import { useDelayedFlag } from '@/hooks/use-delayed-flag';
 
+function formatPercent(value: number): string {
+  const n = Number.isFinite(value) ? value : 0;
+  return `${n.toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 0 })}%`;
+}
+
 function getStatusLabel(status: string): string {
   switch (status) {
     case 'PUBLISHED':
@@ -70,7 +75,7 @@ export default function TeacherDashboard() {
             <CardContent className="p-4 sm:p-6">
               <Target className="mb-3 h-7 w-7 text-green-500 sm:mb-4 sm:h-8 sm:w-8" />
               <p className="text-sm font-medium text-muted-foreground">Taxa Conclusão Média</p>
-              <h3 className="text-xl font-bold sm:text-2xl md:text-3xl">{data.averageCompletionRate}%</h3>
+              <h3 className="text-xl font-bold sm:text-2xl md:text-3xl">{formatPercent(data.averageCompletionRate)}</h3>
             </CardContent>
           </Card>
         </div>
@@ -102,7 +107,7 @@ export default function TeacherDashboard() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-foreground/90 lg:px-6 lg:py-4">{course.enrollmentCount}</td>
-                      <td className="px-4 py-3 text-foreground/90 lg:px-6 lg:py-4">{course.completionRate}%</td>
+                      <td className="px-4 py-3 text-foreground/90 lg:px-6 lg:py-4">{formatPercent(course.completionRate)}</td>
                     </tr>
                   ))}
                   {data.courses.length === 0 && (
@@ -132,7 +137,7 @@ export default function TeacherDashboard() {
                     <strong className="text-foreground">{course.enrollmentCount}</strong> alunos
                   </span>
                   <span>
-                    <strong className="text-foreground">{course.completionRate}%</strong> conclusão
+                    <strong className="text-foreground">{formatPercent(course.completionRate)}</strong> conclusão
                   </span>
                 </div>
               </div>
