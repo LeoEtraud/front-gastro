@@ -219,16 +219,6 @@ export default function Login() {
             </Link>
           </p>
           <p className="text-[12px] leading-relaxed text-slate-400">
-            Conta habilitada e o link de senha expirou? Use{' '}
-            <Link
-              to="/forgot-password"
-              className="font-medium text-slate-500 underline-offset-2 transition-colors hover:text-primary hover:underline"
-            >
-              Esqueci minha senha
-            </Link>
-            .
-          </p>
-          <p className="text-[12px] leading-relaxed text-slate-400">
             Ao entrar, você concorda com os{' '}
             <LegalDocumentLinks
               linkClassName="font-medium text-slate-500 underline-offset-2 hover:underline transition-colors hover:text-primary"
